@@ -1,0 +1,15 @@
+#ifndef _U_COLORS_H_
+#define _U_COLORS_H_
+
+#define BLACK 0x00000000
+#define RED 0x00E4080A
+#define ORANGE 0x00FF7701
+#define YELLOW 0x00FFDE22
+#define GREEN 0x008BEE2E
+#define LIGHT_BLUE 0x004AB1EE
+#define TURQUOISE 0x0002FAD5
+#define PINK 0x00F33AF6
+#define PURPLE 0x00CB3AF6
+#define WHITE 0x00FFFFFF
+
+#endif
