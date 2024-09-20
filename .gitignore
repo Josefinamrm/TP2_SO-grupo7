@@ -10,5 +10,4 @@
 #Object files
 *.o
 
-# my start.sh 
-*.sh 
+.vscode/*
