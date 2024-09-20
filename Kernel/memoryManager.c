@@ -1,6 +1,9 @@
 #include <unistd.h>
 
-#define FREE_MEM_START 0x600000
+// #define FREE_MEM_START 0x50000 // datos sacados del Pure64 Manual
+#define FREE_MEM_END 0xFFFFFFFFFFFFFFFF
+
+extern char endOfBinary;
 
 typedef long Align;
 
@@ -17,13 +20,10 @@ static Header * free_mem; // ACÁ VA A ESTAR TODA LA LISTA
 // hacer un init
 void init(){
 
-
-    // AVERIGUAR DIRECCION DE MEMORIA PARA PONER MEMORIA LIBRE 
-    // iterar la lista y """poner la dirección de memoria"""
     
     // ASIGNAR EL free_mem
-    free_mem = (Header *)FREE_MEM_START;
-    free_mem->node.size = sizeof(Header);
+    free_mem = (Header *)endOfBinary;
+    free_mem->node.size = (FREE_MEM_END - endOfBinary) - sizeof(Header); // tamaño de la memoria libre
     free_mem->node.next = NULL;
 }
 
