@@ -1,0 +1,20 @@
+#Binary Files
+*.bin
+*.sys
+
+#The images
+*.img
+*.qcow2
+*.vmdk
+
+#Object files
+*.o
+
+# my start.sh 
+*.sh 
+
+# other
+.gdb_history
+.viminfo
+.vscode/c_cpp_properties.json
+.vscode/settings.json
