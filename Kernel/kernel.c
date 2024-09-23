@@ -26,6 +26,9 @@ static void *const sampleDataModuleAddress = (void *)0x500000;
 
 typedef int (*EntryPoint)();
 
+// para el test de la mm
+uint64_t test_mm(uint64_t argc, char *argv[]);
+
 void clearBSS(void *bssAddress, uint64_t bssSize)
 {
 	memset(bssAddress, 0, bssSize);
@@ -54,8 +57,19 @@ void *initializeKernelBinary()
 int main()
 {
 	load_idt(); 	// Cargar la tabla de descriptores de interrupciones (IDT)
+
+	printArray("antes de entrar al test\n");
+
+	printDec(mm_header_size());
+  	putChar('\n');
+
+
+	// test mm
+	/* int argc = 1;
+	char * argv[] = {"100000", NULL};
+	test_mm(argc, argv); */
 	
-	_setUser(); 	// Cambiar a modo usuario
+	//_setUser(); 	// Cambiar a modo usuario
 
 	printArray("You shouldn't be here chief..."); 	// Imprimir un mensaje (esto no debería ocurrir)
 
