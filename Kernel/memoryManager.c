@@ -1,98 +1,129 @@
+/* 
+
+    Se mantiene una lista con todos los nodos de memoria, libre o ocupada
+
+ */
+
+
 #include "memoryManager.h" 
 
 typedef long Align;
 
-typedef union header{
+typedef union header {
     struct{
-        union header *  next;
+        union header * next;
         unsigned size;
-    } node;
-} Header;
+        unsigned state;
+    } s;
+    Align x;
+}Header;
 
-static Header * free_mem; // ACÁ VA A ESTAR TODA LA LISTA
+static int header_size = sizeof(Header);
+
+// Puntero al inicio de la lista
+static Header * start; 
 
 
-// hacer un init
+
+// Inicializa la lista y la cantidad de nodos libres
 void mm_init(){
-    
-    // ASIGNAR EL free_mem
-    //free_mem = (Header *)endOfBinary;
-    free_mem = (Header *)FREE_MEM_START; // datos sacados del Pure64 Manual
-    free_mem->node.size = (FREE_MEM_END - FREE_MEM_START) - sizeof(Header); // tamaño de la memoria libre
-    free_mem->node.next = NULL;
-
-    
+    start = (Header *) FREE_MEM_START;
+    start->s.next = NULL;
+    start->s.size = TOTAL_HEADER_UNITS - 1;
+    start->s.state = FREE;
 }
 
 
 // MALLOC
 void * mm_malloc(unsigned int nbytes){
-   
-    unsigned nuints = (nbytes + sizeof(Header) - 1)/sizeof(Header) + 1;
+    Header *current;
+    unsigned nuints;
 
-    Header *previous;
-    previous = free_mem;
+    nuints = (nbytes + header_size - 1)/header_size + 1;
 
-    // busco nodo con tamaño <FIRST FIT>
-    Header * current;
-    for(current = previous->node.next; ; previous = current, current = current->node.next){ // recorro la lista  VER!!!!!!
-        if(current->node.size >= nuints){ // si es más grande
-            if(current->node.size == nuints){
-                previous->node.next = current->node.next; // si es lo que necesito, es
-            }else{
-                current->node.size -= nuints;
-                current += current->node.size;
-                current->node.size = nuints;
+    for(current = start; current != NULL; current = current->s.next){
+        if(current->s.state == FREE && current->s.size >= nuints){
+            if(current->s.size == nuints){
+                current->s.state = OCCUPIED;
+                return (void *) (current + 1);
             }
-
-            return (void *)(current + 1);
+            else{
+                Header * to_return;
+                current->s.size -= nuints; 
+                to_return = current + current->s.size;
+                to_return->s.size = nuints - 1;
+                to_return->s.next = current->s.next;
+                to_return->s.state = OCCUPIED;
+                current->s.next = to_return;
+                return (void *)(to_return + 1);
+            }
         }
+    }
 
-        if(current == free_mem){ // si llego al final
-            return NULL; // no hay nada libre
-        }   
+    return NULL;
+}
+
+
+// 
+void mm_free(void * ptr){
+    Header *to_free, *p, *previous = NULL;
+
+    // Apunta al header del bloque
+    to_free = (Header *)ptr - 1;
+
+    if(to_free->s.state == FREE)
+        return;
+    
+    for(p = start; p != to_free && p != NULL ; previous = p, p = p->s.next);
+
+    if(p == NULL)
+        return;
+
+    if(p->s.next != NULL && p->s.next == FREE){
+        p->s.size += p->s.next->s.size;
+        p->s.next = p->s.next->s.next;
+    }
+
+    if(previous != NULL && previous->s.state == FREE){
+        previous->s.size += p->s.size;
+        previous->s.next = p->s.next;
+    }else{
+        p->s.state = FREE;
     }
 }
 
 
-// FREE vuelve a meter al bloque en la lista
-void mm_free(void * toFree){
-    Header *bp, *current;
-
-    bp = (Header *)toFree - 1; // -1 porque "saco el header"
-
-    // veo donde va
-    for(current = free_mem; !(bp > current && bp < current->node.next); current = current->node.next){
-        if(current >= current->node.next /*no circular*/ && (bp > current || bp < current->node.next) /* en el medio de los nodos*/){
-            break; // encontré la posición
-        }
-    }
-
-    //COALESCE:
-    if(bp + bp->node.size == current->node.next){ // si son contiguos
-        bp->node.size += current->node.next->node.size;
-        bp->node.next = current->node.next->node.next;
-    } else {
-        bp->node.next = current->node.next;
-    }
-
-    if(current + current->node.size == bp){ // lo meto
-        current->node.size += bp->node.size;
-        current->node.next = bp->node.next;
-    } else{
-        current->node.next = bp;
-    }
-
-    free_mem = current;
-}
-
-
-// consultar cuánto espacio libre tengo
-int mm_free_space(){
+// Función auxiliar usada por mm_occupied_space y por mm_free_space
+static int calculate_space(int condition){
     Header * current;
     int total = 0;
-    for(current = free_mem; current != NULL; current = current->node.next){
-        total += current->node.size;
+    for(current = start; current != NULL; current = current->s.next){
+        if(current->s.state == condition)
+            total += (current->s.size * header_size);
     }
     return total;
+}
+
+
+// Consultar espacio ocupado
+int mm_occupied_space(){
+    return calculate_space(OCCUPIED);
+}
+
+
+// Consultar cuánto espacio libre tengo
+int mm_unused_space(){
+    return calculate_space(FREE);
+}
+
+
+// Memoria total disponible
+int mm_total_space(){
+    return sizeof(Header)*(TOTAL_HEADER_UNITS - 1);
+}
+
+
+// es auxiliar para ahora
+int mm_header_size(){
+    return header_size;
 }
