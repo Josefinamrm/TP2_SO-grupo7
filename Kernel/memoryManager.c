@@ -36,7 +36,7 @@ void mm_init(){
 
 // MALLOC
 void * mm_malloc(unsigned int nbytes){
-    Header *current, *previous;
+    Header *current;
     unsigned nuints;
 
     nuints = (nbytes + header_size - 1)/header_size + 1;
@@ -66,18 +66,30 @@ void * mm_malloc(unsigned int nbytes){
 
 // 
 void mm_free(void * ptr){
-    Header *to_free, *p;
+    Header *to_free, *p, *previous = NULL;
 
     // Apunta al header del bloque
     to_free = (Header *)ptr - 1;
 
-    if(to_free->s.state == FREE){
+    if(to_free->s.state == FREE)
         return;
+    
+    for(p = start; p != to_free && p != NULL ; previous = p, p = p->s.next);
+
+    if(p == NULL)
+        return;
+
+    if(p->s.next != NULL && p->s.next == FREE){
+        p->s.size += p->s.next->s.size;
+        p->s.next = p->s.next->s.next;
     }
 
-    for(p = start; p != to_free && p != NULL ; p = p->s.next);
-
-    
+    if(previous != NULL && previous->s.state == FREE){
+        previous->s.size += p->s.size;
+        previous->s.next = p->s.next;
+    }else{
+        p->s.state = FREE;
+    }
 }
 
 

@@ -60,14 +60,11 @@ int main()
 
 	printArray("antes de entrar al test\n");
 
-	printDec(mm_header_size());
-  	putChar('\n');
-
 
 	// test mm
-	/* int argc = 1;
-	char * argv[] = {"100000", NULL};
-	test_mm(argc, argv); */
+	int argc = 1;
+	char * argv[] = {"1000", NULL};
+	test_mm(argc, argv);
 	
 	//_setUser(); 	// Cambiar a modo usuario
 
