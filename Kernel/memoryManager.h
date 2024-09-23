@@ -2,6 +2,7 @@
 #define MEMORYMANAGER_H
 
 #include <unistd.h>
+#include <stdint.h>
 
 // Información de la memoria libre
 #define FREE_MEM_START 0x0000000000600000 // datos sacados del Pure64 Manual
@@ -13,7 +14,7 @@
 
 
 // Inicializa la lista de nodos de memoria
-void mm_init();
+void mm_init(uint64_t memory_start, uint64_t size);
 
 // Devuelve un puntero al bloque de memoria reservada
 void * mm_malloc(unsigned int nbytes);
