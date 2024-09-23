@@ -26,10 +26,10 @@ static Header * start;
 
 
 // Inicializa la lista y la cantidad de nodos libres
-void mm_init(){
-    start = (Header *) FREE_MEM_START;
+void mm_init(uint64_t memory_start, uint64_t size){
+    start = (Header *) memory_start;
     start->s.next = NULL;
-    start->s.size = TOTAL_HEADER_UNITS - 1;
+    start->s.size = size;
     start->s.state = FREE;
 }
 
