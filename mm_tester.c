@@ -66,8 +66,9 @@ uint64_t test_mm(uint64_t argc, char *argv[]) {
 
 
 int main(int argc, char* argv[]){
-    char * mem = malloc(1000);
-    mm_init((uint64_t)mem, MAX_BLOCKS * 16);
+    uint64_t size = MAX_BLOCKS * 16;
+    char * mem = malloc(size + 1024);
+    mm_init((uint64_t)mem, size + 1024);
 
     char * aux[] = {"1000", NULL};
     test_mm(1, aux);
