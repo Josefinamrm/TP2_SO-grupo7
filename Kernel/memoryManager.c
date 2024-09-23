@@ -49,12 +49,12 @@ void * mm_malloc(unsigned int nbytes){
             }
             else{
                 Header * to_return;
-                to_return->s.size = nuints;
+                current->s.size -= nuints; 
+                to_return = current + current->s.size;
+                to_return->s.size = nuints - 1;
                 to_return->s.next = current->s.next;
                 to_return->s.state = OCCUPIED;
-                current->s.size -= nuints; 
                 current->s.next = to_return;
-                to_return = current + current->s.size;
                 return (void *)(to_return + 1);
             }
         }
