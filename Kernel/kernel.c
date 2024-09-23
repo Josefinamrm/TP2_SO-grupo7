@@ -12,6 +12,8 @@
 #include <sound.h>
 #include <time.h>
 
+#include "memoryManager.h"
+
 extern uint8_t text;
 extern uint8_t rodata;
 extern uint8_t data;
@@ -66,6 +68,22 @@ int main()
 	char * argv[] = {"1000", NULL};
 	test_mm(argc, argv);
 	
+	/* mm_init();
+	printDec(mm_total_space());
+	putChar('\n');
+	char * pointer = (char *) mm_malloc(100);
+	printDec(mm_occupied_space());
+	putChar('\n');
+	printDec(mm_unused_space());
+	putChar('\n');
+	mm_free((void *) pointer);
+	printDec(mm_occupied_space());
+	putChar('\n');
+	printDec(mm_unused_space());
+	putChar('\n');
+ */
+
+
 	//_setUser(); 	// Cambiar a modo usuario
 
 	printArray("You shouldn't be here chief..."); 	// Imprimir un mensaje (esto no debería ocurrir)

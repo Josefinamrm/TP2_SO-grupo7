@@ -79,13 +79,13 @@ void mm_free(void * ptr){
     if(p == NULL)
         return;
 
-    if(p->s.next != NULL && p->s.next == FREE){
-        p->s.size += p->s.next->s.size;
+    if(p->s.next != NULL && p->s.next->s.state == FREE){
+        p->s.size += (p->s.next->s.size + 1);
         p->s.next = p->s.next->s.next;
     }
 
     if(previous != NULL && previous->s.state == FREE){
-        previous->s.size += p->s.size;
+        previous->s.size += (p->s.size + 1);
         previous->s.next = p->s.next;
     }else{
         p->s.state = FREE;

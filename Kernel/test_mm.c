@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+void timer_wait(int seconds);
 
 #include "memoryManager.h"
 
@@ -34,7 +35,10 @@ uint64_t test_mm(uint64_t argc, char *argv[]) {
     rq = 0;
     total = 0;
 
-    printArray("antes de hacer el request\n");
+    printArray("inicialmente tengo :");
+    printDec(mm_unused_space());
+    putChar('\n');
+
 
     // Request as many blocks as we can
     while (rq < MAX_BLOCKS && total < max_memory) {
@@ -46,8 +50,17 @@ uint64_t test_mm(uint64_t argc, char *argv[]) {
         rq++;
       }
     }
+    printArray("mi rq es:");
+    printDec(rq);
+    putChar('\n');
 
-    printArray("Ya requestee los bloques\n");
+    printArray("mi total requested es :");
+    printDec(total);
+    putChar('\n');
+
+    printArray("luego de req, tengo unused :");
+    printDec(mm_unused_space());
+    putChar('\n');
 
     // Set
     uint32_t i;
@@ -63,13 +76,16 @@ uint64_t test_mm(uint64_t argc, char *argv[]) {
           return -1;
         }
 
-    printArray("ya los chequee\n");
-
     // Free
     for (i = 0; i < rq; i++)
       if (mm_rqs[i].address)
         mm_free(mm_rqs[i].address);
-    printArray("los libere y vuelvo a arrancar\n");
+    
+    printArray("luego de liberar todo :");
+    printDec(mm_unused_space());
+    putChar('\n');
+
+    timer_wait(2);
   }
 }
 
