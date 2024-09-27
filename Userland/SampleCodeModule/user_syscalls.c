@@ -31,7 +31,7 @@ void usys_print_rect(uint32_t color, int x, int y, int size_x, int size_y) {
     _print_rect((uint32_t) color, (uint64_t) x, (uint64_t) y, (uint64_t) size_x, (uint64_t) size_y);
 }
 
-int usys_getRegisters(uint64_t * registers){
+int usys_get_registers(uint64_t * registers){
     return _getRegisters(registers);
 }
 

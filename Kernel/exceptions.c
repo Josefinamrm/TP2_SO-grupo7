@@ -32,7 +32,7 @@ static void zero_division() {
 	printArrayWithColor(RED, BLACK, "Error: Division por cero\n");
 	showRegs();
 	printArrayWithColor(YELLOW, BLACK, "Presione cualquier letra para continuar\n");
-	while(getChar() == 0){
+	while(get_char_from_buffer() == 0){
 		_hlt();
 	};
 	clearScreen();
@@ -42,7 +42,7 @@ static void invalid_opcode() {
 	printArrayWithColor(RED, BLACK, "Error: Opcode invalido\n");
 	showRegs();		
 	printArrayWithColor(YELLOW, BLACK, "Presione cualquier letra para continuar\n");
-	while(getChar() == 0){
+	while(get_char_from_buffer() == 0){
 		_hlt();
 	};
 	clearScreen();

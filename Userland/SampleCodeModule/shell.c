@@ -33,17 +33,17 @@ static Command commands[] = {
     {"beep", beep, "Emite un beep"}
 };
 
-void parseCommand(char *str) {
+void parse_command(char *str) {
     char argument[] = {0};
 
     if (strcmp(str, "")==0) {
         return;
     }
 
-    int argC = parseCommandArg(str);
+    int argC = parse_command_arg(str);
 
     if (argC > 1) {
-        printColor(YELLOW, "No puede haber ni un espacio ni mas de 1 argumento. Verificar los comandos de nuevo.\n");
+        print_color(YELLOW, "No puede haber ni un espacio ni mas de 1 argumento. Verificar los comandos de nuevo.\n");
     }
 
     for (int i = 0; i < COMMAND_COUNT; i++) {
@@ -52,42 +52,42 @@ void parseCommand(char *str) {
             return;
         }
     } 
-    printError("Error: comando no diponible. Ingrese \"help\" para ver los comandos disponibles.\n");
+    print_error("Error: comando no diponible. Ingrese \"help\" para ver los comandos disponibles.\n");
 }
 
-void printPromptIcon() {
-    printColor(GREEN, "$>");
+void print_prompt_icon() {
+    print_color(GREEN, "$>");
 }
 
 void init_shell() {
     print("Bienvenido a ");
-    printColor(GREEN,"OUR_OS\n"); 
+    print_color(GREEN,"OUR_OS\n"); 
     print("Ingrese uno de los siguientes comandos:\n");
     for(int i = 1; i < COMMAND_COUNT-1 ; i++){
-            printColor(LIGHT_BLUE, commands[i].name_id);
+            print_color(LIGHT_BLUE, commands[i].name_id);
             print(" | ");
     } 
-    printColor(LIGHT_BLUE, commands[COMMAND_COUNT-1].name_id);
+    print_color(LIGHT_BLUE, commands[COMMAND_COUNT-1].name_id);
     print("\nIngrese \"help\" para la descripcion los comandos.\n");
     char c;
     int running = 1; 
     currentFontSize = usys_get_font_size();
-    printPromptIcon();
+    print_prompt_icon();
     while (running) {  // if ESC 
-        c = getChar();  // non-blocking read
+        c = get_char();  // non-blocking read
         if (c != 0) {
             if (c == '\b' && bufferIndex > 0) {
                 bufferIndex--;
-                putChar(c);
+                put_char(c);
             } else if (c == '\n') {
-                putChar(c);
+                put_char(c);
                 // printPromptIcon();
                 buffer[bufferIndex] = '\0';  // Null-terminate the command
-                parseCommand(buffer);  // Process the command
+                parse_command(buffer);  // Process the command
                 bufferIndex = 0;  // Reset the buffer for the next command
-                printPromptIcon();
+                print_prompt_icon();
             } else if (c != '\b') {
-                putChar(c);
+                put_char(c);
                 buffer[bufferIndex++] = c;
             }
         }
@@ -98,10 +98,10 @@ void help() {
     print("Comandos disponibles:\n");
     for(int i = 1; i < COMMAND_COUNT ; i++){
             print("   ");
-            printColor(LIGHT_BLUE, commands[i].name_id);
+            print_color(LIGHT_BLUE, commands[i].name_id);
             print(": ");
             print(commands[i].desc);
-            putChar('\n');
+            put_char('\n');
     } 
 }
 
@@ -109,7 +109,7 @@ void divzero() {
     int a = 1; //rax??
     int b = 0; 
     if (a/b == 1) {
-        printError("This is wrong...");
+        print_error("This is wrong...");
     }
 }
 void invopcode() {
@@ -117,50 +117,50 @@ void invopcode() {
 }
 
 void time() {
-    printColor(GREEN, "ART (Argentine Time): UTC/GMT -3 horas\n"); 
+    print_color(GREEN, "ART (Argentine Time): UTC/GMT -3 horas\n"); 
     _get_time(); 
 }
 
 void zoomin() {
-    printColor(YELLOW, "Esto va a borrar toda la pantalla. Esta seguro de que quiere proceder?\n");
-    printColor(ORANGE, "Indicar Si (Si) o N (No)\n"); 
+    print_color(YELLOW, "Esto va a borrar toda la pantalla. Esta seguro de que quiere proceder?\n");
+    print_color(ORANGE, "Indicar Si (Si) o N (No)\n"); 
     char c;
     while (1) {
-        while ((c = getChar()) == 0); 
+        while ((c = get_char()) == 0); 
         if (c == 'N' || c == 'n') {
             return;
         } else if (c == 'S' || c == 's') {
             if (currentFontSize >= 3) {
-                printColor(RED, "No se puede agrandar mas.\n");
+                print_color(RED, "No se puede agrandar mas.\n");
                 return;
             }
             usys_change_font_size(++currentFontSize);
             clear_shell();
             return;
         } else {
-            printColor(RED, "Indique S o N\n");
+            print_color(RED, "Indique S o N\n");
         }
     }
 }
 
 void zoomout() {
-    printColor(YELLOW, "Esto va a borrar toda la pantalla. Esta seguro de que quiere proceder?\n");
-    printColor(ORANGE, "Indicar S (Si) o N (No)\n"); 
+    print_color(YELLOW, "Esto va a borrar toda la pantalla. Esta seguro de que quiere proceder?\n");
+    print_color(ORANGE, "Indicar S (Si) o N (No)\n"); 
     char c;
     while (1) {
-        while ((c = getChar()) == 0); 
+        while ((c = get_char()) == 0); 
         if (c == 'N' || c == 'n') {
             return;
         } else if (c == 'S' || c == 's') {
             if (currentFontSize <= 1) {
-                printColor(RED, "No se puede achicar mas.\n");
+                print_color(RED, "No se puede achicar mas.\n");
                 return;
             }
             usys_change_font_size(--currentFontSize);
             clear_shell();
             return;
         } else {
-            printColor(RED, "Indique S o N\n");
+            print_color(RED, "Indique S o N\n");
         }
     }
 }
@@ -170,18 +170,18 @@ void inforeg() {
     char *regsNames[CANT_REGS] = {"rax:", "rbx:", "rcx:", "rdx:", "rsi:", "rdi:", "rbp:", "rsp:", "r8:", "r9:",
 					   "r10:", "r11:", "r12:", "r13:", "r14:", "r15:", "rip:", "rflags:"};
     char aux[128];
-    int flag = usys_getRegisters(regs);
+    int flag = usys_get_registers(regs);
     if (flag) {
-        printColor(GREEN, "Informacion de los registros: \n");
+        print_color(GREEN, "Informacion de los registros: \n");
         for(int i = 0; i<CANT_REGS; i++){
             print("    ");
-			printColor(GREEN, regsNames[i]);
-			uintToBase(regs[i], aux, 16);
+			print_color(GREEN, regsNames[i]);
+			uint_to_base(regs[i], aux, 16);
 			print(aux);
 			print("\n");
          }
     } else {
-        printColor(RED, "No se pudo encontrar ningun momento de captura de registro. Presione CTRL para capturar los registros.\n");
+        print_color(RED, "No se pudo encontrar ningun momento de captura de registro. Presione CTRL para capturar los registros.\n");
     }
 }
 void clear_shell() {
@@ -189,7 +189,7 @@ void clear_shell() {
 }
 
 void beep() {
-    printColor(GREEN, "BEEP!!\n");
+    print_color(GREEN, "BEEP!!\n");
     usys_beep(1000, 10);
 }
 

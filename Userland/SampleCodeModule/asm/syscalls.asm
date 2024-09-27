@@ -16,6 +16,17 @@ GLOBAL _draw_array
 GLOBAL _flush_buffer
 section .text
 
+_read: 
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 0
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp
+    ret
+
 _write:
     push rbp
     mov rbp, rsp 
@@ -27,37 +38,48 @@ _write:
     pop rbp
     ret
 
-_getRegisters:
-    push rbp
-    mov rbp, rsp 
-
-    mov rax, 8
-    int 80h
-
-    mov rsp, rbp
-    pop rbp
-    ret
-
-_wait:
-    push rbp
-    mov rbp, rsp 
-
-    mov rax, 9
-    int 80h
-
-    mov rsp, rbp
-    pop rbp
-    ret
-
-_read: 
+_get_time: 
     push rbp 
     mov rbp, rsp 
 
-    mov rax, 0
+    mov rax, 2
     int 80h 
 
     mov rsp, rbp 
-    pop rbp
+    pop rbp 
+    ret
+
+_change_draw_size:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 3
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_print_array_of_draw_size:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 4
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_draw_array: 
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 5
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
     ret
 
 _write_color: 
@@ -81,6 +103,29 @@ _clear_screen:
     mov rsp, rbp 
     pop rbp 
     ret 
+
+_getRegisters:
+    push rbp
+    mov rbp, rsp 
+
+    mov rax, 8
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+_wait:
+    push rbp
+    mov rbp, rsp 
+
+    mov rax, 9
+    int 80h
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
 
 _change_font_size: 
     push rbp 
@@ -136,49 +181,7 @@ _print_rect:
     pop rbp 
     ret
 
-_get_time: 
-    push rbp 
-    mov rbp, rsp 
 
-    mov rax, 2
-    int 80h 
-
-    mov rsp, rbp 
-    pop rbp 
-    ret
-
-_change_draw_size:
-    push rbp 
-    mov rbp, rsp 
-
-    mov rax, 3
-    int 80h 
-
-    mov rsp, rbp 
-    pop rbp 
-    ret
-
-_print_array_of_draw_size:
-    push rbp 
-    mov rbp, rsp 
-
-    mov rax, 4
-    int 80h 
-
-    mov rsp, rbp 
-    pop rbp 
-    ret
-
-_draw_array: 
-    push rbp 
-    mov rbp, rsp 
-
-    mov rax, 5
-    int 80h 
-
-    mov rsp, rbp 
-    pop rbp 
-    ret
 
 _flush_buffer:
     push rbp 

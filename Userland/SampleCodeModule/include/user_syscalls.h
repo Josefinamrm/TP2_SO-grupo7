@@ -23,7 +23,7 @@ void usys_print_square(uint32_t fontColor, int x, int y, int size);
 
 void usys_print_rect(uint32_t color, int x, int y, int size_x, int size_y);
 
-int usys_getRegisters(uint64_t * registers);
+int usys_get_registers(uint64_t * registers);
 
 void usys_wait(int ms);
 

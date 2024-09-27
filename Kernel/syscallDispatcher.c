@@ -80,7 +80,7 @@ uint64_t ksys_read(uint64_t fd, uint64_t buffer, uint64_t count)
     char *buff = (char *)buffer;
     if (fd == STDIN)
     {
-        while (i < count && (c = getChar()) != 0)
+        while (i < count && (c = get_char_from_buffer()) != 0)
         {
             buff[i++] = c;
         }
@@ -88,7 +88,7 @@ uint64_t ksys_read(uint64_t fd, uint64_t buffer, uint64_t count)
     }
     else if (fd == LASTIN)
     {
-        while (i < count && (c = getLastChar()) != 0)
+        while (i < count && (c = get_last_char_from_buffer()) != 0)
         {
             buff[i++] = c;
         }
