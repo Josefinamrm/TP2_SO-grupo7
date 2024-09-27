@@ -4,34 +4,37 @@
 #include <unistd.h>
 #include <stdint.h>
 
-// Información de la memoria libre
-#define FREE_MEM_START 0x0000000000600000 // datos sacados del Pure64 Manual
-#define TOTAL_HEADER_UNITS 4096 + 1
+// Info about free memory
+#define FREE_MEM_START 0x0000000000600000 // Data from Pure64 Manual
+#define TOTAL_HEADER_UNITS 8388608 + 1
 
-// Estado de un nodo de la lista
+// List node state
 #define FREE 0
 #define OCCUPIED 1
 
 
-// Inicializa la lista de nodos de memoria
+// Initializes memory list
 void mm_init(uint64_t memory_start, uint64_t size);
 
-// Devuelve un puntero al bloque de memoria reservada
+// Returns a pointer to the memory block
 void * mm_malloc(unsigned int nbytes);
 
-// Libera un bloque de memoria usado, cuya dirección de memoria es la indicada
+// Returns a pointer to a new memory block of size new_size, reallocating the info contained in ptr
+void * mm_realloc(void * ptr, uint64_t new_size); 
+
+// Frees a memory block, starting in the provided pointer
 void mm_free(void * ptr);
 
-// Retorna la cantidad de espacio libre
+// Returns free memory size
 int mm_unused_space();
 
-// Retorna la cantidad de espacio utilizado
+// Returns used memory size
 int mm_occupied_space();
 
-// Retorna el espacio total de memoria, ocupado o no ocupado
+// Returns total memory size
 int mm_total_space();
 
-// Tamaño del header
+// Returns header size
 int mm_header_size();
 
 
