@@ -6,6 +6,7 @@
 
 int main()
 {
+	// create_process(init_shell(), ...)
 	init_shell();
 
 	return 0;

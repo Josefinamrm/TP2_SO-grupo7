@@ -12,6 +12,28 @@ enum fd {STDIN=0, STDOUT, STDERR};
 
 enum State {READY, RUNNING, BLOCKED, KILLED, ZOMBIE};
 
+typedef struct {
+
+    uint8_t * name;
+    
+    // process managment
+    uint32_t * registers;
+
+    uint64_t pid;
+    uint64_t ppid;
+    uint8_t priority;
+    uint8_t state;
+
+    uint64_t * function;
+    uint64_t * stack_pointer; // 
+
+    uint64_t * parameters;
+
+    // file managment
+    uint32_t * file_descriptors;
+
+} p ;
+
 typedef p * process;
 
 process current_process;
@@ -22,19 +44,20 @@ typedef struct node{
 }node;
 typedef node * queue;
 
-
-
 queue ready_queue;
 
-
+uint64_t * scheduler(uint64_t * rsp);
 uint64_t my_getpid();
-uint64_t my_create_process(uint8_t * name, uint64_t ppid, uint64_t priority);
+uint64_t my_create_process(uint8_t * name, uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint8_t ** argv);
 uint64_t my_nice(uint64_t pid, uint64_t newPrio);
 uint64_t my_kill(uint64_t pid);
 uint64_t my_block(uint64_t pid);
 uint64_t my_unblock(uint64_t pid);
 uint64_t my_yield();
 uint64_t my_wait(int64_t pid);
+
+
+queue remove_from_ready_queue(uint32_t pid);
 
 
 #endif

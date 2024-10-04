@@ -1,31 +1,6 @@
-/* #include "processManager.h"
+#include "processManager.h"
 
-
-extern void schedule; // ##########################################################################################################
-
-typedef struct {
-
-    uint8_t * name;
-    
-    // process managment
-    uint32_t * registers;
-
-    uint64_t pid;
-    uint64_t ppid;
-    uint8_t priority;
-    uint8_t state;
-
-    uint64_t * function;
-    uint64_t * stack_pointer; // 
-
-    uint64_t * parameters;
-
-    // file managment
-    uint32_t * file_descriptors;
-
-} p ;
-
-process * process_list;
+process process_list[MAX_PROCESS];
 uint8_t process_counter = 0;
 
 uint64_t my_getpid(){
@@ -40,7 +15,7 @@ static queue add_to_ready_queue(process p){
 }
 
 
-uint64_t my_create_process(uint8_t * name, uint64_t ppid, uint64_t priority, uint64_t argc, uint8_t ** argv){
+uint64_t my_create_process(uint8_t * name, uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint8_t ** argv){
     if(process_counter == MAX_PROCESS){
         return -1;
     }
@@ -83,7 +58,7 @@ uint64_t my_create_process(uint8_t * name, uint64_t ppid, uint64_t priority, uin
 
  
 
-static queue remove_from_ready_queue(uint32_t pid){
+queue remove_from_ready_queue(uint32_t pid){
     if(ready_queue->p->pid == pid){
         queue aux = ready_queue;
         ready_queue = ready_queue->next;
@@ -110,7 +85,7 @@ uint64_t my_nice(uint64_t pid, uint64_t newPrio){
     process_list[pid]->priority = newPrio;
 }
 
-uint32_t my_kill(uint64_t pid){
+uint64_t my_kill(uint64_t pid){
     process p = process_list[pid];
     p->state = KILLED;
     for(int32_t i =0; i < p->priority; i++)
@@ -118,26 +93,26 @@ uint32_t my_kill(uint64_t pid){
     free(p);
 }
 
-uint32_t my_block(uint64_t pid){
+uint64_t my_block(uint64_t pid){
     process_list[pid]->state = BLOCKED;
     for(int32_t i =0; i < process_list[pid]->priority; i++)
         ready_queue = remove_from_ready_queue(process_list[pid]->pid);
 }
 
-uint32_t my_unblock(uint64_t pid){
+uint64_t my_unblock(uint64_t pid){
     process_list[pid]->state = READY;
     for(int32_t i =0; i < process_list[pid]->priority; i++)
         ready_queue = add_to_ready_queue(process_list[pid]);
 }
 
-uint32_t my_yield(){
+uint64_t my_yield(){
     process_list[my_getpid()]->state = READY;
     for(int32_t i =0; i < process_list[my_getpid()]->priority; i++)
         ready_queue = add_to_ready_queue(process_list[my_getpid()]);
     // FORZAR A SCHEDULE // TIMERTICK ################################################################################################
 }
 
-uint32_t my_wait(int64_t pid){
+uint64_t my_wait(int64_t pid){
     process_list[my_getpid()]->state = BLOCKED;
     for(int32_t i =0; i < process_list[pid]->priority; i++)
         ready_queue = remove_from_ready_queue(process_list[pid]->pid);
@@ -148,4 +123,3 @@ uint32_t my_wait(int64_t pid){
 
     return 0;
 }
- */
