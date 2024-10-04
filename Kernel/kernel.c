@@ -11,6 +11,7 @@
 #include <interrupts.h>
 #include <sound.h>
 #include <time.h>
+#include "dory.h"
 
 
 extern uint8_t text;
@@ -58,15 +59,7 @@ void *initializeKernelBinary()
 int main()
 {
 	load_idt(); 	// Cargar la tabla de descriptores de interrupciones (IDT)
-
-	printArray("antes de entrar al test\n");
-
-
-	// test mm
-	int argc = 1;
-	char * argv[] = {"63488", NULL};
-	test_mm(argc, argv);
-
+	dory_start();
 
 	_setUser(); 	// Cambiar a modo usuario
 

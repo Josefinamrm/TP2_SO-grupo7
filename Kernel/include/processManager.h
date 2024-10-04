@@ -12,7 +12,7 @@ typedef p * process;
 
 
 uint64_t my_getpid();
-uint64_t my_create_process(char *name);
+uint64_t my_create_process(uint8_t * name, uint64_t ppid, uint64_t priority);
 uint64_t my_nice(uint64_t pid, uint64_t newPrio);
 uint64_t my_kill(uint64_t pid);
 uint64_t my_block(uint64_t pid);

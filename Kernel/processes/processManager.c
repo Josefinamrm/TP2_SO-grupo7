@@ -1,4 +1,4 @@
-#include "processManager.h"
+/* #include "processManager.h"
 
 typedef struct {
 
@@ -22,7 +22,7 @@ typedef struct {
 
 } p ;
 
-process process_list[MAX_PROCESS];
+process * process_list;
 uint8_t process_counter = 0;
 
 uint64_t my_getpid(){
@@ -91,3 +91,4 @@ uint32_t my_wait(int64_t pid){
 
     return 0;
 }
+ */
