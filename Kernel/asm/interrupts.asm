@@ -199,9 +199,15 @@ picSlaveMask:
 ;8254 Timer (Timer Tick)
 _irq00Handler:
 	pushState
- 
+	
+	push rsp
+
 	mov rdi, %1 ; pasaje de parametro
 	call int_20
+
+	mov rdi, rsp
+	call scheduler
+	mov rsp, rax
 
 	; signal pic EOI (End of Interrupt)
 	mov al, 20h
