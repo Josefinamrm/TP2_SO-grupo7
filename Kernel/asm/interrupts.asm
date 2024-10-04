@@ -27,6 +27,8 @@ EXTERN irqDispatcher
 EXTERN exceptionDispatcher
 EXTERN syscallDispatcher
 EXTERN getStackBase
+EXTERN scheduler
+EXTERN int_20
 
 
 
@@ -70,7 +72,7 @@ SECTION .text
 
 %macro irqHandlerMaster 1
 	pushState
-
+ 
 	mov rdi, %1 ; pasaje de parametro
 	call irqDispatcher
 
@@ -193,9 +195,22 @@ picSlaveMask:
     retn
 
 
+
 ;8254 Timer (Timer Tick)
 _irq00Handler:
-	irqHandlerMaster 0
+	pushState
+ 
+	mov rdi, %1 ; pasaje de parametro
+	call int_20
+
+	; signal pic EOI (End of Interrupt)
+	mov al, 20h
+	out 20h, al
+
+	popState
+	iretq
+
+
 
 ;Keyboard
 _irq01Handler:
