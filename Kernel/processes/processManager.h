@@ -3,12 +3,22 @@
 
 
 #include <stdint.h>
+#include <stdlib.h>
 
-#define MAX_PROCESS 100
+#define MAX_PROCESS 200
+#define PROCESS_STACK_SIZE 4096
 
 enum State {READY, RUNNING, BLOCKED, KILLED, ZOMBIE};
 
 typedef p * process;
+
+typedef struct node{
+    process p;
+    struct node * next;
+}node;
+typedef node * queue;
+
+queue ready_queue;
 
 
 uint64_t my_getpid();
