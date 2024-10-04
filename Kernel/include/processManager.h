@@ -8,15 +8,21 @@
 #define MAX_PROCESS 200
 #define PROCESS_STACK_SIZE 4096
 
+enum fd {STDIN=0, STDOUT, STDERR};
+
 enum State {READY, RUNNING, BLOCKED, KILLED, ZOMBIE};
 
 typedef p * process;
+
+process current_process;
 
 typedef struct node{
     process p;
     struct node * next;
 }node;
 typedef node * queue;
+
+
 
 queue ready_queue;
 

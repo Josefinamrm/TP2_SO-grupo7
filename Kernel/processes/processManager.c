@@ -1,5 +1,8 @@
 /* #include "processManager.h"
 
+
+extern void schedule; // ##########################################################################################################
+
 typedef struct {
 
     uint8_t * name;
@@ -12,10 +15,8 @@ typedef struct {
     uint8_t priority;
     uint8_t state;
 
-    // memory managment PUNTERO A FUNCION - RIP
-    uint64_t * text_pointer;
-    uint64_t * data_pointer;  
-    uint64_t * stack_pointer;
+    uint64_t * function;
+    uint64_t * stack_pointer; // 
 
     uint64_t * parameters;
 
@@ -28,28 +29,14 @@ process * process_list;
 uint8_t process_counter = 0;
 
 uint64_t my_getpid(){
-    for(int i = 0; i < MAX_PROCESS; i++){
-        if(process_list[i]->state == RUNNING){
-            return process_list[i]->pid;
-        }
-    }
-    return -1;
+    return current_process->pid;
 }
 
 static queue add_to_ready_queue(process p){ 
     queue new = (queue) mm_malloc(sizeof(node));
     new->p = p;
-    new->next = NULL;
-
-    queue aux = ready_queue;
-    while(aux->next != NULL && aux->p->priority > p->priority){ //  no se si tengo que ordenarlo segun la prioridad??????
-        aux = aux->next;
-    }
-    queue aux2 = aux->next;
-    aux->next = new;
-    new->next = aux2;
-
-    return ready_queue;
+    new->next = ready_queue;
+    return new;
 }
 
 
@@ -66,8 +53,13 @@ uint64_t my_create_process(uint8_t * name, uint64_t ppid, uint64_t priority, uin
 
     new_process->stack_pointer = mm_malloc(PROCESS_STACK_SIZE); 
 
-    // FALTA ASIGNARLE LOS PUNTEROS A FUNCIONES
+    // FALTA ASIGNARLE LOS PUNTEROS A FUNCIONES ###############################################################################
 
+    if(ppid == 0){ // if proc is init
+        new_process->file_descriptors[STDIN] = STDIN;
+        new_process->file_descriptors[STDOUT] = STDOUT;
+        new_process->file_descriptors[STDERR] = STDERR;
+    }
     for(int i = 0; i < MAX_PROCESS; i++){
         if(process_list[i]->pid == ppid){
             new_process->file_descriptors = process_list[i]->file_descriptors;
@@ -75,47 +67,84 @@ uint64_t my_create_process(uint8_t * name, uint64_t ppid, uint64_t priority, uin
         }
     }
 
-    for(int i=0; i< argc; i++){ // #########################################################################333
+    for(int i=0; i< argc; i++){ // ###########################################################################################
         new_process->parameters[i] = argv[i];
     }
 
     process_list[process_counter] = new_process;
 
-    ready_queue = add_to_ready_queue(new_process);
+    for(uint32_t i=0; i < priority; i++)
+        ready_queue = add_to_ready_queue(new_process);
     
+    // FORZAR LA LLAMA A SCHEDULER // TIMERTICK ################################################################################################
+
     return process_counter;
 }
 
+ 
+
+static queue remove_from_ready_queue(uint32_t pid){
+    if(ready_queue->p->pid == pid){
+        queue aux = ready_queue;
+        ready_queue = ready_queue->next;
+        free(aux->p);
+        free(aux);
+        return ready_queue;
+    }
+    ready_queue->next = remove_from_ready_queue(pid);
+    return ready_queue;
+}
+
+
 uint64_t my_nice(uint64_t pid, uint64_t newPrio){
+    if(process_list[pid]->priority < newPrio){ // upgrade
+        for(uint32_t i = process_list[pid]->priority; i < newPrio - process_list[pid]->priority; i++){
+            ready_queue = add_to_ready_queue(process_list[pid]);
+        }
+    }
+    else if(process_list[pid]->priority > newPrio){ // downgrade
+        for(uint32_t i = process_list[pid]->priority; i > newPrio - process_list[pid]->priority; i--){
+            ready_queue = remove_from_ready_queue(process_list[pid]->pid);
+        }
+    }
     process_list[pid]->priority = newPrio;
-    // ##################### si la lista está ordenada por prioridad, hay que reordenarla #####################
 }
 
 uint32_t my_kill(uint64_t pid){
     process p = process_list[pid];
     p->state = KILLED;
+    for(int32_t i =0; i < p->priority; i++)
+        ready_queue = remove_from_ready_queue(pid);
     free(p);
 }
 
 uint32_t my_block(uint64_t pid){
     process_list[pid]->state = BLOCKED;
+    for(int32_t i =0; i < process_list[pid]->priority; i++)
+        ready_queue = remove_from_ready_queue(process_list[pid]->pid);
 }
 
 uint32_t my_unblock(uint64_t pid){
     process_list[pid]->state = READY;
-    ready_queue = add_to_ready_queue(process_list[pid]);
+    for(int32_t i =0; i < process_list[pid]->priority; i++)
+        ready_queue = add_to_ready_queue(process_list[pid]);
 }
 
 uint32_t my_yield(){
     process_list[my_getpid()]->state = READY;
-    ready_queue = add_to_ready_queue(process_list[my_getpid()]);
+    for(int32_t i =0; i < process_list[my_getpid()]->priority; i++)
+        ready_queue = add_to_ready_queue(process_list[my_getpid()]);
+    // FORZAR A SCHEDULE // TIMERTICK ################################################################################################
 }
 
 uint32_t my_wait(int64_t pid){
-
     process_list[my_getpid()]->state = BLOCKED;
+    for(int32_t i =0; i < process_list[pid]->priority; i++)
+        ready_queue = remove_from_ready_queue(process_list[pid]->pid);
+
     while(process_list[pid]->state != RUNNING);
-    process_list[my_getpid()]->state = READY;
+    for(int32_t i =0; i < process_list[pid]->priority; i++)
+        process_list[my_getpid()]->state = READY;
 
     return 0;
 }
