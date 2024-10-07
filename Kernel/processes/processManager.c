@@ -1,5 +1,6 @@
 #include "processManager.h"
 
+extern void hang();
 
 typedef struct{
     uint64_t ss;
@@ -43,6 +44,7 @@ queue_element add_to_ready_queue(process p){
     queue_element new = (queue_element) mm_malloc(sizeof(node));
     new->p = p;
     new->next = ready_queue;
+    ready_count++;
     return new;
 }
 
@@ -55,6 +57,7 @@ queue_element remove_from_ready_queue(uint64_t pid){
         return ready_queue;
     }
     ready_queue->next = remove_from_ready_queue(pid);
+    ready_count--;
     return ready_queue;
 }
 
@@ -203,7 +206,7 @@ uint64_t my_yield(){
     process_array[my_getpid()]->state = READY;
     for(int32_t i =0; i < process_array[my_getpid()]->priority; i++)
         ready_queue = add_to_ready_queue(process_array[my_getpid()]);
-    // FORZAR A SCHEDULE // TIMERTICK ################################################################################################
+    // FORZAR A SCHEDULE // TIMERTICK ############################################################
 }
 
 
@@ -218,4 +221,28 @@ uint64_t my_wait(int64_t pid){
         process_array[my_getpid()]->state = READY;
 
     return 0;
+}
+
+
+void init_process(){
+    current_process = NULL;
+    ready_queue = NULL;
+    ready_count = 0;
+
+    process idle_process = (process) mm_malloc(sizeof(p));
+    idle_process->name = "idle";
+    idle_process->pid = 0;
+    idle_process->ppid = 0;
+    idle_process->priority = 1;
+    idle_process->state = READY;
+    // idle_process->stack_pointer = !!!!!!!!!!!!!
+
+    process_array[0] = idle_process;
+
+    return process_counter;
+
+}
+
+void idle(){
+    hang();   
 }

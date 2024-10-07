@@ -42,9 +42,12 @@ typedef struct node{
 typedef node * queue_element;
 
 
-process current_process = NULL;
-queue_element ready_queue = NULL;
+process current_process;
+queue_element ready_queue;
 
+process idle_process;
+
+uint32_t ready_count;
 
 /*--------------------------------------------------------- Process Control Functions ---------------------------------------------------------*/
 
