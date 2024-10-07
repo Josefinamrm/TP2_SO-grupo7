@@ -49,11 +49,13 @@ queue_element ready_queue = NULL;
 /*--------------------------------------------------------- Process Control Functions ---------------------------------------------------------*/
 
 
-// Inserts at the beginning of the list
+/* // Inserts at the beginning of the list
 void add_to_ready_queue(process p);
 
 // Removes all instances of the process from the ready queue
-void remove_from_ready_queue(uint64_t pid);
+void remove_from_ready_queue(uint64_t pid); */
+
+uint64_t _setup_stack_structure_asm(uint64_t top_stack, uint64_t function, uint64_t argc, uint8_t ** argv);
 
 /*--------------------------------------------------------- Syscalls ---------------------------------------------------------*/
 uint64_t my_getpid();

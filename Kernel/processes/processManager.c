@@ -132,7 +132,6 @@ static uint64_t setup_stack_structure(uint64_t function, uint64_t argc, uint8_t 
     return (uint64_t) dummy_filler;
 }
 
-// mov rsp, dummy_filler
 
 // después veo que hago en el caso border  ###############################
 uint64_t my_create_process(uint8_t * name, uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint8_t ** argv){

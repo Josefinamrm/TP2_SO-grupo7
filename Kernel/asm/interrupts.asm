@@ -6,6 +6,7 @@ GLOBAL picSlaveMask
 GLOBAL haltcpu
 GLOBAL _hlt
 GLOBAL _setUser
+GLOBAL _setup_stack_structure_asm
 
 GLOBAL _irq00Handler
 GLOBAL _irq01Handler
@@ -178,6 +179,12 @@ _setUser:
 	
 	iretq
 
+
+_setup_stack_structure_asm:
+	
+
+
+
 picMasterMask:
 	push rbp
     mov rbp, rsp
@@ -200,10 +207,9 @@ picSlaveMask:
 _irq00Handler:
 
 	pushState
-	
 	push rsp
 
-	mov rdi, 0 ; pasaje de parametro
+	mov rdi, 0
 	call irqDispatcher
 
 	pop rsp
