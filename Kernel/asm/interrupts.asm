@@ -203,8 +203,10 @@ _irq00Handler:
 	
 	push rsp
 
-	mov rdi, %1 ; pasaje de parametro
-	call int_20
+	mov rdi, 0 ; pasaje de parametro
+	call irqDispatcher
+
+	pop rsp
 
 	mov rdi, rsp
 	call scheduler
