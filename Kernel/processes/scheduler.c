@@ -3,7 +3,7 @@
 uint64_t * scheduler(uint64_t * rsp){
 
     if(ready_count == 0) return idle_process->stack_pointer;
-
+    
     // Stores running process information
     current_process->stack_pointer = rsp;
     current_process->state = READY;

@@ -102,7 +102,7 @@ queue_element remove_from_ready_queue(uint64_t pid){
 
     return process_counter;
 } */
-
+/* 
 
 static uint64_t setup_stack_structure(uint64_t function, uint64_t argc, uint8_t ** argv){
     uint64_t * initial_rsp = (uint64_t *) mm_malloc(PROCESS_STACK_SIZE);
@@ -133,7 +133,7 @@ static uint64_t setup_stack_structure(uint64_t function, uint64_t argc, uint8_t 
     dummy_filler->r15 = 0;
 
     return (uint64_t) dummy_filler;
-}
+} */
 
 
 // después veo que hago en el caso border  ###############################
@@ -145,13 +145,12 @@ uint64_t my_create_process(uint8_t * name, uint64_t function, uint64_t ppid, uin
         new_process->ppid = ppid;
         new_process->priority = priority;
         new_process->state = READY;
-        // scheduler job? rsp
-        new_process->stack_pointer = (uint64_t *)setup_stack_structure(function, argc, argv);
-
+        uint64_t * initial_rsp = (uint64_t *) mm_malloc(PROCESS_STACK_SIZE);
+        initial_rsp += PROCESS_STACK_SIZE / sizeof(uint64_t);
+        new_process->stack_pointer = (uint64_t *)setup_stack_structure_asm(initial_rsp, function, argc, argv);
+                                                                            // rdi        rsi      rdx  rcx
         // Add to ready queue and force scheduler
         ready_queue = add_to_ready_queue(new_process);
-        current_process = ready_queue->p;
-        // int_20 (?)
 
         return process_counter;
     }
@@ -234,12 +233,12 @@ void init_process(){
     idle_process->ppid = 0;
     idle_process->priority = 1;
     idle_process->state = READY;
-    // idle_process->stack_pointer = !!!!!!!!!!!!!
+    uint64_t * initial_rsp = (uint64_t *) mm_malloc(PROCESS_STACK_SIZE);
+    initial_rsp += PROCESS_STACK_SIZE / sizeof(uint64_t);
+    char * argv = {NULL};
+    idle_process->stack_pointer = (uint64_t *)_setup_stack_structure_asm(initial_rsp, (uint64_t)idle, 0, argv);
 
     process_array[0] = idle_process;
-
-    return process_counter;
-
 }
 
 void idle(){
