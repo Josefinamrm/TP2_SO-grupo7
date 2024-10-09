@@ -107,7 +107,7 @@ void play_game()
     while (game_on)
     {
         
-        char c = getLastChar();
+        char c = get_last_char();
 
         switch (c)
         {
@@ -185,13 +185,13 @@ void play_game()
             if (player1_timer == 0)
             {
                 player1.score += 1;
-                printScores();
+                print_scores();
                 clear_playable_screen();
-                udrawArray(GREEN, BLACK, (SQUARE_WIDTH - INIT_WIDTH) / 2 - 47, middle_y + 120, "Restart en 3... ");
+                udraw_array(GREEN, BLACK, (SQUARE_WIDTH - INIT_WIDTH) / 2 - 47, middle_y + 120, "Restart en 3... ");
                 usys_wait(1000);
-                udrawArray(GREEN, BLACK, (SQUARE_WIDTH - INIT_WIDTH) / 2 - 47, middle_y + 120, "Restart en 3...2... ");
+                udraw_array(GREEN, BLACK, (SQUARE_WIDTH - INIT_WIDTH) / 2 - 47, middle_y + 120, "Restart en 3...2... ");
                 usys_wait(1000);
-                udrawArray(GREEN, BLACK, (SQUARE_WIDTH - INIT_WIDTH) / 2 - 47, middle_y + 120, "Restart en 3...2...1 ");
+                udraw_array(GREEN, BLACK, (SQUARE_WIDTH - INIT_WIDTH) / 2 - 47, middle_y + 120, "Restart en 3...2...1 ");
                 usys_wait(1000);
                 restart_match();
             }
@@ -223,9 +223,9 @@ void pauseGame()
         usys_print_array_of_draw_size(WHITE, BLACK, 790, 370, "Para Seguir");
         usys_print_array_of_draw_size(WHITE, BLACK, 790, 400, "Presione [ESC]");
         usys_change_draw_size(3);
-        udrawFrame(TURQUOISE, 0, 0, MAX_SQUARE_WIDTH_PX, MAX_HEIGHT_PX, BORDER_SIZE);
-        udrawFrame(TURQUOISE, MAX_SQUARE_WIDTH_PX + 4, 0, (MAX_WIDTH_PX - MAX_SQUARE_WIDTH_PX) - 4, MAX_HEIGHT_PX, BORDER_SIZE);
-        char c = getLastChar();
+        udraw_frame(TURQUOISE, 0, 0, MAX_SQUARE_WIDTH_PX, MAX_HEIGHT_PX, BORDER_SIZE);
+        udraw_frame(TURQUOISE, MAX_SQUARE_WIDTH_PX + 4, 0, (MAX_WIDTH_PX - MAX_SQUARE_WIDTH_PX) - 4, MAX_HEIGHT_PX, BORDER_SIZE);
+        char c = get_last_char();
         if (c == ESC)
         {
             paused = 0;
@@ -237,8 +237,8 @@ void pauseGame()
         }
     }
     usys_print_rect(BLACK, 790, 210, 224, 1700);
-    udrawFrame(RED, 0, 0, MAX_SQUARE_WIDTH_PX, MAX_HEIGHT_PX, BORDER_SIZE);
-    udrawFrame(LIGHT_BLUE, MAX_SQUARE_WIDTH_PX + 4, 0, (MAX_WIDTH_PX - MAX_SQUARE_WIDTH_PX) - 4, MAX_HEIGHT_PX, BORDER_SIZE);
+    udraw_frame(RED, 0, 0, MAX_SQUARE_WIDTH_PX, MAX_HEIGHT_PX, BORDER_SIZE);
+    udraw_frame(LIGHT_BLUE, MAX_SQUARE_WIDTH_PX + 4, 0, (MAX_WIDTH_PX - MAX_SQUARE_WIDTH_PX) - 4, MAX_HEIGHT_PX, BORDER_SIZE);
 }
 
 // Función auxiliar
@@ -280,11 +280,11 @@ void move_player(Player *player)
         playAgainScreen();
         if (!exit)
         {
-            udrawArray(GREEN, BLACK, (SQUARE_WIDTH - INIT_WIDTH) / 2 - 47, middle_y + 120, "Restart en 3... ");
+            udraw_array(GREEN, BLACK, (SQUARE_WIDTH - INIT_WIDTH) / 2 - 47, middle_y + 120, "Restart en 3... ");
             usys_wait(1000);
-            udrawArray(GREEN, BLACK, (SQUARE_WIDTH - INIT_WIDTH) / 2 - 47, middle_y + 120, "Restart en 3...2... ");
+            udraw_array(GREEN, BLACK, (SQUARE_WIDTH - INIT_WIDTH) / 2 - 47, middle_y + 120, "Restart en 3...2... ");
             usys_wait(1000);
-            udrawArray(GREEN, BLACK, (SQUARE_WIDTH - INIT_WIDTH) / 2 - 47, middle_y + 120, "Restart en 3...2...1 ");
+            udraw_array(GREEN, BLACK, (SQUARE_WIDTH - INIT_WIDTH) / 2 - 47, middle_y + 120, "Restart en 3...2...1 ");
             usys_wait(1000);
 
             restart_match();
@@ -301,7 +301,7 @@ void drawStartingScreen()
     int string_x = middle_x - (strlen("Presiona la tecla C para Comenzar") / 2);
 
     usys_clear_screen();
-    udrawFrame(RED, 0, 0, MAX_WIDTH_PX, MAX_HEIGHT_PX, BORDER_SIZE); // outer frame
+    udraw_frame(RED, 0, 0, MAX_WIDTH_PX, MAX_HEIGHT_PX, BORDER_SIZE); // outer frame
     usys_change_draw_size(3);
     usys_print_array_of_draw_size(RED, BLACK, title_x, middle_y - 100, "ELIMINATOR");
     usys_wait(1000);
@@ -309,7 +309,7 @@ void drawStartingScreen()
     usys_print_array_of_draw_size(WHITE, RED, string_x - 120, middle_y, "Presione la tecla C para Comenzar");
     usys_print_array_of_draw_size(RED, BLACK, string_x - 130, middle_y + 200, "Presione [ESC] para salir del juego");
     char c;
-    while ((c = getLastChar()) != 'c' && c != 'C')
+    while ((c = get_last_char()) != 'c' && c != 'C')
     {
         if (c == ESC)
         {
@@ -323,7 +323,7 @@ void drawStartingScreen()
 void ControlScreen()
 {
     usys_clear_screen();
-    udrawFrame(YELLOW, 0, 0, MAX_WIDTH_PX, MAX_HEIGHT_PX, BORDER_SIZE); // outer frame
+    udraw_frame(YELLOW, 0, 0, MAX_WIDTH_PX, MAX_HEIGHT_PX, BORDER_SIZE); // outer frame
     print("\n\n");
     usys_change_draw_size(3);
     usys_print_array_of_draw_size(YELLOW, BLACK, middle_x, middle_y - 250, "CONTROLES");
@@ -350,7 +350,7 @@ void drawEndGame()
     usys_print_array_of_draw_size(YELLOW, BLACK, end_x - 240, middle_y, "Desea salir del juego? Presione S (Si) o N (No)");
     while (1)
     {
-        char c = getLastChar();
+        char c = get_last_char();
         if (c == 'S' || c == 's')
         {
             game_on = 0;
@@ -368,7 +368,7 @@ void drawPlayerScreen()
 {
     usys_clear_screen();
     usys_change_draw_size(3);
-    udrawFrame(ORANGE, 0, 0, MAX_WIDTH_PX, MAX_HEIGHT_PX, BORDER_SIZE); // outer frame
+    udraw_frame(ORANGE, 0, 0, MAX_WIDTH_PX, MAX_HEIGHT_PX, BORDER_SIZE); // outer frame
     usys_print_array_of_draw_size(ORANGE, BLACK, middle_x + 30, middle_y - 300, "PLAYERS");
     usys_change_draw_size(2);
     usys_print_array_of_draw_size(WHITE, ORANGE, middle_x - 160, middle_y - 200, "Seleccione cantidad de jugadores (1 o 2):");
@@ -376,7 +376,7 @@ void drawPlayerScreen()
     char selection;
     while (1)
     {
-        selection = getLastChar();
+        selection = get_last_char();
         if (selection == '1')
         {
             usys_print_array_of_draw_size(WHITE, BLACK, middle_x - 100, middle_y - 120, "1 (jugador)                  ");
@@ -395,7 +395,7 @@ void drawPlayerScreen()
     usys_print_array_of_draw_size(WHITE, BLACK, middle_x - 150, middle_y + 40, "1 (Facil), 2 (Medio), 3 (Dificil)");
     while (1)
     {
-        selection = getLastChar();
+        selection = get_last_char();
         if (selection == '1')
         {
             usys_print_array_of_draw_size(WHITE, BLACK, middle_x - 150, middle_y + 40, "1 (Facil)                        ");
@@ -429,9 +429,9 @@ void drawPlayerScreen()
 void drawMainGameScreen()
 {
     usys_clear_screen();
-    udrawFrame(RED, 0, 0, MAX_SQUARE_WIDTH_PX, MAX_HEIGHT_PX, BORDER_SIZE); // outer frame
-    udrawFrame(LIGHT_BLUE, MAX_SQUARE_WIDTH_PX + 4, 0, (MAX_WIDTH_PX - MAX_SQUARE_WIDTH_PX) - 4, MAX_HEIGHT_PX, BORDER_SIZE);
-    printScores();
+    udraw_frame(RED, 0, 0, MAX_SQUARE_WIDTH_PX, MAX_HEIGHT_PX, BORDER_SIZE); // outer frame
+    udraw_frame(LIGHT_BLUE, MAX_SQUARE_WIDTH_PX + 4, 0, (MAX_WIDTH_PX - MAX_SQUARE_WIDTH_PX) - 4, MAX_HEIGHT_PX, BORDER_SIZE);
+    print_scores();
 }
 
 void playAgainScreen()
@@ -441,7 +441,7 @@ void playAgainScreen()
     usys_print_array_of_draw_size(RED, BLACK, 100, middle_y + 60, "Presione [ESC] para salir del juego");
     while (1)
     {
-        char c = getLastChar();
+        char c = get_last_char();
         if (c == ESC)
         {
             drawEndGame();
@@ -454,7 +454,7 @@ void playAgainScreen()
     }
 }
 
-void printScores()
+void print_scores()
 {
     usys_change_draw_size(3);
     usys_print_array_of_draw_size(LIGHT_BLUE, BLACK, 814, 38, "PUNTAJE");
@@ -469,10 +469,10 @@ void printScores()
 
 void printPlayerScores()
 {
-    printScore(GREEN, BLACK, 960, 106, player1.score);
+    print_score(GREEN, BLACK, 960, 106, player1.score);
     if (player_count == 2)
     {
-        printScore(ORANGE, BLACK, 960, 158, player2.score);
+        print_score(ORANGE, BLACK, 960, 158, player2.score);
     }
 }
 
@@ -484,7 +484,7 @@ void clear_playable_screen()
 void print_time()
 {
     char time_buf[3] = {0};
-    intToString(player1_timer / 1000, time_buf, 3);
+    int_to_string(player1_timer / 1000, time_buf, 3);
     usys_change_draw_size(2);
     usys_print_array_of_draw_size(BLACK, BLACK, 890, 158, "  ");
     usys_print_array_of_draw_size(YELLOW, BLACK, 890, 158, time_buf);

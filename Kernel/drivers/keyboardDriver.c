@@ -49,7 +49,7 @@ static void addToBuffer(char c)
 }
 
 /* Función para obtener un carácter del buffer */
-char getChar()
+char get_char_from_buffer()
 {
     if (readIndex == writeIndex)
         return 0;
@@ -59,7 +59,7 @@ char getChar()
 }
 
 /* Función para obtener el último carácter ingresado en el buffer --> para el juego */
-char getLastChar()
+char get_last_char_from_buffer()
 {
     if (writeIndex == 0)
     {

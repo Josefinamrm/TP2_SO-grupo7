@@ -26,10 +26,10 @@ static Header * start;
 
 
 // Inicializa la lista y la cantidad de nodos libres
-void mm_init(){
-    start = (Header *) FREE_MEM_START;
+void mm_init(uint64_t memory_start, uint64_t size){
+    start = (Header *) memory_start;
     start->s.next = NULL;
-    start->s.size = TOTAL_HEADER_UNITS - 1;
+    start->s.size = size;
     start->s.state = FREE;
 }
 
@@ -79,21 +79,37 @@ void mm_free(void * ptr){
     if(p == NULL)
         return;
 
-    if(p->s.next != NULL && p->s.next == FREE){
-        p->s.size += p->s.next->s.size;
+    if(p->s.next != NULL && p->s.next->s.state == FREE){
+        p->s.size += (p->s.next->s.size + 1);
         p->s.next = p->s.next->s.next;
     }
 
     if(previous != NULL && previous->s.state == FREE){
-        previous->s.size += p->s.size;
+        previous->s.size += (p->s.size + 1);
         previous->s.next = p->s.next;
     }else{
         p->s.state = FREE;
     }
 }
 
+void * mm_realloc(void * ptr, uint64_t new_size){
+    char * to_return = (void *) mm_malloc(new_size);
 
-// Función auxiliar usada por mm_occupied_space y por mm_free_space
+    // Obtain block memory size
+    Header * ptr_hd = (Header *) ptr - 1;
+    int size = ptr_hd->s.size * sizeof(Header);
+
+    // Copy data from old pointer to new pointer
+    for (int i = 0; i < size; i++){
+        to_return[i] = ((char *) ptr)[i];
+    }
+
+    mm_free(ptr);
+    return (void *) to_return;
+}
+
+
+// auxiliary function used in mm_occupied_space and mm_free_space
 static int calculate_space(int condition){
     Header * current;
     int total = 0;

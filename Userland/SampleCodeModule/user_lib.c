@@ -2,28 +2,28 @@
 #include <user_lib.h>
 
 
-char getChar() {
+char get_char() {
     char v[]={0};
     usys_read(STDIN,v,1);
     return v[0];
 }
 
-char getLastChar() { 
+char get_last_char() { 
     char v[] = {0};
     usys_read(LASTIN, v, 1); 
     return v[0];
 }
 
-void putChar(char c) {
+void put_char(char c) {
     usys_write(STDOUT, &c, 1);
 }
 
-void printColor(int fontColor, char * string) {
+void print_color(int fontColor, char * string) {
     usys_write_color(fontColor, string, strlen(string));
 }
 
 
-void printError(char * string) {
+void print_error(char * string) {
     usys_write(STDERR, string, strlen(string)); 
 }
 
@@ -48,7 +48,7 @@ void strcpy(char *destination, const char *source)
     *destination = '\0';
 }
 
-uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base)
+uint32_t uint_to_base(uint64_t value, char *buffer, uint32_t base)
 {
     char *p = buffer;
     char *p1, *p2;
@@ -81,7 +81,7 @@ uint32_t uintToBase(uint64_t value, char *buffer, uint32_t base)
 }
 
 //función auxiliar
-static void reverseString(char* str, int length) {
+static void reverse_string(char* str, int length) {
     int start = 0;
     int end = length - 1;
     while (start < end) {
@@ -93,7 +93,7 @@ static void reverseString(char* str, int length) {
     }
 }
 
-void intToString(int num, char* buf, int dim) {
+void int_to_string(int num, char* buf, int dim) {
     int index = 0;
 
     if (num == 0) {
@@ -111,13 +111,13 @@ void intToString(int num, char* buf, int dim) {
     }
 
     buf[index] = '\0';
-    reverseString(buf, index);
+    reverse_string(buf, index);
 }
 
 // Para el juego
-void printScore(uint32_t fontColor, uint32_t backgroundColor, uint64_t x, uint64_t y, int num){
+void print_score(uint32_t fontColor, uint32_t backgroundColor, uint64_t x, uint64_t y, int num){
     char scoreBuf[13];
-    intToString(num, scoreBuf, 13);
+    int_to_string(num, scoreBuf, 13);
     usys_print_array_of_draw_size(fontColor, backgroundColor, x, y, scoreBuf);
 }
 
@@ -130,7 +130,7 @@ int strcmp(const char *s1, const char *s2){
 	return (*s1 - *--s2);
 }
 
-int parseCommandArg(char * str) {
+int parse_command_arg(char * str) {
     int argC = 1;
     for (int i = 0; str[i] != '\0'; i++) {
         if (str[i] == ' ') {
@@ -140,13 +140,13 @@ int parseCommandArg(char * str) {
     return argC;
 }
 
-void udrawFrame(uint32_t color, uint64_t x, uint64_t y, uint64_t size_x, uint64_t size_y, uint64_t thickness) {
+void udraw_frame(uint32_t color, uint64_t x, uint64_t y, uint64_t size_x, uint64_t size_y, uint64_t thickness) {
 	usys_print_rect(color, x, y, size_x, thickness); 
 	usys_print_rect(color, x, y+size_y-thickness, size_x, thickness);
 	usys_print_rect(color, x, y, thickness, size_y); 
 	usys_print_rect(color, x + size_x - thickness, y, thickness, size_y);
 }
 
-void udrawArray(uint32_t fontColor, uint32_t backgroundColor, int x, int y, char * arr) {
+void udraw_array(uint32_t fontColor, uint32_t backgroundColor, int x, int y, char * arr) {
     _draw_array(fontColor, backgroundColor, (uint64_t) x,(uint64_t) y, (uint64_t) arr);
 }

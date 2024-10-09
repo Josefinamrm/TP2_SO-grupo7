@@ -74,7 +74,7 @@ void drawMainGameScreen();
 
 void playAgainScreen();
 
-void printScores();
+void print_scores();
 
 void printPlayerScores();
 

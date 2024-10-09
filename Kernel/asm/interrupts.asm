@@ -6,6 +6,7 @@ GLOBAL picSlaveMask
 GLOBAL haltcpu
 GLOBAL _hlt
 GLOBAL _setUser
+GLOBAL _setup_stack_structure_asm
 
 GLOBAL _irq00Handler
 GLOBAL _irq01Handler
@@ -27,6 +28,8 @@ EXTERN irqDispatcher
 EXTERN exceptionDispatcher
 EXTERN syscallDispatcher
 EXTERN getStackBase
+EXTERN scheduler
+EXTERN int_20
 
 
 
@@ -70,7 +73,7 @@ SECTION .text
 
 %macro irqHandlerMaster 1
 	pushState
-
+ 
 	mov rdi, %1 ; pasaje de parametro
 	call irqDispatcher
 
@@ -176,6 +179,43 @@ _setUser:
 	
 	iretq
 
+
+_setup_stack_structure_asm:
+	push rbp
+	mov rbp, rsp
+
+	mov rsp, rdi
+
+	push 0x0 			; r15
+	push 0x0			; r14
+	push 0x0			; r13
+	push 0x0			; r12
+	push 0x0			; r11
+	push 0x0			; r10
+	push 0x0			; r9
+	push 0x0			; r8
+	push rdx            ; rdi->argc
+	push rcx 			; rsi->argv
+	push rdi			; rbp->stack_pointer
+	push 0x0			; rdx
+	push 0x0			; rcx
+	push 0x0			; rbx
+	push 0x0			; rax
+	push 0x0			; ss
+	push rdi			; rsp
+	push 0x202			; rflags
+	push 0x8			; cs
+	push rsi			; rip
+	
+	mov rax, rsp
+
+	mov rsp, rbp
+	pop rbp
+	ret 
+	
+
+
+
 picMasterMask:
 	push rbp
     mov rbp, rsp
@@ -193,9 +233,30 @@ picSlaveMask:
     retn
 
 
+
 ;8254 Timer (Timer Tick)
 _irq00Handler:
-	irqHandlerMaster 0
+
+	pushState
+	push rsp
+
+	mov rdi, 0
+	call irqDispatcher
+
+	pop rsp
+
+	mov rdi, rsp
+	call scheduler
+	mov rsp, rax
+
+	; signal pic EOI (End of Interrupt)
+	mov al, 20h
+	out 20h, al
+
+	popState
+	iretq
+
+
 
 ;Keyboard
 _irq01Handler:

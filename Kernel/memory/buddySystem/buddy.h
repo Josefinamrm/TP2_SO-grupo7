@@ -1,19 +1,23 @@
-#ifndef MEMORYMANAGER_H
-#define MEMORYMANAGER_H
+#ifndef BUDDY_H
+#define BUDDY_H
 
-#include <unistd.h>
+#include <stdint.h>
+#include <stdlib.h>
 
-// Información de la memoria libre
-#define FREE_MEM_START 0x0000000000600000 // datos sacados del Pure64 Manual
-#define TOTAL_HEADER_UNITS 4096 + 1
+#define MEM_SIZE 0x4000000 // 64M
+#define MEM_MIN 0x1000000 // 1M
+#define MEM_BLOCKS MEM_SIZE/MEM_MIN // 64
+#define CANT_NODES MEM_BLOCKS*2 - 1 // 127
 
-// Estado de un nodo de la lista
-#define FREE 0
-#define OCCUPIED 1
+#define LEFT_CHILD(x) 2*x + 1
+#define RIGHT_CHILD(x) 2*x + 2
+
+const enum {FREE=0, SPLIT, OCCUPIED};
+
 
 
 // Inicializa la lista de nodos de memoria
-void mm_init();
+void mm_init(uint64_t memory_start, uint64_t size);
 
 // Devuelve un puntero al bloque de memoria reservada
 void * mm_malloc(unsigned int nbytes);
@@ -30,8 +34,7 @@ int mm_occupied_space();
 // Retorna el espacio total de memoria, ocupado o no ocupado
 int mm_total_space();
 
-// Tamaño del header
-int mm_header_size();
 
+void print_mem_states();
 
 #endif
