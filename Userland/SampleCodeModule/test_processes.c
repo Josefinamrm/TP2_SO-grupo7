@@ -1,17 +1,12 @@
-#include <stdint.h>
-#include "test_util.h"
 #include <user_syscalls.h>
-#include <user_lib.h>
-#include "test.h"
-
-
+#include <test_util.h>
 
 enum State { RUNNING,
              BLOCKED,
              KILLED };
 
 typedef struct P_rq {
-  uint32_t pid;
+  int32_t pid;
   enum State state;
 } p_rq;
 
@@ -34,9 +29,7 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
 
     // Create max_processes processes
     for (rq = 0; rq < max_processes; rq++) {
-      //p_rqs[rq].pid = my_create_process("endless_loop", 0, argvAux);
-      p_rqs[rq].pid = create_process((uint64_t)endless_loop, get_pid(), 0,  0, argvAux);
-
+      p_rqs[rq].pid = create_process((uint64_t)endless_loop, get_pid(), 0, 1, argvAux);
 
       if (p_rqs[rq].pid == -1) {
         print("test_processes: ERROR creating process\n");

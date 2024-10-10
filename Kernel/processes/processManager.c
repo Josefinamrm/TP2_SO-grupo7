@@ -1,7 +1,11 @@
 #include <processManager.h>
-#include <interrupts.h>
 
-extern void hang();
+#define INIT_PID 1
+
+process current_process;
+queue_element ready_queue;
+process idle_process;
+uint32_t ready_count;
 
 process process_array[MAX_PROCESS];
 uint8_t process_counter = 0;
@@ -28,8 +32,8 @@ queue_element remove_from_ready_queue(uint64_t pid){
     if(ready_queue->p->pid == pid){
         queue_element aux = ready_queue;
         ready_queue = ready_queue->next;
-        free(aux->p);
-        free(aux);
+        mm_free(aux->p);
+        mm_free(aux);
         return ready_queue;
     }
     ready_queue->next = remove_from_ready_queue(pid);
@@ -48,9 +52,14 @@ uint64_t my_create_process(uint64_t function, uint64_t ppid, uint64_t priority, 
         new_process->state = READY;
         uint64_t * initial_rsp = (uint64_t *) mm_malloc(PROCESS_STACK_SIZE);
         initial_rsp += PROCESS_STACK_SIZE / sizeof(uint64_t);
-        new_process->stack_pointer = (uint64_t *)setup_stack_structure_asm(initial_rsp, function, argc, argv);
+        new_process->stack_pointer = (uint64_t *)_setup_stack_structure_asm(initial_rsp, function, argc, argv);
                                                                             // rdi        rsi      rdx  rcx
+
         add_to_ready_queue(new_process);
+
+        process_array[ppid]->child_list = mm_malloc(sizeof(node));
+        process_array[ppid]->child_list->p = new_process;
+        process_array[ppid]->child_list->next = NULL;
 
         return process_counter;
     }
@@ -74,6 +83,7 @@ void my_nice(uint64_t pid, uint64_t newPrio){
 
 
 
+
 uint32_t my_kill(uint64_t pid){
     process p = process_array[pid];
 
@@ -82,8 +92,23 @@ uint32_t my_kill(uint64_t pid){
     p->state = KILLED;
     for(int32_t i =0; i < p->priority; i++)
         ready_queue = remove_from_ready_queue(p->pid);
-    free(p);
-    process_array[p->pid] = NULL;
+    
+
+    // init adopts children
+    while(p->child_list != NULL){
+        p->child_list->p->ppid = INIT_PID;
+        p->child_list = p->child_list->next;
+    }
+    process_array[INIT_PID]->child_list = p->child_list;
+
+    // free children
+    while(p->child_list != NULL){
+        mm_free(p->child_list->p);
+        queue_element aux = p->child_list;
+        p->child_list = p->child_list->next;
+        mm_free(aux);
+    }
+    mm_free(p->child_list);
 
     return EXIT_SUCCESS;
 }
@@ -118,16 +143,26 @@ void my_yield(){
 }
 
 
-
 void my_wait(int64_t pid){
-    my_block(pid);
-    while(process_array[pid]->state != RUNNING);
-    my_unblock(pid);
 
+    process p = process_array[pid];
+
+    if(p->child_list == NULL) return;
+
+    queue_element temp = p->child_list;
+    while(temp != NULL){
+        if(temp->p->state != KILLED) my_yield();
+
+        queue_element aux = temp;
+        temp = temp->next;
+        mm_free(aux->p);
+        mm_free(aux);
+    }
+    p->child_list = temp;
 }
 
 
-void init_process(){
+void init_function(){
     current_process = NULL;
     ready_queue = NULL;
     ready_count = 0;
@@ -146,5 +181,13 @@ void init_process(){
 }
 
 void idle(){
-    hang();   
+    my_create_process((uint64_t)init_process, 0, 1, 0, 0);
+    while(1) haltcpu();
+}
+
+
+void init_process(){
+    my_create_process((uint64_t)USERLAND_DIREC, my_getpid(), 0, 0, NULL);
+    _irq00Handler();
+    my_wait(INIT_PID);
 }

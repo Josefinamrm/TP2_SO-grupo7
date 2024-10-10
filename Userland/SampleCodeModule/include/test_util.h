@@ -1,3 +1,6 @@
+#ifndef TEST_UTIL_H
+#define TEST_UTIL_H
+
 #include <stdint.h>
 
 uint32_t GetUint();
@@ -7,3 +10,5 @@ int64_t satoi(char *str);
 void bussy_wait(uint64_t n);
 void endless_loop();
 void endless_loop_print(uint64_t wait);
+
+#endif

@@ -63,7 +63,7 @@ void flush_buffer(){
     _flush_buffer();
 }
 
-uint64_t getpid(){
+uint64_t get_pid(){
     return _get_pid();
 }
 
