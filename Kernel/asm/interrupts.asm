@@ -237,24 +237,24 @@ picSlaveMask:
 ;8254 Timer (Timer Tick)
 _irq00Handler:
 
-	; pushState
-	; push rsp
+	pushState
+	push rsp
 
-	; mov rdi, 0
-	; call irqDispatcher
+	mov rdi, 0
+	call irqDispatcher
 
-	; ; pop rsp
+	pop rsp
 
-	; ; mov rdi, rsp
-	; ; call scheduler
-	; ; mov rsp, rax
+	mov rdi, rsp
+	call scheduler
+	mov rsp, rax
 
-	; ; signal pic EOI (End of Interrupt)
-	; mov al, 20h
-	; out 20h, al
+	; signal pic EOI (End of Interrupt)
+	mov al, 20h
+	out 20h, al
 
-	; popState
-	; iretq
+	popState
+	iretq
 	irqHandlerMaster 0
 
 

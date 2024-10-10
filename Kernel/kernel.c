@@ -59,10 +59,9 @@ void *initializeKernelBinary()
 int main()
 {
 	load_idt(); 	// Cargar la tabla de descriptores de interrupciones (IDT)
-	//dory_start();
+	dory_start();
 
 	init_function();
-	_setUser();
 
 	printArray("You shouldn't be here chief..."); 	// Imprimir un mensaje (esto no debería ocurrir)
 
