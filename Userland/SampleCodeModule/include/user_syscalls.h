@@ -39,4 +39,16 @@ int usys_get_time();
 
 void flush_buffer();
 
+
+// processes syscalls
+
+uint64_t get_pid();
+uint64_t my_create_process(uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint8_t ** argv);
+void nice(uint64_t pid, uint64_t newPrio);
+uint32_t kill(uint64_t pid);
+uint32_t block(uint64_t pid);
+uint32_t unblock(uint64_t pid);
+void yield();
+void ps_wait(int64_t pid);
+
 #endif

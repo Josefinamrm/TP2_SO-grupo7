@@ -1,4 +1,5 @@
 #include <shell.h>
+#include "./tests/test.h"
 
 #define INPUT_SIZE 100 
 #define COMMAND_COUNT 10  
@@ -69,6 +70,13 @@ void init_shell() {
     } 
     print_color(LIGHT_BLUE, commands[COMMAND_COUNT-1].name_id);
     print("\nIngrese \"help\" para la descripcion los comandos.\n");
+
+    /* --------------------- Test Processes ---------------------------*/
+    my_create_process((uint64_t)test_processes, get_pid(), 1, 0, 0);
+    my_create_process((uint64_t)test_prio, get_pid(), 1, 0, 0);
+    /* ----------------------------------------------------------------*/
+
+
     char c;
     int running = 1; 
     currentFontSize = usys_get_font_size();
