@@ -2,7 +2,7 @@
 #include "./tests/test.h"
 
 #define INPUT_SIZE 100 
-#define COMMAND_COUNT 10  
+#define COMMAND_COUNT 11
 #define CANT_REGS 18
 
 void help();
@@ -31,7 +31,8 @@ static Command commands[] = {
     {"zoomin", zoomin, "Aumenta el tamanio de la letra"},
     {"zoomout", zoomout, "Disminuye el tamanio de la letra"},
     {"clear", clear_shell, "Limpia la shell"},
-    {"beep", beep, "Emite un beep"}
+    {"beep", beep, "Emite un beep"},
+    {"test_processes", test_p, "Crea los procesos test_processes y test_prio"},
 };
 
 void parse_command(char *str) {
@@ -70,11 +71,6 @@ void init_shell() {
     } 
     print_color(LIGHT_BLUE, commands[COMMAND_COUNT-1].name_id);
     print("\nIngrese \"help\" para la descripcion los comandos.\n");
-
-    /* --------------------- Test Processes ---------------------------*/
-    my_create_process((uint64_t)test_processes, get_pid(), 1, 0, 0);
-    my_create_process((uint64_t)test_prio, get_pid(), 1, 0, 0);
-    /* ----------------------------------------------------------------*/
 
 
     char c;
@@ -208,3 +204,11 @@ void play_eliminator() {
     clear_shell(); 
     gameActive = 0;
 }
+
+
+/* --------------------- Test Processes ---------------------------*/
+void test_p(){
+    my_create_process((uint64_t)test_processes, get_pid(), 1, 0, 0);
+    my_create_process((uint64_t)test_prio, get_pid(), 1, 0, 0);
+}
+/* ----------------------------------------------------------------*/
