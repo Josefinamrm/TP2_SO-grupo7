@@ -14,6 +14,19 @@ GLOBAL _print_rect
 GLOBAL _get_time
 GLOBAL _draw_array
 GLOBAL _flush_buffer
+
+; processes:
+GLOBAL _get_pid
+GLOBAL _create_process
+GLOBAL _nice
+GLOBAL _kill
+GLOBAL _block
+GLOBAL _unblock
+GLOBAL _yield
+GLOBAL _ps_wait
+
+
+
 section .text
 
 _read: 
@@ -188,6 +201,94 @@ _flush_buffer:
     mov rbp, rsp 
 
     mov rax, 15
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_get_pid:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 16
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_create_process:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 17
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_nice:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 18
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_kill:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 19
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_block:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 20
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_unblock:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 21
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_yield:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 22
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_ps_wait:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 23
     int 80h 
 
     mov rsp, rbp 

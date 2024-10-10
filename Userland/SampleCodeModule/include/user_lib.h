@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <user_syscalls.h>
 #include <ucolors.h>
+#include <stddef.h>
+
 #define INPUT_SIZE 100
 
 void print(char *arr);

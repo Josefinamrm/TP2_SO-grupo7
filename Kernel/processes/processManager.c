@@ -1,8 +1,9 @@
-#include "processManager.h"
 
+#include "processManager.h"
+#define INIT_PID 1
 // sería mas facil en el momento de crear el proceso decirle si escribe a la terminal o si escribe a un pipe (agodio)
 enum fd {STDIN=0, STDOUT, STDERR};
-uint64_t pids_test = 0;
+
 
 /*--------------------------------------------------------- Process Control Structure ---------------------------------------------------------*/
 
@@ -13,6 +14,7 @@ struct p{
     uint8_t priority;
     uint8_t state;
     uint64_t stack_pointer;
+    struct node * child_list;
 
     // file managment
     // uint32_t * file_descriptors;
@@ -156,27 +158,31 @@ uint64_t is_ready_queue_empty(){
 
 
 /*--------------------------------------------------------- Process Syscall Implementations ---------------------------------------------------------*/
-/* 
 
 uint64_t my_getpid(){
     return current_process->pid;
 }
 
-
-queue_element add_to_ready_queue(process p){ 
+static uint32_t add_to_ready_queue(process p){ 
     queue_element new = (queue_element) mm_malloc(sizeof(node));
+    if(new==NULL){
+        return EXIT_FAIL;
+    }
+
     new->p = p;
     new->next = ready_queue;
     ready_count++;
-    return new;
+    ready_queue = new;
+
+    return EXIT_SUCCESS;
 }
 
 queue_element remove_from_ready_queue(uint64_t pid){
     if(ready_queue->p->pid == pid){
         queue_element aux = ready_queue;
         ready_queue = ready_queue->next;
-        free(aux->p);
-        free(aux);
+        mm_free(aux->p);
+        mm_free(aux);
         return ready_queue;
     }
     ready_queue->next = remove_from_ready_queue(pid);
@@ -195,10 +201,14 @@ uint64_t my_create_process(uint64_t function, uint64_t ppid, uint64_t priority, 
         new_process->state = READY;
         uint64_t * initial_rsp = (uint64_t *) mm_malloc(PROCESS_STACK_SIZE);
         initial_rsp += PROCESS_STACK_SIZE / sizeof(uint64_t);
-        new_process->stack_pointer = (uint64_t *)setup_stack_structure_asm(initial_rsp, function, argc, argv);
+        new_process->stack_pointer = (uint64_t *)_setup_stack_structure_asm(initial_rsp, function, argc, argv);
                                                                             // rdi        rsi      rdx  rcx
-        // Add to ready queue and force scheduler
-        ready_queue = add_to_ready_queue(new_process);
+
+        add_to_ready_queue(new_process);
+
+        process_array[ppid]->child_list = mm_malloc(sizeof(node));
+        process_array[ppid]->child_list->p = new_process;
+        process_array[ppid]->child_list->next = NULL;
 
         return process_counter;
     }
@@ -206,10 +216,10 @@ uint64_t my_create_process(uint64_t function, uint64_t ppid, uint64_t priority, 
 
 
 
-uint64_t my_nice(uint64_t pid, uint64_t newPrio){
+void my_nice(uint64_t pid, uint64_t newPrio){
     if(process_array[pid]->priority < newPrio){ // upgrade
         for(uint32_t i = process_array[pid]->priority; i < newPrio - process_array[pid]->priority; i++){
-            ready_queue = add_to_ready_queue(process_array[pid]);
+            add_to_ready_queue(process_array[pid]);
         }
     }
     else if(process_array[pid]->priority > newPrio){ // downgrade
@@ -222,59 +232,87 @@ uint64_t my_nice(uint64_t pid, uint64_t newPrio){
 
 
 
-uint64_t my_kill(uint64_t pid){
+
+uint32_t my_kill(uint64_t pid){
     process p = process_array[pid];
+
+    if(p == NULL) return EXIT_FAIL;
+    
     p->state = KILLED;
     for(int32_t i =0; i < p->priority; i++)
-        ready_queue = remove_from_ready_queue(pid);
-    free(p);
+        ready_queue = remove_from_ready_queue(p->pid);
+    
+
+    // init adopts children
+    while(p->child_list != NULL){
+        p->child_list->p->ppid = INIT_PID;
+        p->child_list = p->child_list->next;
+    }
+    process_array[INIT_PID]->child_list = p->child_list;
+
+    // free children
+    while(p->child_list != NULL){
+        mm_free(p->child_list->p);
+        queue_element aux = p->child_list;
+        p->child_list = p->child_list->next;
+        mm_free(aux);
+    }
+    mm_free(p->child_list);
+
+    return EXIT_SUCCESS;
 }
 
 
 
-uint64_t my_block(uint64_t pid){
+uint32_t my_block(uint64_t pid){
+
+    if(process_array[pid] == NULL) return EXIT_FAIL;    
+
     process_array[pid]->state = BLOCKED;
     for(int32_t i =0; i < process_array[pid]->priority; i++)
         ready_queue = remove_from_ready_queue(process_array[pid]->pid);
+
+    return EXIT_SUCCESS;
 }
 
 
 
-uint64_t my_unblock(uint64_t pid){
+uint32_t my_unblock(uint64_t pid){
+    if(process_array[pid] == NULL) return EXIT_FAIL;
+    
     process_array[pid]->state = READY;
     for(int32_t i =0; i < process_array[pid]->priority; i++)
-        ready_queue = add_to_ready_queue(process_array[pid]);
+        add_to_ready_queue(process_array[pid]);
 }
 
 
 
-uint64_t my_yield(){
-    process_array[my_getpid()]->state = READY;
-    for(int32_t i =0; i < process_array[my_getpid()]->priority; i++)
-        ready_queue = add_to_ready_queue(process_array[my_getpid()]);
-    // FORZAR A SCHEDULE // TIMERTICK ############################################################
+void my_yield(){
+    _irq00Handler();
 }
 
 
+void my_wait(int64_t pid){
 
-uint64_t my_wait(int64_t pid){
-    process_array[my_getpid()]->state = BLOCKED;
-    for(int32_t i =0; i < process_array[pid]->priority; i++)
-        ready_queue = remove_from_ready_queue(process_array[pid]->pid);
+    process p = process_array[pid];
 
-    while(process_array[pid]->state != RUNNING);
-    for(int32_t i =0; i < process_array[pid]->priority; i++)
-        process_array[my_getpid()]->state = READY;
+    if(p->child_list == NULL) return;
+    queue_element temp = p->child_list;
+    while(temp != NULL){
+        if(temp->p->state != KILLED) my_yield();
 
-    return 0;
-}*/
+        queue_element aux = temp;
+        temp = temp->next;
+        mm_free(aux->p);
+        mm_free(aux);
+    }
+    p->child_list = temp;
+}
 
-/* 
-void init_process(){
 
-    // inicializacion listas
+void init_function(){
 
-    process idle_process = (process) mm_malloc(sizeof(struct p));
+    process idle_process = (process) mm_malloc(sizeof(p));
     idle_process->pid = 0;
     idle_process->ppid = 0;
     idle_process->priority = 1;
@@ -288,5 +326,13 @@ void init_process(){
 }
 
 void idle(){
-    hang();   
-} */
+    my_create_process((uint64_t)init_process, 0, 1, 0, 0);
+    while(1) haltcpu();
+}
+
+
+void init_process(){
+    my_create_process((uint64_t)USERLAND_DIREC, my_getpid(), 0, 0, NULL);
+    _irq00Handler();
+    my_wait(INIT_PID);
+}

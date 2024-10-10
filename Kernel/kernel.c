@@ -12,7 +12,7 @@
 #include <sound.h>
 #include <time.h>
 #include "dory.h"
-
+#include "processManager.h"
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -61,7 +61,7 @@ int main()
 	load_idt(); 	// Cargar la tabla de descriptores de interrupciones (IDT)
 	dory_start();
 
-	_setUser(); 	// Cambiar a modo usuario
+	init_function();
 
 	printArray("You shouldn't be here chief..."); 	// Imprimir un mensaje (esto no debería ocurrir)
 

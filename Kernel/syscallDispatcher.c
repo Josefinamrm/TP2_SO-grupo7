@@ -5,6 +5,7 @@
 #include <keyboardDriver.h> 
 #include <clock.h>
 #include <sound.h>
+#include "processManager.h"
 
 #define STDIN 0
 #define STDOUT 1
@@ -31,6 +32,14 @@ uint64_t ksys_getTime();
 uint64_t ksys_draw_square(uint64_t color, uint64_t x, uint64_t y, uint64_t size);
 uint64_t ksys_draw_rect(uint64_t color, uint64_t x, uint64_t y, uint64_t size_x, uint64_t size_y);
 uint64_t ksys_draw_array(uint64_t fontColor, uint64_t backgroundColor, uint64_t x, uint64_t y, uint64_t arr);
+uint64_t ksys_getpid();
+uint64_t ksys_create_process(uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint8_t ** argv);
+uint64_t ksys_nice(uint64_t pid, uint64_t newPrio);
+uint64_t ksys_kill(uint64_t pid);
+uint64_t ksys_block(uint64_t pid);
+uint64_t ksys_unblock(uint64_t pid);
+uint64_t ksys_yield();
+uint64_t ksys_ps_wait(int64_t pid);
 
 uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, uint64_t r8, uint64_t rax)
 {
@@ -69,7 +78,25 @@ uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rc
     case 15:
         flushBuffer();
         return 0;
+    case 16:
+        return ksys_getpid();
+    case 17:
+        return ksys_create_process(rdi, rsi, rdx, rcx, r8);
+    case 18:
+        return ksys_nice(rdi, rsi);
+    case 19:
+        return ksys_kill(rdi);
+    case 20:
+        return ksys_block(rdi);
+    case 21:
+        return ksys_unblock(rdi);
+    case 22:
+        return ksys_yield();
+    case 23:
+        return ksys_ps_wait(rdi);
     }
+
+
     return 0;
 }
 
@@ -188,5 +215,42 @@ uint64_t ksys_draw_rect(uint64_t color, uint64_t x, uint64_t y, uint64_t size_x,
 uint64_t ksys_draw_array(uint64_t fontColor, uint64_t backgroundColor, uint64_t x, uint64_t y, uint64_t arr)
 {
     drawArray(fontColor, backgroundColor, x, y, (char *) arr);
+    return 0;
+}
+
+uint64_t ksys_getpid(){
+    return my_getpid();
+}
+
+
+uint64_t ksys_create_process(uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint8_t ** argv)
+{
+    return my_create_process(function, ppid, priority, argc, argv);
+}
+
+uint64_t ksys_nice(uint64_t pid, uint64_t newPrio){
+    my_nice(pid, newPrio);
+    return 0;
+}
+
+uint64_t ksys_kill(uint64_t pid){
+    return  my_kill(pid);
+}
+
+uint64_t ksys_block(uint64_t pid){
+    return my_block(pid);
+}
+
+uint64_t ksys_unblock(uint64_t pid){
+    return my_unblock(pid);
+}
+
+uint64_t ksys_yield(){
+    my_yield();
+    return 0;
+}
+
+uint64_t ksys_ps_wait(int64_t pid){
+    my_wait(pid);
     return 0;
 }

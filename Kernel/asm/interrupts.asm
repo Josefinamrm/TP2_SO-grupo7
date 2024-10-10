@@ -255,7 +255,7 @@ _irq00Handler:
 
 	popState
 	iretq
-
+	irqHandlerMaster 0
 
 
 ;Keyboard

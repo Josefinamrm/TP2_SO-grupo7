@@ -62,3 +62,35 @@ int usys_get_time() {
 void flush_buffer(){
     _flush_buffer();
 }
+
+uint64_t get_pid(){
+    return _get_pid();
+}
+
+uint64_t create_process(uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint8_t ** argv){
+    return _create_process(function, ppid, priority, argc, argv);
+}
+
+void nice(uint64_t pid, uint64_t newPrio){
+    _nice(pid, newPrio);
+}
+
+uint32_t kill(uint64_t pid){
+    _kill(pid);
+}
+
+uint32_t block(uint64_t pid){
+    _block(pid);
+}
+
+uint32_t unblock(uint64_t pid){
+    _unblock(pid);
+}
+
+void yield(){
+    _yield();
+}
+
+void ps_wait(int64_t pid){
+    _ps_wait(pid);
+}
