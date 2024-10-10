@@ -9,56 +9,67 @@
 
 #define MAX_PROCESS 200
 #define PROCESS_STACK_SIZE 4096
-
+enum State {READY, RUNNING, BLOCKED, KILLED, ZOMBIE};
 #define EXIT_FAIL -1
 #define EXIT_SUCCESS 0
 
 // sería mas facil en el momento de crear el proceso decirle si escribe a la terminal o si escribe a un pipe (agodio)
 enum fd {STDIN=0, STDOUT, STDERR};
 
-enum State {READY, RUNNING, BLOCKED, KILLED, ZOMBIE};
+typedef struct queue_info * process_queue;
+
+typedef struct p * process;
+
+/*--------------------------------------------------------- Queue Functions ---------------------------------------------------------*/
+
+// Initializes queue
+process_queue initialize_queue();
 
 
 
-/*--------------------------------------------------------- Process Control Structure ---------------------------------------------------------*/
-typedef struct node{
-    struct pr * p;
-    struct node * next;
-}node;
-typedef node * queue_element;
-
-typedef struct pr {
-    uint64_t pid;
-    uint64_t ppid;
-    uint8_t priority;
-    uint8_t state;
-    uint64_t * stack_pointer;
-
-    queue_element child_list;
-} p ;
-typedef p * process;
+// Adds a process to the end of the queue
+void add_process(process_queue queue, process p);
 
 
-/*--------------------------------------------------------- Process Control Variables ---------------------------------------------------------*/
+// Removes all instances of the process in the queue
+void delete_process(process_queue queue, uint64_t pid);
+
+// Checks if queue is empty, returns 1 if so
+uint64_t is_empty(process_queue queue);
 
 
-extern process current_process;
-extern queue_element ready_queue;
-extern process idle_process;
-extern uint32_t ready_count;
 
+// Returns next running process rsp from the ready process queue
+uint64_t next_running_process(uint64_t current_rsp);
+
+
+// Returns idle process rsp
+uint64_t idle_process_rsp();
+
+
+// Returns wether ready queue is empty (1) or not (0)
+uint64_t is_ready_queue_empty();
+
+/*--------------------------------------------------------- Syscalls ---------------------------------------------------------*/
+
+// Returns the pid of the current process
 uint64_t my_getpid();
+
+// Creates a new process
 uint64_t my_create_process(uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint8_t ** argv);
-void my_nice(uint64_t pid, uint64_t newPrio);
-uint32_t my_kill(uint64_t pid);
-uint32_t my_block(uint64_t pid);
-uint32_t my_unblock(uint64_t pid);
-void my_yield();
-void my_wait(int64_t pid);
+
+// Changes process priority
+uint64_t my_nice(uint64_t pid, uint64_t newPrio);
+uint64_t my_kill(uint64_t pid);
+uint64_t my_block(uint64_t pid);
+uint64_t my_unblock(uint64_t pid);
+uint64_t my_yield();
+uint64_t my_wait(int64_t pid);
 
 void init_function();
 
 void init_process();
 void idle();
+
 
 #endif
