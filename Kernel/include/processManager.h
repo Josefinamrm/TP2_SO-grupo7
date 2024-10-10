@@ -8,61 +8,57 @@
 
 #define MAX_PROCESS 200
 #define PROCESS_STACK_SIZE 4096
-
-// sería mas facil en el momento de crear el proceso decirle si escribe a la terminal o si escribe a un pipe (agodio)
-enum fd {STDIN=0, STDOUT, STDERR};
-
 enum State {READY, RUNNING, BLOCKED, KILLED, ZOMBIE};
 
 
+typedef struct queue_info * process_queue;
 
-/*--------------------------------------------------------- Process Control Structure ---------------------------------------------------------*/
-typedef struct {
+typedef struct p * process;
 
-    uint8_t * name;
-    uint64_t pid;
-    uint64_t ppid;
-    uint8_t priority;
-    uint8_t state;
-    uint64_t * stack_pointer;
+/*--------------------------------------------------------- Queue Functions ---------------------------------------------------------*/
 
-    // file managment
-    // uint32_t * file_descriptors;
-
-} p ;
-typedef p * process;
+// Initializes queue
+process_queue initialize_queue();
 
 
-/*--------------------------------------------------------- Process Control Variables ---------------------------------------------------------*/
-
-typedef struct node{
-    process p;
-    struct node * next;
-}node;
-typedef node * queue_element;
+// Adds a process to the end of the queue
+void add_process(process_queue queue, process p);
 
 
-process current_process;
-queue_element ready_queue;
-
-process idle_process;
-
-uint32_t ready_count;
-
-/*--------------------------------------------------------- Process Control Functions ---------------------------------------------------------*/
+// Removes all instances of the process in the queue
+void delete_process(process_queue queue, uint64_t pid);
 
 
-/* // Inserts at the beginning of the list
-void add_to_ready_queue(process p);
+// Checks if queue is empty, returns 1 if so
+uint64_t is_empty(process_queue queue);
 
-// Removes all instances of the process from the ready queue
-void remove_from_ready_queue(uint64_t pid); */
 
-uint64_t _setup_stack_structure_asm(uint64_t top_stack, uint64_t function, uint64_t argc, uint8_t ** argv);
+// Returns next running process rsp from the ready process queue
+uint64_t next_running_process(uint64_t current_rsp);
+
+
+// Returns idle process rsp
+uint64_t idle_process_rsp();
+
+
+// Returns wether ready queue is empty (1) or not (0)
+uint64_t is_ready_queue_empty();
+
+
+
+/*--------------------------------------------------------- ASM Functions ---------------------------------------------------------*/
+
+
 
 /*--------------------------------------------------------- Syscalls ---------------------------------------------------------*/
+
+// Returns the pid of the current process
 uint64_t my_getpid();
-uint64_t my_create_process(uint8_t * name, uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint8_t ** argv);
+
+// Creates a new process
+uint64_t my_create_process(uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint8_t ** argv);
+
+// Changes process priority
 uint64_t my_nice(uint64_t pid, uint64_t newPrio);
 uint64_t my_kill(uint64_t pid);
 uint64_t my_block(uint64_t pid);

@@ -1,39 +1,162 @@
 #include "processManager.h"
 
-extern void hang();
+// sería mas facil en el momento de crear el proceso decirle si escribe a la terminal o si escribe a un pipe (agodio)
+enum fd {STDIN=0, STDOUT, STDERR};
+uint64_t pids_test = 0;
 
-typedef struct{
-    uint64_t ss;
-    uint64_t rsp;
-    uint64_t rflags;
-    uint64_t cs;
-    uint64_t rip;
-    uint64_t rax;
-    uint64_t rbx;
-    uint64_t rcx;
-    uint64_t rdx;
-    uint64_t rbp;
-    uint64_t rdi;
-    uint64_t rsi;
-    uint64_t r8;
-    uint64_t r9;
-    uint64_t r10;
-    uint64_t r11;
-    uint64_t r12;
-    uint64_t r13;
-    uint64_t r14;
-    uint64_t r15;
-}initial_stack;
+/*--------------------------------------------------------- Process Control Structure ---------------------------------------------------------*/
 
-typedef initial_stack * initial_stack_ptr;
+struct p{
 
+    uint64_t pid;
+    uint64_t ppid;
+    uint8_t priority;
+    uint8_t state;
+    uint64_t stack_pointer;
+
+    // file managment
+    // uint32_t * file_descriptors;
+
+};
+
+/*--------------------------------------------------------- Ready Process Queue ---------------------------------------------------------*/
+
+typedef struct node{
+    process p;
+    struct node * next;
+}t_node;
+
+struct queue_info{
+    t_node * front;
+    t_node * rear;
+    uint64_t size;
+};
+
+/*--------------------------------------------------------- Process Array ---------------------------------------------------------*/
+
+process_queue ready_queue;
 
 process process_array[MAX_PROCESS];
+
 uint8_t process_counter = 0;
 
+/*--------------------------------------------------------- Queue Functions Implementations ---------------------------------------------------------*/
+
+// Initializes queue CHANGE TO MM_MALLOC
+process_queue initialize_queue(){
+    process_queue queue = (process_queue) malloc(sizeof(struct queue_info));
+    queue->front = NULL;
+    queue->rear = NULL;
+    queue->size = 0;
+    return queue;
+}
 
 
+// Adds a process to the end of the queue
+void add_process(process_queue queue, process p){
+    t_node * new_node = (t_node *) mm_malloc(sizeof(t_node));
+    new_node->p = p;
+    new_node->next = NULL;
 
+    if(queue->front == NULL){
+        queue->front = queue->rear = new_node;
+    }
+    else{
+        queue->rear->next = new_node;
+        queue->rear = new_node;
+    }
+    new_node->next = queue->front;
+    
+    queue->size++;
+}
+
+// Removes all or one instance of the process in the queue
+static void remove_process(process_queue queue, uint64_t pid, uint64_t remove_all){
+    t_node * current = queue->front;
+    t_node * prev = queue->rear;
+    uint64_t stop = 0;
+    do{
+        if(current->p->pid == pid){
+            if(ready_queue->size > 0){
+                if(current == queue->front){
+                    queue->front = current->next;
+                    queue->rear->next = queue->front;
+                }
+                else if(current == queue->rear){
+                    queue->rear = prev;
+                    queue->rear->next = queue->front;
+                }
+                else{
+                    prev->next = current->next;
+                }
+            }
+            else{
+                queue->front = queue->rear = NULL;
+            }
+            queue->size--;
+            current->p->priority--;
+            if(current->p->priority == 0 || !remove_all){
+                stop = 1;
+            }
+            mm_free(current->p);
+            mm_free(current);
+        }
+        else{
+            prev = current;
+            current = current->next;
+        }
+    }while(ready_queue->size > 0 && current != queue->front && !stop);
+}
+
+
+// Removes all instances of the process in the queue
+void delete_process(process_queue queue, uint64_t pid){
+    remove_process(queue, pid, 1);
+}
+
+
+// Checks if queue is empty, returns 1 if so
+uint64_t is_empty(process_queue queue){
+    return queue->size == 0;
+}
+
+
+// Backs up rsp register 
+static void backup_current_process(uint64_t rsp){
+    ready_queue->front->p->stack_pointer = rsp;
+    ready_queue->front->p->state = READY;
+}
+
+
+// Sets next running process
+static uint64_t setup_next_running_process(){
+    ready_queue->rear = ready_queue->front;
+    ready_queue->front = ready_queue->front->next;
+    ready_queue->front->p->state = RUNNING;
+    return ready_queue->front->p->stack_pointer;
+}
+
+
+// Returns next running process rsp from the ready process queue
+uint64_t next_running_process(uint64_t current_rsp){
+    backup_current_process(current_rsp);
+    return setup_next_running_process();
+}
+
+
+// Returns idle process rsp, idle process will have pid 0 for now, must change later;
+uint64_t idle_process_rsp(){
+    return process_array[0]->stack_pointer;
+}
+
+
+uint64_t is_ready_queue_empty(){
+    return is_empty(ready_queue);
+}
+
+
+/*--------------------------------------------------------- Process Syscall Implementations ---------------------------------------------------------*/
+/* 
 
 uint64_t my_getpid(){
     return current_process->pid;
@@ -62,85 +185,10 @@ queue_element remove_from_ready_queue(uint64_t pid){
 }
 
 
-/* uint64_t my_create_process(uint8_t * name, uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint8_t ** argv){
-    if(process_counter == MAX_PROCESS){
-        return -1;
-    }
-    process new_process = (process) mm_malloc(sizeof(p));
-    new_process->name = name;
-    new_process->pid = ++process_counter;
-    new_process->ppid = ppid;
-    new_process->priority = priority;
-    new_process->state = READY;
-
-    new_process->stack_pointer = mm_malloc(PROCESS_STACK_SIZE); 
-
-    // FALTA ASIGNARLE LOS PUNTEROS A FUNCIONES ###############################################################################
-
-    if(ppid == 0){ // if proc is init
-        new_process->file_descriptors[STDIN] = STDIN;
-        new_process->file_descriptors[STDOUT] = STDOUT;
-        new_process->file_descriptors[STDERR] = STDERR;
-    }
-    for(int i = 0; i < MAX_PROCESS; i++){
-        if(process_array[i]->pid == ppid){
-            new_process->file_descriptors = process_array[i]->file_descriptors;
-            break;
-        }
-    }
-
-    for(int i=0; i< argc; i++){ // ###########################################################################################
-        new_process->parameters[i] = argv[i];
-    }
-
-    process_array[process_counter] = new_process;
-
-    for(uint32_t i=0; i < priority; i++)
-        ready_queue = add_to_ready_queue(new_process);
-    
-    // FORZAR LA LLAMA A SCHEDULER // TIMERTICK ################################################################################################
-
-    return process_counter;
-} */
-/* 
-
-static uint64_t setup_stack_structure(uint64_t function, uint64_t argc, uint8_t ** argv){
-    uint64_t * initial_rsp = (uint64_t *) mm_malloc(PROCESS_STACK_SIZE);
-    initial_rsp += PROCESS_STACK_SIZE / sizeof(uint64_t);
-
-    initial_stack_ptr dummy_filler = (initial_stack_ptr) (initial_rsp - sizeof(initial_stack) / sizeof(uint64_t));
-    dummy_filler->ss = 0;
-    dummy_filler->rsp = (uint64_t) initial_rsp;
-    dummy_filler->rflags = 0x202;
-    dummy_filler->cs = 0x08;
-    dummy_filler->rip = function;
-    dummy_filler->rax = 0;
-    dummy_filler->rbx = 0;
-    dummy_filler->rbp = (uint64_t) initial_rsp;
-    
-    dummy_filler->rdi = argc;
-    dummy_filler->rsi = (uint64_t) argv;
-    dummy_filler->rdx = 0;
-    dummy_filler->rcx = 0;
-    dummy_filler->r8 = 0;
-    dummy_filler->r9 = 0;
-
-    dummy_filler->r10 = 0;
-    dummy_filler->r11 = 0;
-    dummy_filler->r12 = 0;
-    dummy_filler->r13 = 0;
-    dummy_filler->r14 = 0;
-    dummy_filler->r15 = 0;
-
-    return (uint64_t) dummy_filler;
-} */
-
-
 // después veo que hago en el caso border  ###############################
-uint64_t my_create_process(uint8_t * name, uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint8_t ** argv){
+uint64_t my_create_process(uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint8_t ** argv){
     if(process_counter != MAX_PROCESS){
         process new_process = (process) mm_malloc(sizeof(p));
-        new_process->name = name;
         new_process->pid = ++process_counter;
         new_process->ppid = ppid;
         new_process->priority = priority;
@@ -219,16 +267,14 @@ uint64_t my_wait(int64_t pid){
         process_array[my_getpid()]->state = READY;
 
     return 0;
-}
+}*/
 
-
+/* 
 void init_process(){
-    current_process = NULL;
-    ready_queue = NULL;
-    ready_count = 0;
 
-    process idle_process = (process) mm_malloc(sizeof(p));
-    idle_process->name = "idle";
+    // inicializacion listas
+
+    process idle_process = (process) mm_malloc(sizeof(struct p));
     idle_process->pid = 0;
     idle_process->ppid = 0;
     idle_process->priority = 1;
@@ -243,4 +289,4 @@ void init_process(){
 
 void idle(){
     hang();   
-}
+} */

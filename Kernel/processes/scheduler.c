@@ -1,17 +1,10 @@
 #include "processManager.h"
+#include <stdio.h>
 
-uint64_t * scheduler(uint64_t * rsp){
 
-    if(ready_count == 0) return idle_process->stack_pointer;
-    
-    // Stores running process information
-    current_process->stack_pointer = rsp;
-    current_process->state = READY;
-
-    // Chooses next running process from the circular list
-    ready_queue = ready_queue->next;
-    current_process = ready_queue->p;
-    current_process->state = RUNNING;
-
-    return current_process->stack_pointer;
+uint64_t scheduler(uint64_t rsp){
+    if(is_ready_queue_empty()){
+        return idle_process_rsp();
+        }
+    return next_running_process(rsp);
 }
