@@ -4,6 +4,7 @@ GLOBAL getTime
 GLOBAL getHours
 GLOBAL getMinutes
 GLOBAL getSeconds
+GLOBAL force_timer_tick
 GLOBAL inb 
 GLOBAL outb 
 
@@ -128,6 +129,17 @@ getScanCode:
 	
 	mov rsp, rbp 
 	pop rbp 
+	ret
+
+
+force_timer_tick:
+	push rbp
+	mov rbp, rsp
+
+	int 20h
+
+	mov rsp, rbp
+	pop rbp
 	ret
 
 

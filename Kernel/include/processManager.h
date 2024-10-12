@@ -6,12 +6,15 @@
 #include <stdlib.h>
 #include <memoryManager.h>
 #include <interrupts.h>
+#include <lib.h>
 
 #define MAX_PROCESS 200
 #define PROCESS_STACK_SIZE 4096
 enum State {READY, RUNNING, BLOCKED, KILLED, ZOMBIE};
 #define EXIT_FAIL -1
 #define EXIT_SUCCESS 0
+
+// IDEA: CAMBIAR LA IMPL DE LISTA Y PROCESO A OTRO FILE NO POR AHORA
 
 // sería mas facil en el momento de crear el proceso decirle si escribe a la terminal o si escribe a un pipe (agodio)
 enum fd {STDIN=0, STDOUT, STDERR};
@@ -28,15 +31,19 @@ process_queue initialize_queue();
 
 
 // Adds a process to the end of the queue
-void add_process(process_queue queue, process p);
+void add_process_instance(process_queue queue, process p, uint64_t add_all);
+
+
+// Removes all or one instance of the process in the queue
+void remove_process_instance(process_queue queue, uint64_t pid, uint64_t remove_all);
 
 
 // Removes all instances of the process in the queue
-void delete_process(process_queue queue, uint64_t pid);
+void remove_all_process_instances(process_queue queue, uint64_t pid);
+
 
 // Checks if queue is empty, returns 1 if so
 uint64_t is_empty(process_queue queue);
-
 
 
 // Returns next running process rsp from the ready process queue
@@ -59,12 +66,12 @@ uint64_t my_getpid();
 uint64_t my_create_process(uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint8_t ** argv);
 
 // Changes process priority
-uint64_t my_nice(uint64_t pid, uint64_t newPrio);
+void my_nice(uint64_t pid, uint64_t newPrio);
 uint64_t my_kill(uint64_t pid);
 uint64_t my_block(uint64_t pid);
 uint64_t my_unblock(uint64_t pid);
-uint64_t my_yield();
-uint64_t my_wait(int64_t pid);
+void my_yield();
+void my_wait(int64_t pid);
 
 void init_function();
 

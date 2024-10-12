@@ -5,6 +5,7 @@
 #include <naiveConsole.h>
 #include <videoDriver.h>
 #include <idtLoader.h>
+#include "memoryManager.h"
 
 #include <keyboardDriver.h>
 #include "include/idtLoader.h"
@@ -57,10 +58,11 @@ void *initializeKernelBinary()
 }
 
 int main()
-{
+{	
+	_cli();
 	load_idt(); 	// Cargar la tabla de descriptores de interrupciones (IDT)
-	dory_start();
-
+	//dory_start();
+	mm_init(FREE_MEM_START, TOTAL_HEADER_UNITS - 1);
 	init_function();
 
 	printArray("You shouldn't be here chief..."); 	// Imprimir un mensaje (esto no debería ocurrir)

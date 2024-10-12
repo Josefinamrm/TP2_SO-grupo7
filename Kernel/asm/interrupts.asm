@@ -4,6 +4,7 @@ GLOBAL _sti
 GLOBAL picMasterMask
 GLOBAL picSlaveMask
 GLOBAL haltcpu
+GLOBAL _idle
 GLOBAL _hlt
 GLOBAL _setUser
 GLOBAL _setup_stack_structure_asm
@@ -142,6 +143,10 @@ SECTION .text
 	mov [regs+8*17], rax
 %endmacro
 
+_idle:
+	sti
+	hlt
+	jmp _idle
 
 _hlt:
 	sti
