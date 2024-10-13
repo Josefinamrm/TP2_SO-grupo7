@@ -7,6 +7,7 @@
 #include <memoryManager.h>
 #include <interrupts.h>
 #include <lib.h>
+#include "videoDriver.h"
 
 #define MAX_PROCESS 200
 #define PROCESS_STACK_SIZE 4096
@@ -27,7 +28,6 @@ typedef struct p * process;
 
 // Initializes queue
 process_queue initialize_queue();
-
 
 
 // Adds a process to the end of the queue

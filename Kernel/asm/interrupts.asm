@@ -191,26 +191,27 @@ _setup_stack_structure_asm:
 
 	mov rsp, rdi
 
-	push 0x0 			; r15
-	push 0x0			; r14
-	push 0x0			; r13
-	push 0x0			; r12
-	push 0x0			; r11
-	push 0x0			; r10
-	push 0x0			; r9
-	push 0x0			; r8
-	push rdx            ; rdi->argc
-	push rcx 			; rsi->argv
-	push rdi			; rbp->stack_pointer
-	push 0x0			; rdx
-	push 0x0			; rcx
-	push 0x0			; rbx
-	push 0x0			; rax
 	push 0x0			; ss
 	push rdi			; rsp
 	push 0x202			; rflags
 	push 0x8			; cs
 	push rsi			; rip
+	push 0x0			; rax
+	push 0x0			; rbx
+	push 0x0			; rcx
+	push 0x0			; rdx
+	push rdi			; rbp->stack_pointer
+	push rcx 			; rsi->argv
+	push rdx            ; rdi->argc
+	push 0x0			; r8
+	push 0x0			; r9
+	push 0x0			; r10
+	push 0x0			; r11
+	push 0x0			; r12
+	push 0x0			; r13
+	push 0x0			; r14
+	push 0x0 			; r15
+
 	
 	mov rax, rsp
 
@@ -243,16 +244,11 @@ picSlaveMask:
 _irq00Handler:
 
 	pushState
-	push rsp
 
-	mov rdi, 0
-	call irqDispatcher
-
-	pop rsp
-
-	mov rdi, rsp
-	call scheduler
-	mov rsp, rax
+	mov rsi, rsp  			; backs up rsp as second parameter for timer handler
+	mov rdi, 0				; 0 is the number for the tt interrupt
+	call irqDispatcher		; irq dispatcher should leave in rax the value 
+	mov rsp, rax			; i use the rax register just to put the result into rsp
 
 	; signal pic EOI (End of Interrupt)
 	mov al, 20h
@@ -260,7 +256,6 @@ _irq00Handler:
 
 	popState
 	iretq
-	irqHandlerMaster 0
 
 
 ;Keyboard

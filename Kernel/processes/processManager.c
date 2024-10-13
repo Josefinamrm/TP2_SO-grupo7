@@ -1,6 +1,7 @@
 
 #include "processManager.h"
 #define INIT_PID 1
+uint64_t idle_running;
 
 
 /*--------------------------------------------------------- Process Control Structure ---------------------------------------------------------*/
@@ -42,12 +43,13 @@ uint8_t process_counter = 0;
 
 /*--------------------------------------------------------- Queue Functions Implementations ---------------------------------------------------------*/
 
-// Initializes queue CHANGE TO MM_MALLOC
+// Initializes queue and intitializes idle_running to 0
 process_queue initialize_queue(){
     process_queue queue = (process_queue) mm_malloc(sizeof(struct queue_info));
     queue->front = NULL;
     queue->rear = NULL;
     queue->size = 0;
+    idle_running = 0;
     return queue;
 }
 
@@ -168,13 +170,18 @@ static uint64_t setup_next_running_process(){
 
 // Returns next running process rsp from the ready process queue
 uint64_t next_running_process(uint64_t current_rsp){
-    backup_current_process(current_rsp);
+    if(idle_running){
+        idle_running = 0;
+    }else{
+        backup_current_process(current_rsp);
+    }
     return setup_next_running_process();
 }
 
 
 // Returns idle process rsp, idle process will have pid 0 for now, must change later;
 uint64_t idle_process_rsp(){
+    idle_running = 1;
     return process_array[0]->stack_pointer;
 }
 
@@ -194,6 +201,7 @@ uint64_t my_getpid(){
 // después veo que hago en el caso border  ###############################
 uint64_t my_create_process(uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint8_t ** argv){
     if(process_counter != MAX_PROCESS){
+        _cli();
         process new_process = (process) mm_malloc(sizeof(struct p));
         new_process->pid = ++process_counter;
         new_process->ppid = ppid;
@@ -210,6 +218,7 @@ uint64_t my_create_process(uint64_t function, uint64_t ppid, uint64_t priority, 
         process_array[ppid]->child_list->p = new_process;
         process_array[ppid]->child_list->next = NULL;
 
+        _sti();
         return process_counter;
     }
     // for now......
@@ -329,12 +338,13 @@ void init_function(){
 
     process_array[0] = idle_process;
 
-    _sti();
 }
 
 void idle(){
-    my_create_process((uint64_t)init_process, 0, 1, 0, 0);
-    _idle();
+    printArray("inside idle\n");
+    while(1);
+    /* my_create_process((uint64_t)init_process, 0, 1, 0, 0);
+    _idle(); */
 }
 
 
