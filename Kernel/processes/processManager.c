@@ -13,7 +13,7 @@ struct p{
     uint64_t priority;
     uint64_t state;
     uint64_t stack_pointer;
-    struct node * child_list;
+    struct queue_info * child_list;
 
     // file managment
     // uint32_t * file_descriptors;
@@ -40,6 +40,79 @@ process_queue ready_queue;
 process process_array[MAX_PROCESS];
 
 uint8_t process_counter = 0;
+
+/*--------------------------------------------------------- List Functions Implementations ---------------------------------------------------------*/
+
+// Initializes children list
+children_list initialize_children_list(){
+    children_list list = (children_list) mm_malloc(sizeof(struct queue_info));
+    list->front = NULL;
+    list->rear = NULL;
+    list->size = 0;
+    return list;
+}
+
+// Adds a process to the end of the children list
+void add_child(children_list list, process child){
+    t_node * newborn = (t_node *) mm_malloc(sizeof(t_node));
+    newborn->p = child;
+    newborn->next = NULL;
+
+    if(list->size == 0){
+        list->front = list->rear = newborn;
+    }else{
+        list->rear->next = newborn;
+        list->rear = newborn;
+    }
+    list->size++;
+}
+
+// Deletes a process from the children list
+void delete_child(children_list list, uint64_t pid){
+    if(list->size == 0){
+        list->front = list->rear = NULL;
+    }else{
+        t_node * current = list->front;
+        t_node * prev = NULL;
+        while(current != NULL && current->p->pid != pid){
+            prev = current; 
+            current = current->next;
+        }
+        if(current == NULL){
+            return;
+        }
+        if(current == list->front){
+            list->front = current->next;
+        }
+        else if(current == list->rear){
+            list->rear = prev;
+            prev->next = NULL;
+        }
+        else{
+            prev->next = current->next;
+        }
+        mm_free(current->p);
+        mm_free(current);
+        list->size--;
+    }
+}
+
+// Checks whether the list is empty
+uint64_t childless(children_list list){
+    return list->size == 0;
+}
+
+// Frees children list
+void set_for_adoption(children_list list){
+    if(list->size > 0){
+        t_node * aux = list->front;
+        while(aux != NULL){
+            delete_child(list, aux->p->pid);
+            aux = aux->next;
+        }
+    }
+    mm_free(list);
+}
 
 /*--------------------------------------------------------- Queue Functions Implementations ---------------------------------------------------------*/
 
@@ -103,17 +176,17 @@ void remove_process_instance(process_queue queue, uint64_t pid, uint64_t remove_
                 else{
                     prev->next = current->next;
                 }
+                queue->size--;
+                current->p->priority--;
+                if(current->p->priority == 0 || !remove_all){
+                    stop = 1;
+                }
+                mm_free(current->p);
+                mm_free(current);
             }
             else{
                 queue->front = queue->rear = NULL;
             }
-            queue->size--;
-            current->p->priority--;
-            if(current->p->priority == 0 || !remove_all){
-                stop = 1;
-            }
-            mm_free(current->p);
-            mm_free(current);
         }
         else{
             prev = current;
@@ -134,6 +207,12 @@ uint64_t is_empty(process_queue queue){
     return queue->size == 0;
 }
 
+// Concatenate lists
+void adopt_children(children_list adoptive_p, children_list children){
+    adoptive_p->rear->next = children->front;
+    adoptive_p->rear = children->rear;
+    adoptive_p->size += children->size;
+}
 
 /*--------------------------------------------------------- Ready Queue Functions ---------------------------------------------------------*/
 
@@ -215,9 +294,10 @@ uint64_t my_create_process(uint64_t function, uint64_t ppid, uint64_t priority, 
         process_array[new_process->pid] = new_process;
 
         // check ->implementar lista, puede ir igual en mi otro file de tad de lista
-        process_array[ppid]->child_list = mm_malloc(sizeof(t_node));
-        process_array[ppid]->child_list->p = new_process;
-        process_array[ppid]->child_list->next = NULL;
+        if(process_array[new_process->ppid]->child_list == NULL){
+            process_array[new_process->ppid]->child_list = initialize_children_list();
+        }
+        add_child(process_array[new_process->ppid]->child_list, new_process);
 
         _sti();
         return process_counter;
@@ -252,23 +332,20 @@ uint64_t my_kill(uint64_t pid){
     
     p->state = KILLED;
     remove_all_process_instances(ready_queue, pid);
+    process_counter--;
     
 
     // init adopts children
-    while(p->child_list != NULL){
-        p->child_list->p->ppid = INIT_PID;
-        p->child_list = p->child_list->next;
+    t_node * aux = p->child_list->front;
+    while(aux != NULL){
+        aux->p->ppid = INIT_PID;
+        aux = aux->next;
     }
-    process_array[INIT_PID]->child_list = p->child_list;
 
-    // free children
-    while(p->child_list != NULL){
-        mm_free(p->child_list->p);
-        t_node * aux = p->child_list;
-        p->child_list = p->child_list->next;
-        mm_free(aux);
-    }
-    mm_free(p->child_list);
+    adopt_children(process_array[INIT_PID]->child_list, p->child_list);
+
+    // set children freeeeee
+    p->child_list = NULL;
 
     return EXIT_SUCCESS;
 }
@@ -325,7 +402,6 @@ void init_function(){
 
     ready_queue = initialize_queue();
 
-
     // creates idle process
     process idle_process = (process) mm_malloc(sizeof(struct p));
     idle_process->pid = 0;
@@ -336,7 +412,7 @@ void init_function(){
     initial_rsp += PROCESS_STACK_SIZE / sizeof(uint64_t);
     char * argv = {NULL};
     idle_process->stack_pointer = _setup_stack_structure_asm(initial_rsp, (uint64_t)idle, 0, argv);
-
+    idle_process->child_list = initialize_children_list();
     process_array[0] = idle_process;
 
 }
@@ -366,6 +442,7 @@ int64_t test_processes(uint64_t argc, char *argv[]);
 
 void init_process(){
     char * argv[] = { "3" ,NULL};
+    //char * argv[] = {NULL};
     //my_create_process((uint64_t)USERLAND_DIREC, my_getpid(), 1, 0, argv);
     my_create_process((uint64_t)test_processes, my_getpid(), 1, 1, argv);
     // my_wait(INIT_PID);
