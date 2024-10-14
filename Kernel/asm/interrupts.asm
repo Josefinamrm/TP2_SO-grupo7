@@ -200,8 +200,8 @@ _setup_stack_structure_asm:
 	push 0x0			; rcx
 	push 0x0			; rdx
 	push rdi			; rbp->stack_pointer
-	push rcx 			; rsi->argv
-	push rdx            ; rdi->argc
+	push rdx 			; rdi->argc
+	push rcx            ; rsi->argv
 	push 0x0			; r8
 	push 0x0			; r9
 	push 0x0			; r10

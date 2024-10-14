@@ -8,6 +8,7 @@
 #include <interrupts.h>
 #include <lib.h>
 #include "videoDriver.h"
+#include "time.h"
 
 #define MAX_PROCESS 200
 #define PROCESS_STACK_SIZE 4096

@@ -212,8 +212,13 @@ void play_eliminator() {
 }
 
 void testprocess() {
-    create_process((uint64_t)test_processes, 0, get_pid(), 0, 0);
-    create_process((uint64_t)test_prio, 0, get_pid(), 0, 0);
+    clear_shell();
+    create_process((uint64_t)test_processes, get_pid() , 1 , 0, 0);
+    clear_shell();
+}
+
+void testprio() {
+    create_process((uint64_t)test_prio, get_pid(), 1, 0, 0);
 }
 
 /* sampleCodeModule.c */

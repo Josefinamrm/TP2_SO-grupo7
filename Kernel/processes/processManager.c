@@ -348,9 +348,27 @@ void idle(){
 }
 
 
-void init_process(){
-    char * argv = {NULL};
-    my_create_process((uint64_t)USERLAND_DIREC, my_getpid(), 1, 0, argv);
-    my_yield();
-    my_wait(INIT_PID);
+/* void process1(){
+    while(1){
+        printArray("proceso 1\n");
+        timer_wait(2);
+    }
 }
+
+void process2(){
+    while(1){
+        printArray("proceso 2\n");
+        timer_wait(2);
+    }
+} */
+
+int64_t test_processes(uint64_t argc, char *argv[]);
+
+void init_process(){
+    char * argv[] = { "3" ,NULL};
+    //my_create_process((uint64_t)USERLAND_DIREC, my_getpid(), 1, 0, argv);
+    my_create_process((uint64_t)test_processes, my_getpid(), 1, 1, argv);
+    // my_wait(INIT_PID);
+    while(1);
+}
+
