@@ -5,6 +5,7 @@
 #include <user_syscalls.h>
 #include <ucolors.h>
 #include <stddef.h>
+#include <user_lib.h>
 
 #define INPUT_SIZE 100
 

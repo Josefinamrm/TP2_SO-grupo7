@@ -1,6 +1,6 @@
-#include <user_syscalls.h>
-#include <user_lib.h>
-#include <test_util.h>
+#include <test_processes.h>
+
+
 
 enum State { RUNNING,
              BLOCKED,
@@ -11,8 +11,8 @@ typedef struct P_rq {
   enum State state;
 } p_rq;
 
-int64_t test_processes(uint64_t argc, char *argv[]) {
-print("Dentro de test processes\n");
+uint64_t test_processes(uint64_t argc, char *argv[]) {
+  print("Dentro de test processes\n");
   uint8_t rq;
   uint8_t alive = 0;
   uint8_t action;
@@ -31,7 +31,7 @@ print("Dentro de test processes\n");
     print("Dentro de while(1)\n");
     // Create max_processes processes
     for (rq = 0; rq < max_processes; rq++) {
-      p_rqs[rq].pid = create_process((uint64_t)endless_loop, get_pid(), 0, 1, argvAux);
+      p_rqs[rq].pid = create_process((uint64_t)endless_loop, get_pid(), 0, 1, (uint8_t **)argvAux);
 
       if (p_rqs[rq].pid == -1) {
         print("test_processes: ERROR creating process\n");

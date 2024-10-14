@@ -1,6 +1,4 @@
-#include <stdint.h>
-#include <user_syscalls.h>
-#include <test_util.h>
+#include <test_prio.h>
 
 #define MINOR_WAIT 1000000 // TODO: Change this value to prevent a process from flooding the screen
 #define WAIT 10000000      // TODO: Change this value to make the wait long enough to see theese processes beeing run at least twice
@@ -18,7 +16,7 @@ void test_prio() {
   uint64_t i;
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
-    pids[i] = create_process((uint64_t)endless_loop_print, get_pid(), 0,1, argv);
+    pids[i] = create_process((uint64_t)endless_loop_print, get_pid(), 0,1, (uint8_t  **)argv);
 
   bussy_wait(WAIT);
   print("\nCHANGING PRIORITIES...\n");

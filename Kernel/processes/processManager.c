@@ -209,8 +209,8 @@ uint64_t my_create_process(uint64_t function, uint64_t ppid, uint64_t priority, 
         new_process->state = READY;
         uint64_t * initial_rsp = (uint64_t *) mm_malloc(PROCESS_STACK_SIZE);
         initial_rsp += PROCESS_STACK_SIZE / sizeof(uint64_t);
-        new_process->stack_pointer = _setup_stack_structure_asm(initial_rsp, function, argc, argv);
-                                                                            // rdi        rsi      rdx  rcx
+        new_process->stack_pointer = _setup_stack_structure_asm((uint64_t)initial_rsp, function, argc, argv);
+                                                                           // rdi        rsi      rdx  rcx
         add_to_ready_queue(new_process);
         process_array[new_process->pid] = new_process;
 
@@ -334,41 +334,23 @@ void init_function(){
     idle_process->state = READY;
     uint64_t * initial_rsp = (uint64_t *) mm_malloc(PROCESS_STACK_SIZE);
     initial_rsp += PROCESS_STACK_SIZE / sizeof(uint64_t);
-    char * argv = {NULL};
-    idle_process->stack_pointer = _setup_stack_structure_asm(initial_rsp, (uint64_t)idle, 0, argv);
+    char * argv[] = {NULL};
+    idle_process->stack_pointer = _setup_stack_structure_asm((uint64_t)initial_rsp, (uint64_t)idle, 0, (uint8_t **)argv);
 
     process_array[0] = idle_process;
 
 }
 
 void idle(){
-    char * argv = {NULL};
-    my_create_process((uint64_t)init_process, 0, 1, 0, argv);
+    char * argv[] = {NULL};
+    my_create_process((uint64_t)init_process, 0, 1, 0, (uint8_t ** )argv);
     _idle();
 }
 
-
-/* void process1(){
-    while(1){
-        printArray("proceso 1\n");
-        timer_wait(2);
-    }
-}
-
-void process2(){
-    while(1){
-        printArray("proceso 2\n");
-        timer_wait(2);
-    }
-} */
-
-int64_t test_processes(uint64_t argc, char *argv[]);
-
 void init_process(){
-    char * argv[] = { "3" ,NULL};
-    //my_create_process((uint64_t)USERLAND_DIREC, my_getpid(), 1, 0, argv);
-    my_create_process((uint64_t)test_processes, my_getpid(), 1, 1, argv);
-    // my_wait(INIT_PID);
+    my_create_process((uint64_t)USERLAND_DIREC, 0, 1, 0, NULL);
+    //force_timer_tick();
+    //my_wait(INIT_PID);
     while(1);
 }
 

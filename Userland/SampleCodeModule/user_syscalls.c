@@ -76,15 +76,15 @@ void nice(uint64_t pid, uint64_t newPrio){
 }
 
 uint32_t kill(uint64_t pid){
-    _kill(pid);
+    return _kill(pid);
 }
 
 uint32_t block(uint64_t pid){
-    _block(pid);
+    return _block(pid);
 }
 
 uint32_t unblock(uint64_t pid){
-    _unblock(pid);
+    return _unblock(pid);
 }
 
 void yield(){

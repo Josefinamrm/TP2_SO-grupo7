@@ -81,7 +81,7 @@ uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rc
     case 16:
         return ksys_getpid();
     case 17:
-        return ksys_create_process(rdi, rsi, rdx, rcx, r8);
+        return ksys_create_process(rdi, rsi, rdx, rcx, (uint8_t **)r8);
     case 18:
         return ksys_nice(rdi, rsi);
     case 19:
