@@ -40,6 +40,7 @@ uint64_t ksys_block(uint64_t pid);
 uint64_t ksys_unblock(uint64_t pid);
 uint64_t ksys_yield();
 uint64_t ksys_ps_wait(int64_t pid);
+uint64_t ksys_ps();
 
 uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, uint64_t r8, uint64_t rax)
 {
@@ -81,7 +82,7 @@ uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rc
     case 16:
         return ksys_getpid();
     case 17:
-        return ksys_create_process(rdi, rsi, rdx, rcx, r8);
+        return ksys_create_process(rdi, rsi, rdx, rcx, (uint8_t **)r8);
     case 18:
         return ksys_nice(rdi, rsi);
     case 19:
@@ -94,6 +95,8 @@ uint64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rc
         return ksys_yield();
     case 23:
         return ksys_ps_wait(rdi);
+    // case 24:
+    //     return ksys_ps();
     }
 
 
@@ -225,6 +228,17 @@ uint64_t ksys_getpid(){
 
 uint64_t ksys_create_process(uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint8_t ** argv)
 {
+    printHex(function);
+    printArray("\n");
+    printHex(ppid);
+    printArray("\n");
+    printHex(priority);
+    printArray("\n");
+    printHex(argc);
+    printArray("\n");
+    printHex(argv);
+    printArray("\n");
+    timer_wait(1000);
     return my_create_process(function, ppid, priority, argc, argv);
 }
 
@@ -254,3 +268,8 @@ uint64_t ksys_ps_wait(int64_t pid){
     my_wait(pid);
     return 0;
 }
+
+// uint64_t ksys_ps(){
+//     my_ps();
+//     return 0;
+// }

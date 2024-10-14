@@ -5,6 +5,6 @@
 #include <test_util.h>
 #include <stdint.h>
 
-uint64_t test_prio();
+void test_prio();
 
 #endif

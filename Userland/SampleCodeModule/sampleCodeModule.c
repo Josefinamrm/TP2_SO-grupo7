@@ -6,7 +6,7 @@
 #include "../include/test_prio.h"
 
 #define INPUT_SIZE 100 
-#define COMMAND_COUNT 11  
+#define COMMAND_COUNT 12  
 #define CANT_REGS 18
 
 void help();
@@ -20,6 +20,7 @@ void inforeg();
 void clear_shell();
 void beep();
 void testprocess();
+void testprio();
 
 static char buffer[INPUT_SIZE] = {0};
 static int bufferIndex = 0;
@@ -37,7 +38,8 @@ static Command commands[] = {
     {"zoomout", zoomout, "Disminuye el tamanio de la letra"},
     {"clear", clear_shell, "Limpia la shell"},
     {"beep", beep, "Emite un beep"},
-    {"testprocess", testprocess, "Crea los procesos test_processes y test_prio"}
+    {"testprocess", testprocess, "Crea el procesos test_processes"},
+    {"testprio", testprio, "Crea el procesos test_prio"}
 };
 
 void parse_command(char *str) {
@@ -70,7 +72,7 @@ void print_prompt_icon() {
 int main()
 {
 print("Bienvenido a ");
-    print_color(GREEN,"OUR_OS\n"); 
+    print_color(TURQUOISE,"DORY OS\n"); 
     print("Ingrese uno de los siguientes comandos:\n");
     for(int i = 1; i < COMMAND_COUNT-1 ; i++){
             print_color(LIGHT_BLUE, commands[i].name_id);
@@ -211,25 +213,20 @@ void play_eliminator() {
     gameActive = 0;
 }
 
+
 void testprocess() {
     clear_shell();
-    create_process((uint64_t)test_processes, get_pid() , 1 , 0, 0);
+    //char *argvAux[] = {"200", NULL};
+    uint8_t *argv[] = {"test_processes", "200", NULL};
+    // test_processes(2, argv);
+    create_process((uint64_t)test_processes, get_pid(), 1 , 2, (uint8_t **)argv);
+
     clear_shell();
 }
 
 void testprio() {
-    create_process((uint64_t)test_prio, get_pid(), 1, 0, 0);
+    clear_shell();
+    uint8_t * argv[] = {"test_prio", NULL};
+    create_process((uint64_t)test_prio, get_pid(), 1, 2, argv);
+    clear_shell();
 }
-
-/* sampleCodeModule.c */
-
-// #include <user_syscalls.h>
-// #include <user_lib.h>
-// #include <shell.h>
-
-// int main()
-// {
-// 	init_shell();
-
-// 	return 0;
-// }

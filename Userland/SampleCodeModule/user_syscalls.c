@@ -1,5 +1,6 @@
 #include <user_syscalls.h>
 #include <interrupts.h>
+#include <user_lib.h>
 
 #define INPUT_SIZE 100
 
@@ -76,15 +77,15 @@ void nice(uint64_t pid, uint64_t newPrio){
 }
 
 uint32_t kill(uint64_t pid){
-    _kill(pid);
+    return _kill(pid);
 }
 
 uint32_t block(uint64_t pid){
-    _block(pid);
+    return _block(pid);
 }
 
 uint32_t unblock(uint64_t pid){
-    _unblock(pid);
+    return _unblock(pid);
 }
 
 void yield(){
@@ -94,3 +95,7 @@ void yield(){
 void ps_wait(int64_t pid){
     _ps_wait(pid);
 }
+
+void ps(){
+    _ps();
+}   

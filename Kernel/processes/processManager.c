@@ -292,7 +292,7 @@ uint64_t my_create_process(uint64_t function, uint64_t ppid, uint64_t priority, 
         new_process->state = READY;
         uint64_t * initial_rsp = (uint64_t *) mm_malloc(PROCESS_STACK_SIZE);
         initial_rsp += PROCESS_STACK_SIZE / sizeof(uint64_t);
-        new_process->stack_pointer = _setup_stack_structure_asm(initial_rsp, function, argc, argv);
+        new_process->stack_pointer = _setup_stack_structure_asm((uint64_t)initial_rsp, function, argc, argv);
         new_process->child_list = initialize_children_list();
                                                               // rdi        rsi      rdx  rcx
         add_to_ready_queue(new_process);
@@ -489,9 +489,9 @@ uint8_t * get_my_name(){
 uint64_t test_processes(uint64_t argc, char *argv[]);
 
 void init_process(){
-    char * argv[] = { "userland" ,NULL};
-    //char * argv[] = {NULL};
-    //my_create_process((uint64_t)USERLAND_DIREC, my_getpid(), 1, 0, argv);
+    //char * argv[] = { "3" ,NULL};
+    char * argv[] = {"userland", NULL};
+    my_create_process((uint64_t)USERLAND_DIREC, my_getpid(), 1, 0, (uint8_t **)argv);
     //my_create_process((uint64_t)test_processes, my_getpid(), 1, 1, argv);
     // my_wait(INIT_PID);
     my_ps();

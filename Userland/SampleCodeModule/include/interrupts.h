@@ -37,13 +37,14 @@ uint64_t _flush_buffer();
 
 
 uint64_t _get_pid();
-uint64_t _my_create_process(uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint64_t argv);
-void _my_nice(uint64_t pid, uint64_t newPrio);
-uint32_t _my_kill(uint64_t pid);
-uint32_t _my_block(uint64_t pid);
-uint32_t _my_unblock(uint64_t pid);
-void _my_yield();
-void _my_ps_wait(int64_t pid);
+uint64_t _create_process(uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint8_t ** argv);
+void _nice(uint64_t pid, uint64_t newPrio);
+uint32_t _kill(uint64_t pid);
+uint32_t _block(uint64_t pid);
+uint32_t _unblock(uint64_t pid);
+void _yield();
+void _ps_wait(int64_t pid);
+void _ps();
 
 
 
