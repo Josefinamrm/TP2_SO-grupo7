@@ -1,4 +1,5 @@
 #include <user_syscalls.h>
+#include <user_lib.h>
 #include <test_util.h>
 
 enum State { RUNNING,
@@ -11,6 +12,7 @@ typedef struct P_rq {
 } p_rq;
 
 int64_t test_processes(uint64_t argc, char *argv[]) {
+print("Dentro de test processes\n");
   uint8_t rq;
   uint8_t alive = 0;
   uint8_t action;
@@ -26,7 +28,7 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
   p_rq p_rqs[max_processes];
 
   while (1) {
-
+    print("Dentro de while(1)\n");
     // Create max_processes processes
     for (rq = 0; rq < max_processes; rq++) {
       p_rqs[rq].pid = create_process((uint64_t)endless_loop, get_pid(), 0, 1, argvAux);
@@ -40,9 +42,11 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
       }
     }
 
+    print("ya cree los mas processes\n");
+
     // Randomly kills, blocks or unblocks processes until every one has been killed
     while (alive > 0) {
-
+      print("empiezo a matar procesos mientras sigan procesos vivos\n");
       for (rq = 0; rq < max_processes; rq++) {
         action = GetUniform(100) % 2;
 
@@ -80,5 +84,6 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
           p_rqs[rq].state = RUNNING;
         }
     }
+    print("ya los mate todos\n");
   }
 }

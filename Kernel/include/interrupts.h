@@ -32,14 +32,14 @@ void _sti(void);
 
 void _hlt(void);
 
+void _idle(void);
+
 void _setUser();
 
 void picMasterMask(uint8_t mask);
 
 void picSlaveMask(uint8_t mask);
 
-//Termina la ejecución de la cpu.
-void haltcpu(void);
 
 uint64_t _setup_stack_structure_asm(uint64_t top_stack, uint64_t function, uint64_t argc, uint8_t ** argv);
 

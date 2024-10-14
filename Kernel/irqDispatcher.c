@@ -2,13 +2,15 @@
 #include <stdint.h>
 #include <keyboardDriver.h>
 
-static void int_20();
-static void int_21();
+static uint64_t int_20(uint64_t rsp);
+static uint64_t int_21();
+uint64_t scheduler(uint64_t rsp);
 
-void irqDispatcher(uint64_t irq) {
+					//    rdi             rsi
+uint64_t irqDispatcher(uint64_t irq, uint64_t rsp) {
 	switch (irq) {
 		case 0:
-			int_20();
+			int_20(rsp);
 			break;
 		case 1: 
 			int_21();
@@ -17,10 +19,12 @@ void irqDispatcher(uint64_t irq) {
 	return;
 }
 
-void int_20() {
+uint64_t int_20(uint64_t rsp) {
 	timer_handler();
+	return scheduler(rsp);
 }
 
-void int_21() { 
+uint64_t int_21() { 
 	keyboard_handler();
+	return 0;
 }
