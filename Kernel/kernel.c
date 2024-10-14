@@ -60,13 +60,10 @@ void *initializeKernelBinary()
 int main()
 {	
 	_cli();
-	load_idt(); 	// Cargar la tabla de descriptores de interrupciones (IDT)
-	//dory_start();
+	load_idt();
 	mm_init(FREE_MEM_START, TOTAL_HEADER_UNITS - 1);
 	init_function();
 	_sti();
-	printArray("Hola \n");
-
 	printArray("You shouldn't be here chief..."); 	// Imprimir un mensaje (esto no debería ocurrir)
 
 	return 0;

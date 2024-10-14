@@ -10,8 +10,8 @@ struct p{
 
     uint64_t pid;
     uint64_t ppid;
-    uint8_t priority;
-    uint8_t state;
+    uint64_t priority;
+    uint64_t state;
     uint64_t stack_pointer;
     struct node * child_list;
 
@@ -58,7 +58,7 @@ process_queue initialize_queue(){
 void add_process_instance(process_queue queue, process p, uint64_t add_all){
     uint64_t stop = 0;
     uint64_t prio = 0;
-    while(prio == p->priority && !stop){
+    while(prio < p->priority && !stop){
         t_node * new_node = (t_node *) mm_malloc(sizeof(t_node));
         new_node->p = p;
         new_node->next = NULL;
@@ -209,9 +209,10 @@ uint64_t my_create_process(uint64_t function, uint64_t ppid, uint64_t priority, 
         new_process->state = READY;
         uint64_t * initial_rsp = (uint64_t *) mm_malloc(PROCESS_STACK_SIZE);
         initial_rsp += PROCESS_STACK_SIZE / sizeof(uint64_t);
-        new_process->stack_pointer = _setup_stack_structure_asm((uint64_t *)initial_rsp, function, argc, argv);
+        new_process->stack_pointer = _setup_stack_structure_asm(initial_rsp, function, argc, argv);
                                                                             // rdi        rsi      rdx  rcx
         add_to_ready_queue(new_process);
+        process_array[new_process->pid] = new_process;
 
         // check ->implementar lista, puede ir igual en mi otro file de tad de lista
         process_array[ppid]->child_list = mm_malloc(sizeof(t_node));
@@ -334,22 +335,22 @@ void init_function(){
     uint64_t * initial_rsp = (uint64_t *) mm_malloc(PROCESS_STACK_SIZE);
     initial_rsp += PROCESS_STACK_SIZE / sizeof(uint64_t);
     char * argv = {NULL};
-    idle_process->stack_pointer = (uint64_t *)_setup_stack_structure_asm(initial_rsp, (uint64_t)idle, 0, argv);
+    idle_process->stack_pointer = _setup_stack_structure_asm(initial_rsp, (uint64_t)idle, 0, argv);
 
     process_array[0] = idle_process;
 
 }
 
 void idle(){
-    printArray("inside idle\n");
-    while(1);
-    /* my_create_process((uint64_t)init_process, 0, 1, 0, 0);
-    _idle(); */
+    char * argv = {NULL};
+    my_create_process((uint64_t)init_process, 0, 1, 0, argv);
+    _idle();
 }
 
 
 void init_process(){
-    my_create_process((uint64_t)USERLAND_DIREC, my_getpid(), 0, 0, NULL);
+    char * argv = {NULL};
+    my_create_process((uint64_t)USERLAND_DIREC, my_getpid(), 1, 0, argv);
     my_yield();
     my_wait(INIT_PID);
 }
