@@ -13,6 +13,7 @@
 # my start.sh 
 *.sh 
 
+
 # other
 .gdb_history
 .viminfo
