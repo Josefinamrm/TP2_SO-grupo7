@@ -13,6 +13,7 @@
 # my start.sh 
 *.sh 
 
+*.elf
 
 # other
 .gdb_history
