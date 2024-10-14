@@ -21,9 +21,31 @@ enum State {READY, RUNNING, BLOCKED, KILLED, ZOMBIE};
 // sería mas facil en el momento de crear el proceso decirle si escribe a la terminal o si escribe a un pipe (agodio)
 enum fd {STDIN=0, STDOUT, STDERR};
 
+typedef struct queue_info * children_list;
+
 typedef struct queue_info * process_queue;
 
 typedef struct p * process;
+
+/*--------------------------------------------------------- List Functions  ---------------------------------------------------------*/
+
+// Initializes children list
+children_list initialize_children_list();
+
+// Adds a process to the end of the children list
+void add_child(children_list list, process child);
+
+// Deletes a process from the children list
+void delete_child(children_list list, uint64_t pid);
+
+// Checks whether the list is empty
+uint64_t childless(children_list list);
+
+// Frees children list
+void set_for_adoption(children_list list);
+
+// Concatenate lists
+void adopt_children(children_list adoptive_p, children_list children);
 
 /*--------------------------------------------------------- Queue Functions ---------------------------------------------------------*/
 
