@@ -89,15 +89,31 @@ uint64_t my_create_process(uint64_t function, uint64_t ppid, uint64_t priority, 
 
 // Changes process priority
 void my_nice(uint64_t pid, uint64_t newPrio);
+
+// Kills process
 uint64_t my_kill(uint64_t pid);
+
+// Blocks process
 uint64_t my_block(uint64_t pid);
+
+// Unblocks process
 uint64_t my_unblock(uint64_t pid);
+
+// Yields cpu usage
 void my_yield();
+
+// Waits for all children to finish -> change pid
 void my_wait(int64_t pid);
+
+// Prints processes info -> name, pid and state
+void my_ps();
+
+/*--------------------------------------------------------- Base Processes and Functions ---------------------------------------------------------*/
 
 void init_function();
 
 void init_process();
+
 void idle();
 
 

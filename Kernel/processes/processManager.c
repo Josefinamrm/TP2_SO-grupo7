@@ -9,6 +9,7 @@ enum State {READY, RUNNING, BLOCKED, KILLED, ZOMBIE};
 
 struct p{
 
+    uint8_t * name;
     uint64_t pid;
     uint64_t ppid;
     uint64_t priority;
@@ -280,10 +281,12 @@ uint64_t my_getpid(){
 
 // después veo que hago en el caso border  ###############################
 uint64_t my_create_process(uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint8_t ** argv){
-    if(process_counter != MAX_PROCESS){
+    if(process_counter != MAX_PROCESS && argc > 0){
         _cli();
         process new_process = (process) mm_malloc(sizeof(struct p));
-        new_process->pid = ++process_counter;
+        // is this correct? should i memcopy?
+        new_process->name = argv[0];
+        new_process->pid = process_counter++;
         new_process->ppid = ppid;
         new_process->priority = priority;
         new_process->state = READY;
@@ -395,6 +398,48 @@ void my_wait(int64_t pid){
     p->child_list = temp;
 }
 
+// Prints processes info -> name, pid and state
+void my_ps(){
+    char * spacing = "            ";
+    printArray("    ");
+    printArray("NAME");
+    printArray(spacing);
+    printArray("PID");
+    printArray(spacing);
+    printArray("STATE\n");
+    for(uint64_t i = 0; i < process_counter; i++){
+        printArray("    ");
+        printArray(process_array[i]->name);
+        printArray(spacing);
+        printDec(process_array[i]->pid);
+        printArray(spacing);
+        switch (process_array[i]->state){
+        case READY:
+            printArray("READY");
+            break;
+        
+        case RUNNING:
+            printArray("RUNNING");
+            break;
+
+        case BLOCKED:
+            printArray("BLOCKED");
+            break;
+
+        case KILLED:
+            printArray("KILLED");
+            break;
+
+        case ZOMBIE:
+            printArray("ZOMBIE");
+            break;
+        }
+        putChar('\n');
+    }
+}
+
+/*--------------------------------------------------------- Base Processes and Functions ---------------------------------------------------------*/
+
 // ?
 void init_function(){
 
@@ -402,22 +447,23 @@ void init_function(){
 
     // creates idle process
     process idle_process = (process) mm_malloc(sizeof(struct p));
+    idle_process->name = "Idle";
     idle_process->pid = 0;
     idle_process->ppid = 0;
     idle_process->priority = 1;
     idle_process->state = READY;
     uint64_t * initial_rsp = (uint64_t *) mm_malloc(PROCESS_STACK_SIZE);
     initial_rsp += PROCESS_STACK_SIZE / sizeof(uint64_t);
-    char * argv = {NULL};
-    idle_process->stack_pointer = _setup_stack_structure_asm(initial_rsp, (uint64_t)idle, 0, (uint8_t **)argv);
+    char * argv = {idle_process->name, NULL};
+    idle_process->stack_pointer = _setup_stack_structure_asm(initial_rsp, (uint64_t)idle, 1, argv);
     idle_process->child_list = initialize_children_list();
     process_array[0] = idle_process;
-
+    process_counter++;
 }
 
 void idle(){
-    char * argv = {NULL};
-    my_create_process((uint64_t)init_process, 0, 1, 0, (uint8_t **) argv);
+    char * argv[] = {"Init", NULL};
+    my_create_process((uint64_t)init_process, 0, 1, 1, argv);
     _idle();
 }
 
@@ -436,14 +482,19 @@ void process2(){
     }
 } */
 
-int64_t test_processes(uint64_t argc, char *argv[]);
+
+uint8_t * get_my_name(){
+    return ready_queue->front->p->name;
+}
+uint64_t test_processes(uint64_t argc, char *argv[]);
 
 void init_process(){
     //char * argv[] = { "3" ,NULL};
-    char * argv[] = {NULL};
+    char * argv[] = {"userland", NULL};
     my_create_process((uint64_t)USERLAND_DIREC, my_getpid(), 1, 0, (uint8_t **)argv);
     //my_create_process((uint64_t)test_processes, my_getpid(), 1, 1, argv);
     // my_wait(INIT_PID);
+    my_ps();
     while(1);
 }
 

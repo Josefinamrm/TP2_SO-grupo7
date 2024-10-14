@@ -1,4 +1,8 @@
+#include <user_syscalls.h>
+#include <user_lib.h>
+#include <test_util.h>
 #include <test_processes.h>
+
 
 enum State_t { RUNNING_t,
              BLOCKED_t,
@@ -9,7 +13,10 @@ typedef struct P_rq {
   enum State_t state;
 } p_rq;
 
+
 uint64_t test_processes(uint64_t argc, char *argv[]) {
+print("Dentro de test processes\n");
+
   uint8_t rq;
   uint8_t alive = 0;
   uint8_t action;
@@ -38,7 +45,6 @@ uint64_t test_processes(uint64_t argc, char *argv[]) {
         alive++;
       }
     }
-
         print("luego de crear procesos\n");
 
 
@@ -70,7 +76,7 @@ uint64_t test_processes(uint64_t argc, char *argv[]) {
             }
             break;
         }
-      } 
+      }
 
       // Randomly unblocks processes
       for (rq = 0; rq < max_processes; rq++)
@@ -79,7 +85,7 @@ uint64_t test_processes(uint64_t argc, char *argv[]) {
             print("test_processes: ERROR unblocking process\n");
             return -1;
           }
-          p_rqs[rq].state = RUNNING_t;
+          p_rqs[rq].state = RUNNING;
         }
         print("despues del segundo for\n");
     } 
