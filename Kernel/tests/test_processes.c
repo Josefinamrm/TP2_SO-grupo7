@@ -8,7 +8,7 @@ enum State_t { RUNNING_t,
 
 typedef struct P_rq {
   int32_t pid;
-  enum State state;
+  enum State_t state;
 } p_rq;
 
 int64_t test_processes(uint64_t argc, char *argv[]) {
@@ -76,7 +76,7 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
 
       // Randomly unblocks processes
       for (rq = 0; rq < max_processes; rq++)
-        if (p_rqs[rq].state == BLOCKED && GetUniform(100) % 2) {
+        if (p_rqs[rq].state == BLOCKED_t && GetUniform(100) % 2) {
           if (my_unblock(p_rqs[rq].pid) == -1) {
             printArray("test_processes: ERROR unblocking process\n");
             return -1;

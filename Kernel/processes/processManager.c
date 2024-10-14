@@ -2,6 +2,7 @@
 #include "processManager.h"
 #define INIT_PID 1
 uint64_t idle_running;
+enum State {READY, RUNNING, BLOCKED, KILLED, ZOMBIE};
 
 
 /*--------------------------------------------------------- Process Control Structure ---------------------------------------------------------*/
@@ -289,14 +290,10 @@ uint64_t my_create_process(uint64_t function, uint64_t ppid, uint64_t priority, 
         uint64_t * initial_rsp = (uint64_t *) mm_malloc(PROCESS_STACK_SIZE);
         initial_rsp += PROCESS_STACK_SIZE / sizeof(uint64_t);
         new_process->stack_pointer = _setup_stack_structure_asm(initial_rsp, function, argc, argv);
-                                                                            // rdi        rsi      rdx  rcx
+        new_process->child_list = initialize_children_list();
+                                                              // rdi        rsi      rdx  rcx
         add_to_ready_queue(new_process);
         process_array[new_process->pid] = new_process;
-
-        // check ->implementar lista, puede ir igual en mi otro file de tad de lista
-        if(process_array[new_process->ppid]->child_list == NULL){
-            process_array[new_process->ppid]->child_list = initialize_children_list();
-        }
         add_child(process_array[new_process->ppid]->child_list, new_process);
 
         _sti();
@@ -328,14 +325,15 @@ void my_nice(uint64_t pid, uint64_t new_prio){
 uint64_t my_kill(uint64_t pid){
     process p = process_array[pid];
 
-    if(p == NULL) return EXIT_FAIL;
+    // if process is not on the list or i am tryibg to kill "myself" then error
+    if(p == NULL || ready_queue->front->p->pid == pid) return EXIT_FAIL;
     
     p->state = KILLED;
     remove_all_process_instances(ready_queue, pid);
     process_counter--;
     
 
-    // init adopts children
+    // init adopts children, if it has
     t_node * aux = p->child_list->front;
     while(aux != NULL){
         aux->p->ppid = INIT_PID;
