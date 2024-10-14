@@ -215,9 +215,9 @@ void play_eliminator() {
 
 void testprocess() {
     clear_shell();
-    test_processes(0, NULL);
-    // create_process((uint64_t)test_processes, get_pid(), 100 , 0, NULL);
-    // print("Proceso test_processes creado\n");
+    //test_processes(0, NULL);
+    //create_process((uint64_t)test_processes, get_pid(), 1 , 0, NULL);
+    print("Proceso test_processes creado\n");
     clear_shell();
 }
 
