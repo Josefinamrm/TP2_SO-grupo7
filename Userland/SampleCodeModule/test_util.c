@@ -58,7 +58,7 @@ void bussy_wait(uint64_t n) {
     ;
 }
 
-void endless_loop() {
+/* void endless_loop() {
   while (1)
     ;
 }
@@ -74,4 +74,4 @@ void endless_loop_print(uint64_t wait) {
     print(pid_str);
     bussy_wait(wait);
   }
-}
+} */

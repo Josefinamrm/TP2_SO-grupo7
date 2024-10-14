@@ -228,17 +228,6 @@ uint64_t ksys_getpid(){
 
 uint64_t ksys_create_process(uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint8_t ** argv)
 {
-    printHex(function);
-    printArray("\n");
-    printHex(ppid);
-    printArray("\n");
-    printHex(priority);
-    printArray("\n");
-    printHex(argc);
-    printArray("\n");
-    printHex(argv);
-    printArray("\n");
-    timer_wait(1000);
     return my_create_process(function, ppid, priority, argc, argv);
 }
 

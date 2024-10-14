@@ -59,11 +59,11 @@ void bussy_wait(uint64_t n) {
     ;
 }
 
-void endless_loop() {
+/* void endless_loop() {
   printArray("inside endless_loop\n");
   while (1)
     ;
-}
+} */
 
 // void endless_loop_print(uint64_t wait) {
 //   int64_t pid = my_getpid();

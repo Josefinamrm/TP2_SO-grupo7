@@ -2,7 +2,7 @@
 #include <user_lib.h>
 #include <test_util.h>
 #include <test_processes.h>
-
+/* 
 
 enum State_t { RUNNING_t,
              BLOCKED_t,
@@ -85,10 +85,10 @@ print("Dentro de test processes\n");
             print("test_processes: ERROR unblocking process\n");
             return -1;
           }
-          p_rqs[rq].state = RUNNING;
+          p_rqs[rq].state = RUNNING_t;
         }
         print("despues del segundo for\n");
     } 
     usys_wait(2);
   }
-}
+} */

@@ -463,24 +463,9 @@ void init_function(){
 
 void idle(){
     char * argv[] = {"Init", NULL};
-    my_create_process((uint64_t)init_process, 0, 1, 1, argv);
+    my_create_process((uint64_t)init_process, 0, 1, 1, (uint8_t **)argv);
     _idle();
 }
-
-
-/* void process1(){
-    while(1){
-        printArray("proceso 1\n");
-        timer_wait(2);
-    }
-}
-
-void process2(){
-    while(1){
-        printArray("proceso 2\n");
-        timer_wait(2);
-    }
-} */
 
 
 uint8_t * get_my_name(){
@@ -489,12 +474,9 @@ uint8_t * get_my_name(){
 uint64_t test_processes(uint64_t argc, char *argv[]);
 
 void init_process(){
-    //char * argv[] = { "3" ,NULL};
     char * argv[] = {"userland", NULL};
-    my_create_process((uint64_t)USERLAND_DIREC, my_getpid(), 1, 0, (uint8_t **)argv);
-    //my_create_process((uint64_t)test_processes, my_getpid(), 1, 1, argv);
+    my_create_process((uint64_t)USERLAND_DIREC, my_getpid(), 1, 1, (uint8_t **)argv);
     // my_wait(INIT_PID);
-    my_ps();
     while(1);
 }
 
