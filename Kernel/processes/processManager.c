@@ -286,7 +286,7 @@ uint64_t my_create_process(uint64_t function, uint64_t ppid, uint64_t priority, 
         process new_process = (process) mm_malloc(sizeof(struct p));
         // is this correct? should i memcopy?
         new_process->name = argv[0];
-        new_process->pid = process_counter++;
+        new_process->pid = ++process_counter;
         new_process->ppid = ppid;
         new_process->priority = priority;
         new_process->state = READY;
@@ -458,7 +458,6 @@ void init_function(){
     idle_process->stack_pointer = _setup_stack_structure_asm(initial_rsp, (uint64_t)idle, 1, argv);
     idle_process->child_list = initialize_children_list();
     process_array[0] = idle_process;
-    process_counter++;
 }
 
 void idle(){
@@ -467,34 +466,15 @@ void idle(){
     _idle();
 }
 
-
-/* void process1(){
-    while(1){
-        printArray("proceso 1\n");
-        timer_wait(2);
-    }
-}
-
-void process2(){
-    while(1){
-        printArray("proceso 2\n");
-        timer_wait(2);
-    }
-} */
-
-
-uint8_t * get_my_name(){
-    return ready_queue->front->p->name;
-}
 uint64_t test_processes(uint64_t argc, char *argv[]);
 
 void init_process(){
-    char * argv[] = { "userland" ,NULL};
+    char * argv[] = { "test_process", "3" ,NULL};
     //char * argv[] = {NULL};
     //my_create_process((uint64_t)USERLAND_DIREC, my_getpid(), 1, 0, argv);
-    //my_create_process((uint64_t)test_processes, my_getpid(), 1, 1, argv);
+    my_create_process((uint64_t)test_processes, my_getpid(), 1, 2, argv);
     // my_wait(INIT_PID);
-    my_ps();
+    //my_ps();
     while(1);
 }
 
