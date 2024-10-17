@@ -23,7 +23,8 @@ GLOBAL _kill
 GLOBAL _block
 GLOBAL _unblock
 GLOBAL _yield
-GLOBAL _ps_wait
+GLOBAL _wait_processes
+GLOBAL _ps
 
 
 
@@ -284,11 +285,22 @@ _yield:
     pop rbp 
     ret
 
-_ps_wait:
+_wait_processes:
     push rbp 
     mov rbp, rsp 
 
     mov rax, 23
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_ps:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 24
     int 80h 
 
     mov rsp, rbp 

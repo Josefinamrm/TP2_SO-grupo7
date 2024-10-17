@@ -122,6 +122,13 @@ void print_score(uint32_t fontColor, uint32_t backgroundColor, uint64_t x, uint6
 }
 
 
+void print_dec(int num){
+    char buf[256];
+    int_to_string(num, buf, 256);
+    print(buf);
+}
+
+
 int strcmp(const char *s1, const char *s2){
     while (*s1 == *s2++) {
         if (*s1++ == 0)

@@ -12,8 +12,9 @@
 
 #define MAX_PROCESS 200
 #define PROCESS_STACK_SIZE 4096
-#define EXIT_FAIL -1
-#define EXIT_SUCCESS 0
+#define FINISH_SUCCESFULLY 0
+#define FINISH_ON_ERROR -1
+
 
 // IDEA: CAMBIAR LA IMPL DE LISTA Y PROCESO A OTRO FILE NO POR AHORA
 
@@ -85,25 +86,28 @@ uint64_t is_ready_queue_empty();
 uint64_t my_getpid();
 
 // Creates a new process
-uint64_t my_create_process(uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint8_t ** argv);
+int64_t my_create_process(uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint8_t ** argv);
+
+// Exits the current process, killing it
+void my_exit();
 
 // Changes process priority
 void my_nice(uint64_t pid, uint64_t newPrio);
 
 // Kills process
-uint64_t my_kill(uint64_t pid);
+int64_t my_kill(uint64_t pid);
 
 // Blocks process
-uint64_t my_block(uint64_t pid);
+int64_t my_block(uint64_t pid);
 
 // Unblocks process
-uint64_t my_unblock(uint64_t pid);
+int64_t my_unblock(uint64_t pid);
 
 // Yields cpu usage
 void my_yield();
 
-// Waits for all children to finish -> change pid
-void my_wait(int64_t pid);
+// Waits for all children to finish
+void my_wait();
 
 // Prints processes info -> name, pid and state
 void my_ps();

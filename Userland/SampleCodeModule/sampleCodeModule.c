@@ -69,7 +69,9 @@ void print_prompt_icon() {
 
 int main()
 {
-print("Bienvenido a ");
+    testprocess();
+    while(1);
+/* print("Bienvenido a ");
     print_color(GREEN,"OUR_OS\n"); 
     print("Ingrese uno de los siguientes comandos:\n");
     for(int i = 1; i < COMMAND_COUNT-1 ; i++){
@@ -100,7 +102,7 @@ print("Bienvenido a ");
                 buffer[bufferIndex++] = c;
             }
         }
-    } 
+    }  */
     return 0;
 }
 
@@ -213,13 +215,14 @@ void play_eliminator() {
 
 void testprocess() {
     clear_shell();
-    create_process((uint64_t)test_processes, get_pid() , 1 , 0, 0);
+    uint8_t * argv[] = {"test processes", "3" ,NULL};
+    usys_create_process((uint64_t)test_processes, usys_get_pid() , 1 , 2, argv);
     clear_shell();
 }
 
-void testprio() {
-    create_process((uint64_t)test_prio, get_pid(), 1, 0, 0);
-}
+/* void testprio() {
+    usys_create_process((uint64_t)test_prio, usys_get_pid(), 1, 0, 0);
+} */
 
 /* sampleCodeModule.c */
 

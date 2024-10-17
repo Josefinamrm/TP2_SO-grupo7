@@ -27,7 +27,6 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
   p_rq p_rqs[max_processes];
 
   while (1) {
-    printArray("antes de crear procesos\n");
     // Create max_processes processes
     for (rq = 0; rq < max_processes; rq++) {
       p_rqs[rq].pid = my_create_process((uint64_t)endless_loop, my_getpid(), 1, 1, argvAux);
@@ -41,12 +40,8 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
       }
     }
 
-        printArray("luego de crear procesos\n");
-
-
     // Randomly kills, blocks or unblocks processes until every one has been killed
      while (alive > 0) {
-      printArray("Antes de segundo for los procesos\n");
       for (rq = 0; rq < max_processes; rq++) {
         action = GetUniform(100) % 2;
 
@@ -83,8 +78,6 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
           }
           p_rqs[rq].state = RUNNING_t;
         }
-        printArray("despues del segundo for\n");
     } 
-    timer_wait(2);
   }
 }

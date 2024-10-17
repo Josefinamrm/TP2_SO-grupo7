@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include <user_syscalls.h>
+#include <user_lib.h>
 
 
 // Random
@@ -65,10 +65,10 @@ void endless_loop() {
 }
 
 void endless_loop_print(uint64_t wait) {
-  int64_t pid = get_pid();
+  int64_t pid = usys_get_pid();
 
   while (1) {
-    print("%d ", pid);
+    print_dec(pid);
     bussy_wait(wait);
   }
 }
