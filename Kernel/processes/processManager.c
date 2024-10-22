@@ -311,14 +311,44 @@ int64_t my_create_process(uint64_t function, uint64_t ppid, uint64_t priority, u
         _sti();
         return (int64_t)process_pid;
     }
+
     return FINISH_ON_ERROR;
 }
 
 
 // Exits the current process, killing it
-void my_exit(){
-    my_kill(my_getpid());
+void my_exit(uint64_t pid) {
+
+    process_array[pid]->state = ZOMBIE;
+
+    printArray("Como lo dejo en el exit: ");
+    switch(process_array[pid]->state){
+        case READY:
+            printArray("READY");
+            break;
+        
+        case RUNNING:
+            printArray("RUNNING");
+            break;
+
+        case BLOCKED:
+            printArray("BLOCKED");
+            break;
+
+        case KILLED:
+            printArray("KILLED");
+            break;
+
+        case ZOMBIE:
+            printArray("ZOMBIE");
+            break;
+    }
+    printArray("\n");
+
+
+    my_yield();
 }
+
 
 
 // Changes process priority
@@ -339,6 +369,7 @@ void my_nice(uint64_t pid, uint64_t new_prio){
 
 // Kills process
 int64_t my_kill(uint64_t pid){
+
     process p = process_array[pid];
 
     // if process is not on the list or i am tryibg to kill "myself" then error
@@ -360,6 +391,30 @@ int64_t my_kill(uint64_t pid){
 
     // set children freeeeee
     p->child_list = NULL;
+
+
+    switch(process_array[pid]->state){
+        case READY:
+            printArray("READY");
+            break;
+        
+        case RUNNING:
+            printArray("RUNNING");
+            break;
+
+        case BLOCKED:
+            printArray("BLOCKED");
+            break;
+
+        case KILLED:
+            printArray("KILLED");
+            break;
+
+        case ZOMBIE:
+            printArray("ZOMBIE");
+            break;
+    }
+
 
     return EXIT_SUCCESS;
 }
@@ -393,9 +448,28 @@ void my_yield(){
 }
 
 
+void my_wait_pid(uint64_t pid){
+    process p = process_array[my_getpid()];
+    if(p->child_list == NULL) return;
+
+    t_node * aux = p->child_list->front;
+    while(aux != NULL && aux->p->pid != pid){
+        aux = aux->next;
+    }
+
+    while(aux->p->state != ZOMBIE){
+        printArray("a"); // ESTA a DEBERIA ESTAR IMPRIMIENDOSE INFITINAMENTE (el yield lo deberia dejar en la lista 
+                        // de ready y eventulmente debería volver)
+        my_yield();
+    }
+
+    my_kill(pid);
+    return;
+}
+
+
 // Waits for all children to die
 void my_wait(){
-
     process p = process_array[my_getpid()];
     if(p->child_list == NULL) return;
 
@@ -450,6 +524,8 @@ void my_ps(){
         }
         putChar('\n');
     }
+
+    my_exit(my_getpid());    
 }
 
 /*--------------------------------------------------------- Base Processes and Functions ---------------------------------------------------------*/
@@ -476,7 +552,7 @@ void init_function(){
 
     ready_queue = initialize_queue();
     create_idle_process();
-
+    
 }
 
 void idle(){
@@ -485,28 +561,10 @@ void idle(){
     _idle();
 }
 
-void process_1(){
-    printArray("Soy proceso 1\n");
-    timer_wait(20);
-    printArray("termine el proces 1\n");
-}
-
-void process_2(){
-    printArray("Soy proceso 2\n");
-    timer_wait(20);
-    printArray("termine el proces 1\n");
-}
 
 void init_process(){
-    /* uint8_t * argv[] = { "test_process", "3" ,NULL};
-    uint8_t * argv1[] = { "proceso_1", "3" ,NULL};
-    uint8_t * argv2[] = { "proceso_2", "3" ,NULL}; */
     uint8_t * argv[] = {"userland", NULL};
-    /* my_create_process((uint64_t) process_1, my_getpid(), 1, 1, argv1);
-    my_create_process((uint64_t) process_2, my_getpid(), 1, 1, argv2); */
     my_create_process((uint64_t)USERLAND_DIREC, my_getpid(), 1, 1, argv);
-    //my_create_process((uint64_t)test_processes, my_getpid(), 1, 2, argv);
-    my_wait(INIT_PID);
-    //my_ps();
+    my_wait();
 }
 

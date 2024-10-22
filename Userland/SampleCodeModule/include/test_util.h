@@ -2,6 +2,8 @@
 #define TEST_UTIL_H
 
 #include <stdint.h>
+#include <user_lib.h>
+#include <user_syscalls.h>
 
 uint32_t GetUint();
 uint32_t GetUniform(uint32_t max);

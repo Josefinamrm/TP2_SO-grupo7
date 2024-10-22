@@ -53,6 +53,8 @@ void _wait_processes();
 
 void _ps();
 
+void _wait_pid(uint64_t pid);
+
 
 
 #endif

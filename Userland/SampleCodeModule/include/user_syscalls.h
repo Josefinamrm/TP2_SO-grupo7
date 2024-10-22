@@ -60,5 +60,7 @@ void usys_wait_processes();
 
 void usys_ps();
 
+void usys_wait_pid(uint64_t pid);
+
 
 #endif

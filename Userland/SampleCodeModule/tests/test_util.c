@@ -1,6 +1,5 @@
-#include <stdint.h>
-#include <stdio.h>
-#include <videoDriver.h>
+#include <test_util.h>
+
 
 // Random
 static uint32_t m_z = 362436069;
@@ -60,16 +59,19 @@ void bussy_wait(uint64_t n) {
 }
 
 void endless_loop() {
-  printArray("inside endless_loop\n");
   while (1)
     ;
 }
 
 void endless_loop_print(uint64_t wait) {
-  int64_t pid = my_getpid();
+  int64_t pid = get_pid();
+
+  uint8_t pid_str[10] = {0};
+  uint_to_base(pid, pid_str, 10);
 
   while (1) {
-    // printArray("%d ", pid);
+    // print("%d ", pid);
+    //print(pid_str);
     bussy_wait(wait);
   }
 }

@@ -1,6 +1,4 @@
-#include <stdint.h>
-#include <user_lib.h>
-#include <test_util.h>
+#include <test_prio.h>
 
 #define MINOR_WAIT 1000000 // TODO: Change this value to prevent a process from flooding the screen
 #define WAIT 10000000      // TODO: Change this value to make the wait long enough to see theese processes beeing run at least twice
@@ -12,40 +10,40 @@
 
 int64_t prio[TOTAL_PROCESSES] = {LOWEST, MEDIUM, HIGHEST};
 
-void test_prio() {
+void test_prio(uint64_t argc, uint8_t *argv[]) {
   int64_t pids[TOTAL_PROCESSES];
-  uint8_t *argv[] = {"endless loop print", NULL};
+  char *argv[] = {0};
   uint64_t i;
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
-    pids[i] = usys_create_process((uint64_t)endless_loop_print, usys_get_pid(), 0,1, argv);
+    pids[i] = create_process((uint64_t)endless_loop_print, get_pid(), 0,1, (uint8_t **)argv);
 
   bussy_wait(WAIT);
   print("\nCHANGING PRIORITIES...\n");
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
-    usys_nice(pids[i], prio[i]);
+    nice(pids[i], prio[i]);
 
   bussy_wait(WAIT);
   print("\nBLOCKING...\n");
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
-    usys_block(pids[i]);
+    block(pids[i]);
 
   print("CHANGING PRIORITIES WHILE BLOCKED...\n");
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
-    usys_nice(pids[i], MEDIUM);
+    nice(pids[i], MEDIUM);
 
   print("UNBLOCKING...\n");
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
-    usys_unblock(pids[i]);
+    unblock(pids[i]);
 
   bussy_wait(WAIT);
   print("\nKILLING...\n");
 
-  for (i = 0; i < TOTAL_PROCESSES-1; i++)
-    usys_kill(pids[i]); 
+  for (i = 0; i < TOTAL_PROCESSES; i++)
+    kill(pids[i]);
 
-} 
+}

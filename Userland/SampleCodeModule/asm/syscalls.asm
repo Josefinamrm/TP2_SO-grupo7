@@ -25,8 +25,7 @@ GLOBAL _unblock
 GLOBAL _yield
 GLOBAL _wait_processes
 GLOBAL _ps
-
-
+GLOBAL _wait_pid
 
 section .text
 
@@ -301,6 +300,17 @@ _ps:
     mov rbp, rsp 
 
     mov rax, 24
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_wait_pid:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 25
     int 80h 
 
     mov rsp, rbp 

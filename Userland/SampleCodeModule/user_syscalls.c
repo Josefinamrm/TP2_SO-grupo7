@@ -96,5 +96,9 @@ void usys_wait_processes(){
 }
 
 void usys_ps(){
-    _ps();
+    return _ps();
+}
+
+void usys_wait_pid(uint64_t pid){
+    _wait_pid(pid);
 }

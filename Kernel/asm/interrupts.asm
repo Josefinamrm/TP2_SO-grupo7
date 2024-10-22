@@ -24,7 +24,6 @@ GLOBAL _syscallHandler
 GLOBAL regs
 GLOBAL regsSaved
 
-
 EXTERN irqDispatcher
 EXTERN exceptionDispatcher
 EXTERN syscallDispatcher
@@ -32,7 +31,7 @@ EXTERN getStackBase
 EXTERN scheduler
 EXTERN int_20
 
-
+extern printArray
 
 SECTION .text
 
@@ -326,3 +325,4 @@ regsSaved db 0
 SECTION .bss
 	aux resq 1
 	regs resq 18
+	exit_stack resb 0x800 

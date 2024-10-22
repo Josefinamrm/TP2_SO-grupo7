@@ -89,7 +89,7 @@ uint64_t my_getpid();
 int64_t my_create_process(uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint8_t ** argv);
 
 // Exits the current process, killing it
-void my_exit();
+void my_exit(uint64_t pid);
 
 // Changes process priority
 void my_nice(uint64_t pid, uint64_t newPrio);
@@ -112,6 +112,9 @@ void my_wait();
 // Prints processes info -> name, pid and state
 void my_ps();
 
+// Waits for a specific pid to finish
+void my_wait_pid(uint64_t pid);
+
 /*--------------------------------------------------------- Base Processes and Functions ---------------------------------------------------------*/
 
 void init_function();
@@ -121,4 +124,4 @@ void init_process();
 void idle();
 
 
-#endif
+#endif 
