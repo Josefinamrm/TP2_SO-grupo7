@@ -211,8 +211,10 @@ uint64_t ksys_yield(){
     return FINISH_SUCCESFULLY;
 }
 
-uint64_t ksys_wait_processes(int16_t pid){
-    my_wait(pid);
+
+uint64_t ksys_wait_processes(uint64_t pid){
+    my_wait((int16_t)pid);
+
     return FINISH_SUCCESFULLY;
 }
 

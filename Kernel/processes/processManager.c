@@ -15,6 +15,7 @@ struct p{
     uint8_t priority;
     enum State state;
     uint64_t stack_pointer;
+    uint64_t base_pointer;
     struct queue_info * child_list;
  
 };
@@ -38,9 +39,7 @@ process_queue ready_queue;
 
 process process_array[MAX_PROCESS];
 
-int64_t process_pid = 0;
-
-int64_t process_counter = 0;
+uint8_t process_counter = 0;
 
 /*--------------------------------------------------------- List Functions Implementations ---------------------------------------------------------*/
 
@@ -68,7 +67,7 @@ void add_child(children_list list, process child){
     list->size++;
 }
 
-// Deletes a process from the children list
+// Deletes a process from the children list, but doesn´t free the process
 void delete_child(children_list list, int16_t pid){
     if(list->size == 0){
         list->front = list->rear = NULL;
@@ -92,7 +91,6 @@ void delete_child(children_list list, int16_t pid){
         else{
             prev->next = current->next;
         }
-        mm_free(current->p);
         mm_free(current);
         list->size--;
     }
@@ -104,7 +102,7 @@ uint64_t childless(children_list list){
 }
 
 // Frees children list
-void set_for_adoption(children_list list){
+void free_children_list(children_list list){
     if(list->size > 0){
         t_node * aux = list->front;
         while(aux != NULL){
@@ -183,7 +181,6 @@ void remove_process_instance(process_queue queue, int16_t pid, uint8_t remove_al
                 if(current->p->priority == 0 || !remove_all){
                     stop = 1;
                 }
-                mm_free(current->p);
                 mm_free(current);
             }
             else{
@@ -281,6 +278,16 @@ uint8_t is_ready_queue_empty(){
     return is_empty(ready_queue);
 }
 
+// Returns the next available pid
+int16_t next_available_pid(){
+    for(int i=0; i < MAX_PROCESS; i++){
+        if(process_array[i] == NULL){
+            return i;
+        }
+    }
+    return FINISH_ON_ERROR;
+}
+
 
 /*--------------------------------------------------------- Process Syscall Implementations ---------------------------------------------------------*/
 
@@ -292,17 +299,19 @@ int16_t my_getpid(){
 
 // después veo que hago en el caso border  ###############################  ME QUEDE ACA
 int16_t my_create_process(uint64_t function, int16_t ppid, uint8_t priority, uint64_t argc, char ** argv){
-    if(process_counter != MAX_PROCESS && argc > 0){
-        _cli();
+    _cli();
+    int16_t new_pid = next_available_pid();
+    if(new_pid > 0 && argc > 0){
         process new_process = (process) mm_malloc(sizeof(struct p));
         // is this correct? should i memcopy?
         new_process->name = argv[0];
-        new_process->pid = ++process_pid;
+        new_process->pid = new_pid;
         new_process->ppid = ppid;
         new_process->priority = priority;
         new_process->state = READY;
         uint64_t * initial_rsp = (uint64_t *) mm_malloc(PROCESS_STACK_SIZE);
         initial_rsp += PROCESS_STACK_SIZE / sizeof(uint64_t);
+        new_process->base_pointer = (uint64_t)initial_rsp;
         new_process->stack_pointer = _setup_stack_structure_asm((uint64_t)initial_rsp, function, argc, (uint64_t)argv);
         new_process->child_list = initialize_children_list();
                                                               // rdi        rsi      rdx  rcx
@@ -312,9 +321,9 @@ int16_t my_create_process(uint64_t function, int16_t ppid, uint8_t priority, uin
 
         process_counter++;
         _sti();
-        return (int64_t)process_pid;
     }
-    return FINISH_ON_ERROR;
+    _sti();
+    return new_pid;
 }
 
 
@@ -346,25 +355,21 @@ void my_nice(int16_t pid, uint8_t new_prio){
 int16_t my_kill(int16_t pid){
     process p = process_array[pid];
 
-    // if process is not on the list or i am tryibg to kill "myself" then error
-    if(p == NULL/*  || ready_queue->front->p->pid == pid */) return FINISH_ON_ERROR;
+    // if process is not on the list then error
+    if(p == NULL) return FINISH_ON_ERROR;
     
     p->state = KILLED;
-    //remove_all_process_instances(ready_queue, pid);
-    // no lo deberia hacer aca ya que si lo hago aca, pisaria la info que todavia no libere
-    //process_pid--;
     
-
     // init adopts children, if it has
     t_node * aux = p->child_list->front;
     while(aux != NULL){
         aux->p->ppid = INIT_PID;
         aux = aux->next;
     }
-
     adopt_children(process_array[INIT_PID]->child_list, p->child_list);
 
     // set children freeeeee
+    free_children_list(p->child_list);
     p->child_list = NULL;
 
     return EXIT_SUCCESS;
@@ -419,6 +424,7 @@ static my_wait_process(int16_t pid){
 
         if(current->p->state == KILLED){
             delete_child(p->child_list, current->p->pid);
+
         }
         else{
             printArray("en el yield\n");
@@ -444,8 +450,11 @@ void my_wait(int16_t pid){
                 t_node * aux = p->child_list->front;
                 p->child_list->front = p->child_list->front->next;
                 process_array[aux->p->pid] = NULL;
+                mm_free(aux->p->base_pointer);
                 mm_free(aux->p);
                 mm_free(aux);
+              
+              
             }
             else{
                 my_yield();
@@ -463,7 +472,7 @@ void my_ps(){
     printArray("PID");
     printArray(spacing);
     printArray("STATE\n");
-    for(uint64_t i = 0; i <= process_pid; i++){
+    for(uint64_t i = 0; i <= process_counter; i++){
         printArray("    ");
         printArray(process_array[i]->name);
         printArray(spacing);
@@ -498,6 +507,7 @@ void my_ps(){
 
 // Creates idle process
 static void create_idle_process(){
+    _cli();
     process idle_process = (process) mm_malloc(sizeof(struct p));
     idle_process->name = "Idle";
     idle_process->pid = 0;
@@ -506,11 +516,13 @@ static void create_idle_process(){
     idle_process->state = READY;
     uint64_t * initial_rsp = (uint64_t *) mm_malloc(PROCESS_STACK_SIZE);
     initial_rsp += PROCESS_STACK_SIZE / sizeof(uint64_t);
+    idle_process->base_pointer = (uint64_t)initial_rsp;
     char * argv[] = {idle_process->name, NULL};
     idle_process->stack_pointer = _setup_stack_structure_asm((uint64_t)initial_rsp, (uint64_t)idle, 1, (uint64_t)argv);
     idle_process->child_list = initialize_children_list();
     process_array[0] = idle_process;
     process_counter++;
+    _sti();
 }
 
 

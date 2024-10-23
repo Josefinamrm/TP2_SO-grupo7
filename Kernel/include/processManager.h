@@ -35,14 +35,14 @@ children_list initialize_children_list();
 // Adds a process to the end of the children list
 void add_child(children_list list, process child);
 
-// Deletes a process from the children list
+// Deletes a process from the children list, but doesn´t free the process
 void delete_child(children_list list, int16_t pid);
 
 // Checks whether the list is empty
 uint64_t childless(children_list list);
 
 // Frees children list
-void set_for_adoption(children_list list);
+void free_children_list(children_list list);
 
 // Concatenate lists
 void adopt_children(children_list adoptive_p, children_list children);
@@ -79,6 +79,9 @@ uint64_t idle_process_rsp();
 
 // Returns wether ready queue is empty (1) or not (0)
 uint8_t is_ready_queue_empty();
+
+// Returns the next available pid
+int16_t next_available_pid();
 
 /*--------------------------------------------------------- Syscalls ---------------------------------------------------------*/
 
