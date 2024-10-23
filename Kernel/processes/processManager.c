@@ -399,22 +399,57 @@ void my_yield(){
 }
 
 
+static my_wait_process(int16_t pid){
+
+    process p = process_array[my_getpid()]; // padre busca (y mata) a su hijo
+
+    if(p->child_list == NULL) return;
+
+    t_node * current = p->child_list->front;
+    while(current != NULL && current->p->pid != pid){
+        current = current->next;
+    }
+
+    while(1){
+        if(current->p->state == KILLED) printArray("state: KILLED\n");
+        if(current->p->state == READY) printArray("state: READY\n");
+        if(current->p->state == RUNNING) printArray("state: RUNNING\n");
+        if(current->p->state == BLOCKED) printArray("state: BLOCKED\n");
+        if(current->p->state == ZOMBIE) printArray("state: ZOMBIE\n");
+
+        if(current->p->state == KILLED){
+            delete_child(p->child_list, current->p->pid);
+        }
+        else{
+            printArray("en el yield\n");
+            my_yield();
+        }
+    }
+    
+}
+
 // Waits for all children to die -> free del stack pointer
 void my_wait(int16_t pid){
 
-    process p = process_array[my_getpid()];
-    if(p->child_list == NULL) return;
+    if(pid != -1){
+        my_wait_process(pid);
+        return;
+    }
+    else{
+        process p = process_array[my_getpid()];
+        if(p->child_list == NULL) return;
 
-    while(p->child_list->front != NULL){
-        if(p->child_list->front->p->state == KILLED){
-            t_node * aux = p->child_list->front;
-            p->child_list->front = p->child_list->front->next;
-            process_array[aux->p->pid] = NULL;
-            mm_free(aux->p);
-            mm_free(aux);
-        }
-        else{
-            my_yield();
+        while(p->child_list->front != NULL){
+            if(p->child_list->front->p->state == KILLED){
+                t_node * aux = p->child_list->front;
+                p->child_list->front = p->child_list->front->next;
+                process_array[aux->p->pid] = NULL;
+                mm_free(aux->p);
+                mm_free(aux);
+            }
+            else{
+                my_yield();
+            }
         }
     }
 }
@@ -506,13 +541,13 @@ void process_2(){
 }
 
 void init_process(){
-    char * argv2[] = { "proceso_2", "3" ,NULL}; 
-    char * argv1[] = { "proceso_1", "3" ,NULL};
-    /* char * argv[] = {"userland", NULL}; */
-    my_create_process((uint64_t) process_1, my_getpid(), 1, 1, argv1);
-    my_create_process((uint64_t) process_2, my_getpid(), 1, 1, argv2);
-    /* my_create_process((uint64_t)USERLAND_DIREC, my_getpid(), 1, 1, argv); */
-    //my_create_process((uint64_t)test_processes, my_getpid(), 1, 2, argv);
+    // char * argv2[] = { "proceso_2", "3" ,NULL}; 
+    // char * argv1[] = { "proceso_1", "3" ,NULL};
+    char * argv[] = {"userland", NULL};
+    // my_create_process((uint64_t) process_1, my_getpid(), 1, 1, argv1);
+    // my_create_process((uint64_t) process_2, my_getpid(), 1, 1, argv2);
+    my_create_process((uint64_t)USERLAND_DIREC, my_getpid(), 1, 1, argv);
+
     my_wait(-1);
     my_exit();
 }

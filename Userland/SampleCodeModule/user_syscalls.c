@@ -91,8 +91,8 @@ void usys_yield(){
     _yield();
 }
 
-void usys_wait_processes(){
-    _wait_processes();
+void usys_wait_processes(int16_t pid){
+    _wait_processes(pid);
 }
 
 void usys_ps(){

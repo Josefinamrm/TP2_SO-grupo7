@@ -6,7 +6,7 @@
 #include "../include/test_prio.h"
 
 #define INPUT_SIZE 100 
-#define COMMAND_COUNT 11  
+#define COMMAND_COUNT 12  
 #define CANT_REGS 18
 
 void help();
@@ -20,6 +20,7 @@ void inforeg();
 void clear_shell();
 void beep();
 void testprocess();
+void ps();
 
 static char buffer[INPUT_SIZE] = {0};
 static int bufferIndex = 0;
@@ -37,7 +38,8 @@ static Command commands[] = {
     {"zoomout", zoomout, "Disminuye el tamanio de la letra"},
     {"clear", clear_shell, "Limpia la shell"},
     {"beep", beep, "Emite un beep"},
-    {"testprocess", testprocess, "Crea los procesos test_processes y test_prio"}
+    {"testprocess", testprocess, "Crea el proceso test_process"},
+    {"ps", ps, "Muestra los procesos activos"}
 };
 
 void parse_command(char *str) {
@@ -69,9 +71,7 @@ void print_prompt_icon() {
 
 int main()
 {
-    testprocess();
-    while(1);
-/* print("Bienvenido a ");
+    print("Bienvenido a ");
     print_color(GREEN,"OUR_OS\n"); 
     print("Ingrese uno de los siguientes comandos:\n");
     for(int i = 1; i < COMMAND_COUNT-1 ; i++){
@@ -102,7 +102,7 @@ int main()
                 buffer[bufferIndex++] = c;
             }
         }
-    }  */
+    } 
     return 0;
 }
 
@@ -220,19 +220,15 @@ void testprocess() {
     clear_shell();
 }
 
-/* void testprio() {
-    usys_create_process((uint64_t)test_prio, usys_get_pid(), 1, 0, 0);
-} */
-
-/* sampleCodeModule.c */
-
-// #include <user_syscalls.h>
-// #include <user_lib.h>
-// #include <shell.h>
-
-// int main()
-// {
-// 	init_shell();
-
-// 	return 0;
+// void testprio() {
+//     usys_create_process((uint64_t)test_prio, usys_get_pid(), 1, 0, 0);
 // }
+
+void ps() {
+    
+    char * argv[] = {"ps", NULL};
+    int pid = usys_create_process((uint64_t)usys_ps, usys_get_pid(), 3, 1, argv); 
+    usys_wait_processes(pid);
+
+    print("hola\n");
+}
