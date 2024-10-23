@@ -44,15 +44,15 @@ void flush_buffer();
 
 uint64_t usys_get_pid();
 
-int64_t usys_create_process(uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint8_t ** argv);
+int64_t usys_create_process(uint64_t function, int16_t ppid, uint8_t priority, uint64_t argc, char ** argv);
 
-void usys_nice(uint64_t pid, uint64_t newPrio);
+void usys_nice(int16_t pid, uint8_t new_prio);
 
-int64_t usys_kill(uint64_t pid);
+int64_t usys_kill(int16_t pid);
 
-int64_t usys_block(uint64_t pid);
+int64_t usys_block(int16_t pid);
 
-int64_t usys_unblock(uint64_t pid);
+int64_t usys_unblock(int16_t pid);
 
 void usys_yield();
 

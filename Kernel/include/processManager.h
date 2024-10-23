@@ -36,7 +36,7 @@ children_list initialize_children_list();
 void add_child(children_list list, process child);
 
 // Deletes a process from the children list
-void delete_child(children_list list, uint64_t pid);
+void delete_child(children_list list, int16_t pid);
 
 // Checks whether the list is empty
 uint64_t childless(children_list list);
@@ -54,19 +54,19 @@ process_queue initialize_queue();
 
 
 // Adds a process to the end of the queue
-void add_process_instance(process_queue queue, process p, uint64_t add_all);
+void add_process_instance(process_queue queue, process p, uint8_t add_all);
 
 
 // Removes all or one instance of the process in the queue
-void remove_process_instance(process_queue queue, uint64_t pid, uint64_t remove_all);
+void remove_process_instance(process_queue queue, int16_t pid, uint8_t remove_all);
 
 
 // Removes all instances of the process in the queue
-void remove_all_process_instances(process_queue queue, uint64_t pid);
+void remove_all_process_instances(process_queue queue, int16_t pid);
 
 
 // Checks if queue is empty, returns 1 if so
-uint64_t is_empty(process_queue queue);
+uint8_t is_empty(process_queue queue);
 
 
 // Returns next running process rsp from the ready process queue
@@ -78,36 +78,36 @@ uint64_t idle_process_rsp();
 
 
 // Returns wether ready queue is empty (1) or not (0)
-uint64_t is_ready_queue_empty();
+uint8_t is_ready_queue_empty();
 
 /*--------------------------------------------------------- Syscalls ---------------------------------------------------------*/
 
 // Returns the pid of the current process
-uint64_t my_getpid();
+int16_t my_getpid();
 
 // Creates a new process
-int64_t my_create_process(uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint8_t ** argv);
+int16_t my_create_process(uint64_t function, int16_t ppid, uint8_t priority, uint64_t argc, char ** argv);
 
 // Exits the current process, killing it
 void my_exit();
 
 // Changes process priority
-void my_nice(uint64_t pid, uint64_t newPrio);
+void my_nice(int16_t pid, uint8_t newPrio);
 
 // Kills process
-int64_t my_kill(uint64_t pid);
+int16_t my_kill(int16_t pid);
 
 // Blocks process
-int64_t my_block(uint64_t pid);
+int16_t my_block(int16_t pid);
 
 // Unblocks process
-int64_t my_unblock(uint64_t pid);
+int16_t my_unblock(int16_t pid);
 
 // Yields cpu usage
 void my_yield();
 
 // Waits for all children to finish
-void my_wait();
+void my_wait(int16_t pid);
 
 // Prints processes info -> name, pid and state
 void my_ps();

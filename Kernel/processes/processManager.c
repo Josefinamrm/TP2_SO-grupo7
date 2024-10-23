@@ -1,7 +1,7 @@
 
 #include "processManager.h"
 #define INIT_PID 1
-uint64_t idle_running;
+uint8_t idle_running;
 enum State {READY, RUNNING, BLOCKED, KILLED, ZOMBIE};
 
 
@@ -9,17 +9,14 @@ enum State {READY, RUNNING, BLOCKED, KILLED, ZOMBIE};
 
 struct p{
 
-    uint8_t * name;
-    uint64_t pid;
-    uint64_t ppid;
-    uint64_t priority;
-    uint64_t state;
+    char * name;
+    int16_t pid;
+    int16_t ppid;
+    uint8_t priority;
+    enum State state;
     uint64_t stack_pointer;
     struct queue_info * child_list;
-
-    // file managment
-    // uint32_t * file_descriptors;
-
+ 
 };
 
 /*--------------------------------------------------------- Ready Process Queue ---------------------------------------------------------*/
@@ -32,7 +29,7 @@ typedef struct node{
 struct queue_info{
     t_node * front;
     t_node * rear;
-    uint64_t size;
+    uint32_t size;
 };
 
 /*--------------------------------------------------------- Process Array ---------------------------------------------------------*/
@@ -41,9 +38,9 @@ process_queue ready_queue;
 
 process process_array[MAX_PROCESS];
 
-uint8_t process_pid = 0;
+int64_t process_pid = 0;
 
-uint8_t process_counter = 0;
+int64_t process_counter = 0;
 
 /*--------------------------------------------------------- List Functions Implementations ---------------------------------------------------------*/
 
@@ -72,7 +69,7 @@ void add_child(children_list list, process child){
 }
 
 // Deletes a process from the children list
-void delete_child(children_list list, uint64_t pid){
+void delete_child(children_list list, int16_t pid){
     if(list->size == 0){
         list->front = list->rear = NULL;
     }else{
@@ -132,9 +129,9 @@ process_queue initialize_queue(){
 
 
 // Adds one or all process instances to the end of the queue
-void add_process_instance(process_queue queue, process p, uint64_t add_all){
-    uint64_t stop = 0;
-    uint64_t prio = 0;
+void add_process_instance(process_queue queue, process p, uint8_t add_all){
+    uint8_t stop = 0;
+    uint8_t prio = 0;
     while(prio < p->priority && !stop){
         t_node * new_node = (t_node *) mm_malloc(sizeof(t_node));
 
@@ -163,10 +160,10 @@ void add_all_process_instances(process_queue queue, process p){
 
 
 // Removes all or one instance of the process in the queue
-void remove_process_instance(process_queue queue, uint64_t pid, uint64_t remove_all){
+void remove_process_instance(process_queue queue, int16_t pid, uint8_t remove_all){
     t_node * current = queue->front;
     t_node * prev = queue->rear;
-    uint64_t stop = 0;
+    uint8_t stop = 0;
     do{
         if(current->p->pid == pid){
             if(ready_queue->size > 0){
@@ -202,13 +199,13 @@ void remove_process_instance(process_queue queue, uint64_t pid, uint64_t remove_
 
 
 // Removes all instances of the process in the queue
-void remove_all_process_instances(process_queue queue, uint64_t pid){
+void remove_all_process_instances(process_queue queue, int16_t pid){
     remove_process_instance(queue, pid, 1);
 }
 
 
 // Checks if queue is empty, returns 1 if so
-uint64_t is_empty(process_queue queue){
+uint8_t is_empty(process_queue queue){
     return queue->size == 0;
 }
 
@@ -222,7 +219,7 @@ void adopt_children(children_list adoptive_p, children_list children){
 /*--------------------------------------------------------- Ready Queue Functions ---------------------------------------------------------*/
 
 // Adds n process instances, where n = priority
-static uint64_t add_to_ready_queue(process p){ 
+static uint32_t add_to_ready_queue(process p){ 
     
     add_all_process_instances(ready_queue, p);
 
@@ -230,7 +227,7 @@ static uint64_t add_to_ready_queue(process p){
 }
 
 // Removes an instance of the ready_queue
-static uint64_t remove_from_ready_queue(uint64_t pid){
+static uint32_t remove_from_ready_queue(int16_t pid){
     if(process_array[pid] == NULL){
         return EXIT_FAILURE;
     }
@@ -259,7 +256,13 @@ static uint64_t setup_next_running_process(){
 // Returns next running process rsp from the ready process queue
 uint64_t next_running_process(uint64_t current_rsp){
     if(idle_running){
+        // backs up idle rsp
+        process_array[0]->stack_pointer = current_rsp;
         idle_running = 0;
+    }else if(ready_queue->front->p->state == KILLED){
+        remove_from_ready_queue(ready_queue->front->p->pid);
+        // the front of the list will now change to the next process, so i return that one if there are any
+        return ready_queue->size == 0 ? process_array[0]->stack_pointer : ready_queue->front->p->stack_pointer;
     }else{
         backup_current_process(current_rsp);
     }
@@ -274,7 +277,7 @@ uint64_t idle_process_rsp(){
 }
 
 
-uint64_t is_ready_queue_empty(){
+uint8_t is_ready_queue_empty(){
     return is_empty(ready_queue);
 }
 
@@ -282,13 +285,13 @@ uint64_t is_ready_queue_empty(){
 /*--------------------------------------------------------- Process Syscall Implementations ---------------------------------------------------------*/
 
 // Returns the calling process pid
-uint64_t my_getpid(){
+int16_t my_getpid(){
     return ready_queue->front->p->pid;
 }
 
 
-// después veo que hago en el caso border  ###############################
-int64_t my_create_process(uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint8_t ** argv){
+// después veo que hago en el caso border  ###############################  ME QUEDE ACA
+int16_t my_create_process(uint64_t function, int16_t ppid, uint8_t priority, uint64_t argc, char ** argv){
     if(process_counter != MAX_PROCESS && argc > 0){
         _cli();
         process new_process = (process) mm_malloc(sizeof(struct p));
@@ -300,7 +303,7 @@ int64_t my_create_process(uint64_t function, uint64_t ppid, uint64_t priority, u
         new_process->state = READY;
         uint64_t * initial_rsp = (uint64_t *) mm_malloc(PROCESS_STACK_SIZE);
         initial_rsp += PROCESS_STACK_SIZE / sizeof(uint64_t);
-        new_process->stack_pointer = _setup_stack_structure_asm((uint64_t)initial_rsp, function, argc, argv);
+        new_process->stack_pointer = _setup_stack_structure_asm((uint64_t)initial_rsp, function, argc, (uint64_t)argv);
         new_process->child_list = initialize_children_list();
                                                               // rdi        rsi      rdx  rcx
         add_to_ready_queue(new_process);
@@ -318,18 +321,19 @@ int64_t my_create_process(uint64_t function, uint64_t ppid, uint64_t priority, u
 // Exits the current process, killing it
 void my_exit(){
     my_kill(my_getpid());
+    force_timer_tick();
 }
 
 
 // Changes process priority
-void my_nice(uint64_t pid, uint64_t new_prio){
+void my_nice(int16_t pid, uint8_t new_prio){
     if(process_array[pid]->priority < new_prio){ // upgrade
-        for(uint64_t i = process_array[pid]->priority; i > process_array[pid]->priority - new_prio; i--){
+        for(int i = process_array[pid]->priority; i > process_array[pid]->priority - new_prio; i--){
             add_to_ready_queue(process_array[pid]);
         }
     }
     else if(process_array[pid]->priority > new_prio){ // downgrade
-        for(uint64_t i = process_array[pid]->priority; i > new_prio - process_array[pid]->priority; i--){
+        for(int i = process_array[pid]->priority; i > new_prio - process_array[pid]->priority; i--){
             remove_from_ready_queue(process_array[pid]->pid);
         }
     }
@@ -337,16 +341,18 @@ void my_nice(uint64_t pid, uint64_t new_prio){
 }
 
 
-// Kills process
-int64_t my_kill(uint64_t pid){
+// Kills process -> remove it from process_array ?
+// el scheduler se va a encargar de sacarlo de la lista
+int16_t my_kill(int16_t pid){
     process p = process_array[pid];
 
     // if process is not on the list or i am tryibg to kill "myself" then error
-    if(p == NULL || ready_queue->front->p->pid == pid) return FINISH_ON_ERROR;
+    if(p == NULL/*  || ready_queue->front->p->pid == pid */) return FINISH_ON_ERROR;
     
     p->state = KILLED;
-    remove_all_process_instances(ready_queue, pid);
-    process_pid--;
+    //remove_all_process_instances(ready_queue, pid);
+    // no lo deberia hacer aca ya que si lo hago aca, pisaria la info que todavia no libere
+    //process_pid--;
     
 
     // init adopts children, if it has
@@ -366,7 +372,7 @@ int64_t my_kill(uint64_t pid){
 
 
 // Blocks process
-int64_t my_block(uint64_t pid){
+int16_t my_block(int16_t pid){
 
     if(process_array[pid] == NULL) return FINISH_ON_ERROR;    
 
@@ -378,7 +384,7 @@ int64_t my_block(uint64_t pid){
 
 
 // Unblocks process
-int64_t my_unblock(uint64_t pid){
+int16_t my_unblock(int16_t pid){
     if(process_array[pid] == NULL) return FINISH_ON_ERROR;
     
     process_array[pid]->state = READY;
@@ -393,8 +399,8 @@ void my_yield(){
 }
 
 
-// Waits for all children to die
-void my_wait(){
+// Waits for all children to die -> free del stack pointer
+void my_wait(int16_t pid){
 
     process p = process_array[my_getpid()];
     if(p->child_list == NULL) return;
@@ -403,6 +409,7 @@ void my_wait(){
         if(p->child_list->front->p->state == KILLED){
             t_node * aux = p->child_list->front;
             p->child_list->front = p->child_list->front->next;
+            process_array[aux->p->pid] = NULL;
             mm_free(aux->p);
             mm_free(aux);
         }
@@ -464,8 +471,8 @@ static void create_idle_process(){
     idle_process->state = READY;
     uint64_t * initial_rsp = (uint64_t *) mm_malloc(PROCESS_STACK_SIZE);
     initial_rsp += PROCESS_STACK_SIZE / sizeof(uint64_t);
-    uint8_t * argv[] = {idle_process->name, NULL};
-    idle_process->stack_pointer = _setup_stack_structure_asm((uint64_t)initial_rsp, (uint64_t)idle, 1, argv);
+    char * argv[] = {idle_process->name, NULL};
+    idle_process->stack_pointer = _setup_stack_structure_asm((uint64_t)initial_rsp, (uint64_t)idle, 1, (uint64_t)argv);
     idle_process->child_list = initialize_children_list();
     process_array[0] = idle_process;
     process_counter++;
@@ -476,7 +483,6 @@ void init_function(){
 
     ready_queue = initialize_queue();
     create_idle_process();
-
 }
 
 void idle(){
@@ -487,26 +493,27 @@ void idle(){
 
 void process_1(){
     printArray("Soy proceso 1\n");
-    timer_wait(20);
+    timer_wait(3);
     printArray("termine el proces 1\n");
+    my_exit();
 }
 
 void process_2(){
     printArray("Soy proceso 2\n");
-    timer_wait(20);
-    printArray("termine el proces 1\n");
+    timer_wait(3);
+    printArray("termine el proces 2\n");   
+    my_exit();
 }
 
 void init_process(){
-    /* uint8_t * argv[] = { "test_process", "3" ,NULL};
-    uint8_t * argv1[] = { "proceso_1", "3" ,NULL};
-    uint8_t * argv2[] = { "proceso_2", "3" ,NULL}; */
-    uint8_t * argv[] = {"userland", NULL};
-    /* my_create_process((uint64_t) process_1, my_getpid(), 1, 1, argv1);
-    my_create_process((uint64_t) process_2, my_getpid(), 1, 1, argv2); */
-    my_create_process((uint64_t)USERLAND_DIREC, my_getpid(), 1, 1, argv);
+    char * argv2[] = { "proceso_2", "3" ,NULL}; 
+    char * argv1[] = { "proceso_1", "3" ,NULL};
+    /* char * argv[] = {"userland", NULL}; */
+    my_create_process((uint64_t) process_1, my_getpid(), 1, 1, argv1);
+    my_create_process((uint64_t) process_2, my_getpid(), 1, 1, argv2);
+    /* my_create_process((uint64_t)USERLAND_DIREC, my_getpid(), 1, 1, argv); */
     //my_create_process((uint64_t)test_processes, my_getpid(), 1, 2, argv);
-    my_wait(INIT_PID);
-    //my_ps();
+    my_wait(-1);
+    my_exit();
 }
 

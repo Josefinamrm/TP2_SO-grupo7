@@ -67,24 +67,24 @@ uint64_t usys_get_pid(){
     return _get_pid();
 }
 
-int64_t usys_create_process(uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint8_t ** argv){
-    return _create_process(function, ppid, priority, argc, argv);
+int64_t usys_create_process(uint64_t function, int16_t ppid, uint8_t priority, uint64_t argc, char ** argv){
+    return _create_process(function, (uint64_t)ppid, (uint64_t)priority, argc, (uint64_t)argv);
 }
 
-void usys_nice(uint64_t pid, uint64_t newPrio){
-    _nice(pid, newPrio);
+void usys_nice(int16_t pid, uint8_t newPrio){
+    _nice((uint64_t)pid, (uint64_t)newPrio);
 }
 
-int64_t usys_kill(uint64_t pid){
-    return _kill(pid);
+int64_t usys_kill(int16_t pid){
+    return _kill((uint64_t)pid);
 }
 
-int64_t usys_block(uint64_t pid){
-    return _block(pid);
+int64_t usys_block(int16_t pid){
+    return _block((uint64_t)pid);
 }
 
-int64_t usys_unblock(uint64_t pid){
-   return _unblock(pid);
+int64_t usys_unblock(int16_t pid){
+   return _unblock((uint64_t)pid);
 }
 
 void usys_yield(){

@@ -17,7 +17,7 @@ print("Dentro de test processes\n");
   uint8_t alive = 0;
   uint8_t action;
   uint64_t max_processes;
-  uint8_t *argvAux[] = {"test process", NULL};
+  char *argvAux[] = {"test process", NULL};
 
   if (argc != 2)
     return -1;
@@ -86,4 +86,6 @@ print("Dentro de test processes\n");
     }
     print("ya los mate todos\n");
   }
+
+
 }

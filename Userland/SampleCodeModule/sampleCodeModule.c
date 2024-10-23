@@ -215,7 +215,7 @@ void play_eliminator() {
 
 void testprocess() {
     clear_shell();
-    uint8_t * argv[] = {"test processes", "3" ,NULL};
+    char * argv[] = {"test processes", "3" ,NULL};
     usys_create_process((uint64_t)test_processes, usys_get_pid() , 1 , 2, argv);
     clear_shell();
 }
