@@ -4,59 +4,71 @@ int64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx
 {
     switch (rax)
     {
-    case 0:
-        return ksys_read(rdi, rsi, rdx);
-    case 1:
-        return ksys_write(rdi, rsi, rdx);
-    case 2:
-        return ksys_getTime();
-    case 3:
-        return ksys_change_draw_size(rdi);
-    case 4:
-        return ksys_print_array_of_draw_size(rdi, rsi, rdx, rcx, r8);
-    case 5:
-        return ksys_draw_array(rdi, rsi, rdx, rcx, r8);
-    case 6:
-        return ksys_write_color(rdi, rsi, rdx);
-    case 7:
-        return ksys_clear_screen();
-    case 8:
-        return ksys_getRegisters(rdi);
-    case 9:
-        return ksys_wait(rdi);
-    case 10:
-        return ksys_change_font_size(rdi);
-    case 11:
-        return ksys_get_font_size();
-    case 12:
-        return ksys_beep(rdi, rsi);
-    case 13:
-        return ksys_draw_square(rdi, rsi, rdx, rcx);
-    case 14:
-        return ksys_draw_rect(rdi, rsi, rdx, rcx, r8);
-    case 15:
-        flushBuffer();
-        return FINISH_SUCCESFULLY;
-    case 16:
-        return ksys_getpid();
-    case 17:
-        return ksys_create_process(rdi, rsi, rdx, rcx, r8);
-    case 18:
-        return ksys_nice(rdi, rsi);
-    case 19:
-        return ksys_kill(rdi);
-    case 20:
-        return ksys_block(rdi);
-    case 21:
-        return ksys_unblock(rdi);
-    case 22:
-        return ksys_yield();
-    case 23:
-        return ksys_wait_processes(rdi);
-    case 24:
-        return ksys_ps();
-    case 25:
-        return ksys_exit();
+        case 0:
+            return ksys_read(rdi, rsi, rdx);
+        case 1:
+            return ksys_write(rdi, rsi, rdx);
+        case 2:
+            return ksys_getTime();
+        case 3:
+            return ksys_change_draw_size(rdi);
+        case 4:
+            return ksys_print_array_of_draw_size(rdi, rsi, rdx, rcx, r8);
+        case 5:
+            return ksys_draw_array(rdi, rsi, rdx, rcx, r8);
+        case 6:
+            return ksys_write_color(rdi, rsi, rdx);
+        case 7:
+            return ksys_clear_screen();
+        case 8:
+            return ksys_getRegisters(rdi);
+        case 9:
+            return ksys_wait(rdi);
+        case 10:
+            return ksys_change_font_size(rdi);
+        case 11:
+            return ksys_get_font_size();
+        case 12:
+            return ksys_beep(rdi, rsi);
+        case 13:
+            return ksys_draw_square(rdi, rsi, rdx, rcx);
+        case 14:
+            return ksys_draw_rect(rdi, rsi, rdx, rcx, r8);
+        case 15:
+            flushBuffer();
+            return FINISH_SUCCESFULLY;
+        case 16:
+            return ksys_getpid();
+        case 17:
+            return ksys_create_process(rdi, rsi, rdx, rcx, r8);
+        case 18:
+            return ksys_nice(rdi, rsi);
+        case 19:
+            return ksys_kill(rdi);
+        case 20:
+            return ksys_block(rdi);
+        case 21:
+            return ksys_unblock(rdi);
+        case 22:
+            return ksys_yield();
+        case 23:
+            return ksys_wait_processes(rdi);
+        case 24:
+            return ksys_ps();
+        case 25:
+            return ksys_exit();
+        case 26:
+            return ksys_malloc(rdi);
+        case 27:
+            return ksys_realloc((void *)rsi, rdx);
+        case 28:
+            return ksys_free((void *)rsi);
+        case 29:    
+            return ksys_unused_space();
+        case 30:
+            return ksys_occupied_space();
+        case 31:
+            return ksys_total_space();
     }
 
 
@@ -230,4 +242,29 @@ uint64_t ksys_ps(){
 uint64_t ksys_exit(){
     my_exit();
     return FINISH_SUCCESFULLY;
+}
+
+uint64_t ksys_malloc(unsigned int nbytes){
+    return (uint64_t) mm_malloc(nbytes);
+}
+
+uint64_t ksys_realloc(void * ptr, uint64_t new_size){
+    return (uint64_t) mm_realloc(ptr, new_size);
+}
+
+uint64_t ksys_free(void * ptr){
+    mm_free(ptr);
+    return FINISH_SUCCESFULLY;
+}
+
+uint64_t ksys_unused_space(){
+    return (uint64_t) mm_unused_space();
+}
+
+uint64_t ksys_occupied_space(){
+    return (uint64_t) mm_occupied_space();
+}
+
+uint64_t ksys_total_space(){
+    return (uint64_t) mm_total_space();
 }

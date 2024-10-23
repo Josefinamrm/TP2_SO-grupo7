@@ -150,20 +150,17 @@ int parse_command_arg(char * str) {
 char * check_back(char * str, char * cmd) {
     int i = 0;
     
-    // Recorre la cadena hasta encontrar el espacio o el final de la cadena
     while (str[i] != '\0' && str[i] != ' ') {
-        cmd[i] = str[i];  // Copia el carácter actual a cmd
+        cmd[i] = str[i]; 
         i++;
     }
 
-    cmd[i] = '\0';  // Asegura que cmd es una cadena válida con el terminador nulo
+    cmd[i] = '\0'; 
 
-    // Si encontró un espacio, devuelve lo que hay después del espacio
     if (str[i] == ' ') {
         return &str[i + 1];
     }
     
-    // Si no hay espacio, devuelve NULL
     return NULL;
 }
 

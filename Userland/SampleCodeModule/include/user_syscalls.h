@@ -62,4 +62,18 @@ void usys_ps();
 
 void usys_exit();
 
+// memory syscalls
+
+void * usys_malloc(unsigned int nbytes);
+
+void * usys_realloc(void * ptr, uint64_t new_size); 
+
+void usys_free(void * ptr);
+
+int usys_unused_space();
+
+int usys_occupied_space();
+
+int usys_total_space();
+
 #endif

@@ -55,6 +55,20 @@ void _ps();
 
 void _exit();
 
+// memory syscalls
+
+void * _malloc(uint64_t nbytes);
+
+void * _realloc(void * ptr, uint64_t new_size); 
+
+void _free(void * ptr);
+
+int _unused_space();
+
+int _occupied_space();
+
+int _total_space();
+
 #endif
 
 

@@ -27,6 +27,14 @@ GLOBAL _wait_processes
 GLOBAL _ps
 GLOBAL _exit
 
+; memory:
+
+GLOBAL _malloc
+GLOBAL _realloc
+GLOBAL _free
+GLOBAL _unused_space
+GLOBAL _occupied_space
+GLOBAL _total_space
 
 
 section .text
@@ -313,6 +321,72 @@ _exit:
     mov rbp, rsp 
 
     mov rax, 25
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_malloc:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 26
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_realloc:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 27
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_free:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 28
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_unused_space:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 29
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_occupied_space:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 30
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_total_space:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 31
     int 80h 
 
     mov rsp, rbp 

@@ -3,7 +3,7 @@
 #include <shell.h>
 
 #define INPUT_SIZE 100 
-#define COMMAND_COUNT 13
+#define COMMAND_COUNT 14
 #define CANT_REGS 18
 #define TRUE 1
 #define FALSE 0
@@ -21,7 +21,8 @@ void clear_shell();
 void beep();
 void testprocess();
 void testprio();
-void ps(char background);
+void ps();
+void memoryinfo();
 
 static char buffer[INPUT_SIZE] = {0};
 static int bufferIndex = 0;
@@ -42,7 +43,8 @@ static Command commands[] = {
     {"beep", beep, "Emite un beep"},
     {"testprocess", testprocess, "Crea el proceso test_process"},
     {"testprio", testprio, "Crea procesos con distintas prioridades"},
-    {"ps", ps, "Muestra los procesos y sus estados"}
+    {"ps", ps, "Muestra los procesos y sus estados"},
+    {"memoryinfo", memoryinfo, "Muestra informacion de la memoria"},
 };
 
 void parse_command(char *str) {
@@ -231,18 +233,27 @@ void play_eliminator() {
 void testprocess() {
     char * argv[] = {"test processes", "3" ,NULL};
     int pid = usys_create_process((uint64_t)testprocess_ps, usys_get_pid() , 1 , 2, argv);
-    usys_wait_processes(pid);
+    if(foreground) 
+        usys_wait_processes(pid);
 }
 
 void testprio() {
     char * argv[] = {"test prio", NULL};
     int pid = usys_create_process((uint64_t)testprio_ps, usys_get_pid(), 1, 1, argv);
-    usys_wait_processes(pid);
+    if(foreground) 
+        usys_wait_processes(pid);
 }
 
-void ps(char background) {
+void ps() {
     char * argv[] = {"ps", NULL};
     int pid = usys_create_process((uint64_t)ps_ps, usys_get_pid(), 1, 1, argv); 
+    if(foreground) 
+        usys_wait_processes(pid);
+}
+
+void memoryinfo() {
+    char * argv[] = {"memoryinfo", NULL};
+    int pid = usys_create_process((uint64_t)memoryinfo_ps, usys_get_pid(), 1, 1, argv); 
     if(foreground) 
         usys_wait_processes(pid);
 }

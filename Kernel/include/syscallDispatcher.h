@@ -9,6 +9,7 @@
 #include <clock.h>
 #include <sound.h>
 #include "processManager.h"
+#include "memoryManager.h"
 
 #define STDIN 0
 #define STDOUT 1
@@ -45,5 +46,11 @@ uint64_t ksys_yield();
 uint64_t ksys_ps();
 uint64_t ksys_wait_processes(uint64_t pid);
 uint64_t ksys_exit();
+uint64_t ksys_malloc(unsigned int nbytes);
+uint64_t ksys_realloc(void * ptr, uint64_t new_size); 
+uint64_t ksys_free(void * ptr);
+uint64_t ksys_unused_space();
+uint64_t ksys_occupied_space();
+uint64_t ksys_total_space();
 
 #endif

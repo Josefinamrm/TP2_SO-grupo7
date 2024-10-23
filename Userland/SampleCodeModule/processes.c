@@ -14,3 +14,21 @@ void testprio_ps(){
     test_prio();
     usys_exit();
 }
+
+void memoryinfo_ps() {
+
+    print("-------------------------------------------------------\n");
+    print("Total space: ");
+    print_dec(usys_total_space());
+    print("\n");
+
+    print("Occupied space: ");
+    print_dec(usys_occupied_space());
+    print("\n");
+
+    print("Unused space: ");
+    print_dec(usys_unused_space());
+    print("\n");
+    print("-------------------------------------------------------\n");
+    usys_exit();
+}

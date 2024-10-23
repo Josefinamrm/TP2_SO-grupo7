@@ -102,3 +102,28 @@ void usys_ps(){
 void usys_exit(){
     _exit();
 }
+
+
+void * usys_malloc(unsigned int nbytes){
+    return _malloc((uint64_t)nbytes);
+}
+
+void * usys_realloc(void * ptr, uint64_t new_size){
+    return _realloc(ptr, new_size);
+} 
+
+void usys_free(void * ptr){
+    _free(ptr);
+}
+
+int usys_unused_space(){
+    return _unused_space();
+}
+
+int usys_occupied_space(){
+    return _occupied_space();
+}
+
+int usys_total_space(){
+    return _total_space();
+}
