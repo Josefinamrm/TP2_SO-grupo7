@@ -20,6 +20,8 @@ void _invalid_opcode_exception(void);
 
 int parse_command_arg(char * str);
 
+char * check_back(char * str, char * cmd);
+
 int strcmp(const char *s1, const char *s2);
 
 char get_char(); 

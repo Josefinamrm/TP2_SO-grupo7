@@ -147,6 +147,27 @@ int parse_command_arg(char * str) {
     return argC;
 }
 
+char * check_back(char * str, char * cmd) {
+    int i = 0;
+    
+    // Recorre la cadena hasta encontrar el espacio o el final de la cadena
+    while (str[i] != '\0' && str[i] != ' ') {
+        cmd[i] = str[i];  // Copia el carácter actual a cmd
+        i++;
+    }
+
+    cmd[i] = '\0';  // Asegura que cmd es una cadena válida con el terminador nulo
+
+    // Si encontró un espacio, devuelve lo que hay después del espacio
+    if (str[i] == ' ') {
+        return &str[i + 1];
+    }
+    
+    // Si no hay espacio, devuelve NULL
+    return NULL;
+}
+
+
 void udraw_frame(uint32_t color, uint64_t x, uint64_t y, uint64_t size_x, uint64_t size_y, uint64_t thickness) {
 	usys_print_rect(color, x, y, size_x, thickness); 
 	usys_print_rect(color, x, y+size_y-thickness, size_x, thickness);

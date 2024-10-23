@@ -5,6 +5,9 @@
 #define INPUT_SIZE 100 
 #define COMMAND_COUNT 13
 #define CANT_REGS 18
+#define TRUE 1
+#define FALSE 0
+
 
 void help();
 void divzero();
@@ -18,12 +21,13 @@ void clear_shell();
 void beep();
 void testprocess();
 void testprio();
-void ps();
+void ps(char background);
 
 static char buffer[INPUT_SIZE] = {0};
 static int bufferIndex = 0;
 static int currentFontSize;
 static int gameActive = 0;
+static char foreground = TRUE;
 
 static Command commands[] = {
     {"help", help, "Muestra la lista de comandos"},
@@ -49,17 +53,29 @@ void parse_command(char *str) {
     }
 
     int argC = parse_command_arg(str);
+    char cmd[10] = {0};
+
+    char valid_cmd = TRUE;
 
     if (argC > 1) {
-        print_color(YELLOW, "No puede haber ni un espacio ni mas de 1 argumento. Verificar los comandos de nuevo.\n");
+        char * flag = check_back(str, cmd);
+        if(strcmp(flag, "b") == 0){
+            foreground = FALSE;
+            str = cmd;
+        }
+        else{
+            valid_cmd = FALSE;
+        }
     }
 
-    for (int i = 0; i < COMMAND_COUNT; i++) {
-        if (strcmp(str, commands[i].name_id) == 0) {
-            (*commands[i].func)(argument);
-            return;
-        }
-    } 
+    if(valid_cmd){
+        for (int i = 0; i < COMMAND_COUNT; i++) {
+            if (strcmp(str, commands[i].name_id) == 0) {
+                (*commands[i].func)(argument);
+                return;
+            }
+        } 
+    }    
     print_error("Error: comando no diponible. Ingrese \"help\" para ver los comandos disponibles.\n");
 }
 
@@ -224,8 +240,9 @@ void testprio() {
     usys_wait_processes(pid);
 }
 
-void ps() {
+void ps(char background) {
     char * argv[] = {"ps", NULL};
     int pid = usys_create_process((uint64_t)ps_ps, usys_get_pid(), 1, 1, argv); 
-    usys_wait_processes(pid);
+    if(foreground) 
+        usys_wait_processes(pid);
 }
