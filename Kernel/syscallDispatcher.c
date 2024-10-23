@@ -52,7 +52,7 @@ int64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx
     case 22:
         return ksys_yield();
     case 23:
-        return ksys_wait_processes();
+        return ksys_wait_processes(rdi);
     case 24:
         return ksys_ps();
     }
@@ -211,8 +211,8 @@ uint64_t ksys_yield(){
     return FINISH_SUCCESFULLY;
 }
 
-uint64_t ksys_wait_processes(){
-    my_wait();
+uint64_t ksys_wait_processes(uint64_t pid){
+    my_wait((int16_t)pid);
     return FINISH_SUCCESFULLY;
 }
 
