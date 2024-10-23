@@ -1,4 +1,4 @@
-/* #include <stdint.h>
+#include <stdint.h>
 #include <user_lib.h>
 #include <test_util.h>
 
@@ -18,7 +18,7 @@ void test_prio() {
   uint64_t i;
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
-    pids[i] = usys_create_process((uint64_t)endless_loop_print, get_pid(), 0,1, argv);
+    pids[i] = usys_create_process((uint64_t)endless_loop_print, usys_get_pid(), 0,1, argv);
 
   bussy_wait(WAIT);
   print("\nCHANGING PRIORITIES...\n");
@@ -46,5 +46,5 @@ void test_prio() {
   print("\nKILLING...\n");
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
-    kill(pids[i]);
-} */
+    usys_kill(pids[i]);
+}

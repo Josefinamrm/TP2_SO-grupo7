@@ -1,12 +1,9 @@
 /* sampleCodeModule.c */
 
 #include <shell.h>
-#include <user_syscalls.h>
-#include "../include/test_processes.h"
-#include "../include/test_prio.h"
 
 #define INPUT_SIZE 100 
-#define COMMAND_COUNT 12  
+#define COMMAND_COUNT 13
 #define CANT_REGS 18
 
 void help();
@@ -20,6 +17,7 @@ void inforeg();
 void clear_shell();
 void beep();
 void testprocess();
+void testprio();
 void ps();
 
 static char buffer[INPUT_SIZE] = {0};
@@ -39,7 +37,8 @@ static Command commands[] = {
     {"clear", clear_shell, "Limpia la shell"},
     {"beep", beep, "Emite un beep"},
     {"testprocess", testprocess, "Crea el proceso test_process"},
-    {"ps", ps, "Muestra los procesos activos"}
+    {"testprio", testprio, "Crea procesos con distintas prioridades"},
+    {"ps", ps, "Muestra los procesos y sus estados"}
 };
 
 void parse_command(char *str) {
@@ -214,21 +213,19 @@ void play_eliminator() {
 }
 
 void testprocess() {
-    clear_shell();
     char * argv[] = {"test processes", "3" ,NULL};
-    usys_create_process((uint64_t)test_processes, usys_get_pid() , 1 , 2, argv);
-    clear_shell();
+    int pid = usys_create_process((uint64_t)testprocess_ps, usys_get_pid() , 1 , 2, argv);
+    usys_wait_processes(pid);
 }
 
-// void testprio() {
-//     usys_create_process((uint64_t)test_prio, usys_get_pid(), 1, 0, 0);
-// }
+void testprio() {
+    char * argv[] = {"test prio", NULL};
+    int pid = usys_create_process((uint64_t)testprio_ps, usys_get_pid(), 1, 1, argv);
+    usys_wait_processes(pid);
+}
 
 void ps() {
-    
     char * argv[] = {"ps", NULL};
-    int pid = usys_create_process((uint64_t)usys_ps, usys_get_pid(), 3, 1, argv); 
+    int pid = usys_create_process((uint64_t)ps_ps, usys_get_pid(), 1, 1, argv); 
     usys_wait_processes(pid);
-
-    print("hola\n");
 }

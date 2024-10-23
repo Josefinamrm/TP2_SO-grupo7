@@ -98,3 +98,7 @@ void usys_wait_processes(int16_t pid){
 void usys_ps(){
     _ps();
 }
+
+void usys_exit(){
+    _exit();
+}

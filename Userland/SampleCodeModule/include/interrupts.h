@@ -53,7 +53,7 @@ void _wait_processes();
 
 void _ps();
 
-
+void _exit();
 
 #endif
 

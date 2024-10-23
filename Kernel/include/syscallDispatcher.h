@@ -44,5 +44,6 @@ int64_t ksys_unblock(uint64_t pid);
 uint64_t ksys_yield();
 uint64_t ksys_ps();
 uint64_t ksys_wait_processes(uint64_t pid);
+uint64_t ksys_exit();
 
 #endif

@@ -415,22 +415,13 @@ static my_wait_process(int16_t pid){
         current = current->next;
     }
 
-    while(1){
-        if(current->p->state == KILLED) printArray("state: KILLED\n");
-        if(current->p->state == READY) printArray("state: READY\n");
-        if(current->p->state == RUNNING) printArray("state: RUNNING\n");
-        if(current->p->state == BLOCKED) printArray("state: BLOCKED\n");
-        if(current->p->state == ZOMBIE) printArray("state: ZOMBIE\n");
 
-        if(current->p->state == KILLED){
+        while(current->p->state == KILLED){
             delete_child(p->child_list, current->p->pid);
 
         }
-        else{
-            printArray("en el yield\n");
-            my_yield();
-        }
-    }
+        
+            force_timer_tick();
     
 }
 
@@ -472,32 +463,28 @@ void my_ps(){
     printArray("PID");
     printArray(spacing);
     printArray("STATE\n");
-    for(uint64_t i = 0; i <= process_counter; i++){
+    for(uint64_t i = 0; i <= process_counter-1; i++){
         printArray("    ");
         printArray(process_array[i]->name);
         printArray(spacing);
         printDec(process_array[i]->pid);
         printArray(spacing);
         switch (process_array[i]->state){
-        case READY:
-            printArray("READY");
-            break;
-        
-        case RUNNING:
-            printArray("RUNNING");
-            break;
-
-        case BLOCKED:
-            printArray("BLOCKED");
-            break;
-
-        case KILLED:
-            printArray("KILLED");
-            break;
-
-        case ZOMBIE:
-            printArray("ZOMBIE");
-            break;
+            case READY:
+                printArray("READY");        
+                break;
+            case RUNNING:
+                printArray("RUNNING");
+                break;
+            case BLOCKED:
+                printArray("BLOCKED");
+                break;
+            case KILLED:
+                printArray("KILLED");
+                break;
+            case ZOMBIE:
+                printArray("ZOMBIE");
+                break;
         }
         putChar('\n');
     }
@@ -538,19 +525,19 @@ void idle(){
     _idle();
 }
 
-void process_1(){
-    printArray("Soy proceso 1\n");
-    timer_wait(3);
-    printArray("termine el proces 1\n");
-    my_exit();
-}
+// void process_1(){
+//     printArray("Soy proceso 1\n");
+//     timer_wait(3);
+//     printArray("termine el proces 1\n");
+//     my_exit();
+// }
 
-void process_2(){
-    printArray("Soy proceso 2\n");
-    timer_wait(3);
-    printArray("termine el proces 2\n");   
-    my_exit();
-}
+// void process_2(){
+//     printArray("Soy proceso 2\n");
+//     timer_wait(3);
+//     printArray("termine el proces 2\n");   
+//     my_exit();
+// }
 
 void init_process(){
     // char * argv2[] = { "proceso_2", "3" ,NULL}; 
@@ -561,6 +548,6 @@ void init_process(){
     my_create_process((uint64_t)USERLAND_DIREC, my_getpid(), 1, 1, argv);
 
     my_wait(-1);
-    my_exit();
+    my_exit(my_getpid());
 }
 
