@@ -68,7 +68,7 @@ void add_child(children_list list, process child){
 }
 
 // Deletes a process from the children list, but doesn´t free the process
-void delete_child(children_list list, int16_t pid){
+void delete_child(children_list list, int16_t pid, uint8_t free_process){
     if(list->size == 0){
         list->front = list->rear = NULL;
     }else{
@@ -91,6 +91,12 @@ void delete_child(children_list list, int16_t pid){
         else{
             prev->next = current->next;
         }
+        if(free_process){
+            process_array[current->p->pid] = NULL;
+            mm_free(current->p->base_pointer);
+            mm_free(current->p);
+            process_counter--;
+        }
         mm_free(current);
         list->size--;
     }
@@ -102,12 +108,14 @@ uint64_t childless(children_list list){
 }
 
 // Frees children list
-void free_children_list(children_list list){
+void free_children_list(children_list list, uint8_t free_process){
     if(list->size > 0){
-        t_node * aux = list->front;
-        while(aux != NULL){
-            delete_child(list, aux->p->pid);
-            aux = aux->next;
+        t_node * current = list->front;
+        t_node * next = NULL;
+        while(current != NULL){
+            next = current->next;
+            delete_child(list, current->p->pid, free_process);
+            current = next;
         }
     }
     mm_free(list);
@@ -368,8 +376,8 @@ int16_t my_kill(int16_t pid){
     }
     adopt_children(process_array[INIT_PID]->child_list, p->child_list);
 
-    // set children freeeeee
-    free_children_list(p->child_list);
+    // set children freeeeee (but not free the process resources, just free them from the list)
+    free_children_list(p->child_list, 0);
     p->child_list = NULL;
 
     return EXIT_SUCCESS;
@@ -410,18 +418,29 @@ static my_wait_process(int16_t pid){
 
     if(p->child_list == NULL) return;
 
-    t_node * current = p->child_list->front;
+    while(1){
+        if(process_array[pid]->state == KILLED){
+            delete_child(p->child_list, pid, 1);
+            return;
+        }
+        else{
+            my_yield();
+        }
+    }
+    
+
+    /* t_node * current = p->child_list->front;
     while(current != NULL && current->p->pid != pid){
         current = current->next;
     }
 
 
         while(current->p->state == KILLED){
-            delete_child(p->child_list, current->p->pid);
+            delete_child(p->child_list, current->p->pid, 1);
 
         }
         
-            force_timer_tick();
+            force_timer_tick(); */
     
 }
 
@@ -436,16 +455,10 @@ void my_wait(int16_t pid){
         process p = process_array[my_getpid()];
         if(p->child_list == NULL) return;
 
-        while(p->child_list->front != NULL){
-            if(p->child_list->front->p->state == KILLED){
-                t_node * aux = p->child_list->front;
-                p->child_list->front = p->child_list->front->next;
-                process_array[aux->p->pid] = NULL;
-                mm_free(aux->p->base_pointer);
-                mm_free(aux->p);
-                mm_free(aux);
-              
-              
+        t_node * aux = p->child_list->front;
+        while(aux != NULL){
+            if(aux->p->state == KILLED){
+                delete_child(p->child_list, aux->p->pid, 1);
             }
             else{
                 my_yield();
@@ -463,31 +476,39 @@ void my_ps(){
     printArray("PID");
     printArray(spacing);
     printArray("STATE\n");
-    for(uint64_t i = 0; i <= process_counter-1; i++){
-        printArray("    ");
-        printArray(process_array[i]->name);
-        printArray(spacing);
-        printDec(process_array[i]->pid);
-        printArray(spacing);
-        switch (process_array[i]->state){
-            case READY:
-                printArray("READY");        
-                break;
-            case RUNNING:
-                printArray("RUNNING");
-                break;
-            case BLOCKED:
-                printArray("BLOCKED");
-                break;
-            case KILLED:
-                printArray("KILLED");
-                break;
-            case ZOMBIE:
-                printArray("ZOMBIE");
-                break;
+
+    uint32_t i = 0;
+    uint32_t counter = 0;
+    while(counter < process_counter){
+        if(process_array[i] != NULL){
+            printArray("    ");
+            printArray(process_array[i]->name);
+            printArray(spacing);
+            printDec(process_array[i]->pid);
+            printArray(spacing);
+            switch (process_array[i]->state){
+                case READY:
+                    printArray("READY");        
+                    break;
+                case RUNNING:
+                    printArray("RUNNING");
+                    break;
+                case BLOCKED:
+                    printArray("BLOCKED");
+                    break;
+                case KILLED:
+                    printArray("KILLED");
+                    break;
+                case ZOMBIE:
+                    printArray("ZOMBIE");
+                    break;
+            }   
+            putChar('\n');
+            counter++;
         }
-        putChar('\n');
+        i++;
     }
+    
 }
 
 /*--------------------------------------------------------- Base Processes and Functions ---------------------------------------------------------*/

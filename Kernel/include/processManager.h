@@ -36,13 +36,13 @@ children_list initialize_children_list();
 void add_child(children_list list, process child);
 
 // Deletes a process from the children list, but doesn´t free the process
-void delete_child(children_list list, int16_t pid);
+void delete_child(children_list list, int16_t pid, uint8_t free_process);
 
 // Checks whether the list is empty
 uint64_t childless(children_list list);
 
 // Frees children list
-void free_children_list(children_list list);
+void free_children_list(children_list list, uint8_t free_process);
 
 // Concatenate lists
 void adopt_children(children_list adoptive_p, children_list children);

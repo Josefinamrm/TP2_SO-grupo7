@@ -49,7 +49,7 @@ int64_t _unblock(uint64_t pid);
 
 void _yield();
 
-void _wait_processes();
+void _wait_processes(uint64_t pid);
 
 void _ps();
 
