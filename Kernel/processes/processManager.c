@@ -414,7 +414,7 @@ void my_yield(){
 
 static my_wait_process(int16_t pid){
 
-    process p = process_array[my_getpid()]; // padre busca (y mata) a su hijo
+    process p = process_array[my_getpid()];
 
     if(p->child_list == NULL) return;
 

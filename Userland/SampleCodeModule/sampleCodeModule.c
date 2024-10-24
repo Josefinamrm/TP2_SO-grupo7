@@ -118,6 +118,7 @@ int main()
                 put_char(c);
                 buffer[bufferIndex++] = c;
             }
+            foreground = TRUE;
         }
     } 
     return 0;
