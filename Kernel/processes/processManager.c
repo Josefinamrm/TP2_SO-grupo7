@@ -43,36 +43,36 @@ uint8_t process_counter = 0;
 
 /*--------------------------------------------------------- List Functions Implementations ---------------------------------------------------------*/
 
-// Initializes children list
-children_list initialize_children_list(){
-    children_list list = (children_list) mm_malloc(sizeof(struct queue_info));
+// Initializes children queue
+children_queue initialize_children_queue(){
+    children_queue list = (children_queue) mm_malloc(sizeof(struct queue_info));
     list->front = NULL;
     list->rear = NULL;
     list->size = 0;
     return list;
 }
 
-// Adds a process to the end of the children list
-void add_child(children_list list, process child){
+// Adds a process to the end of the children queue
+void add_child(children_queue queue, process child){
     t_node * newborn = (t_node *) mm_malloc(sizeof(t_node));
     newborn->p = child;
     newborn->next = NULL;
 
-    if(list->size == 0){
-        list->front = list->rear = newborn;
+    if(queue->size == 0){
+        queue->front = queue->rear = newborn;
     }else{
-        list->rear->next = newborn;
-        list->rear = newborn;
+        queue->rear->next = newborn;
+        queue->rear = newborn;
     }
-    list->size++;
+    queue->size++;
 }
 
-// Deletes a process from the children list, but doesn´t free the process
-void delete_child(children_list list, int16_t pid, uint8_t free_process){
-    if(list->size == 0){
-        list->front = list->rear = NULL;
+// Deletes a process from the children queue, but doesn´t free the process
+void delete_child(children_queue queue, int16_t pid, uint8_t free_process){
+    if(queue->size == 0){
+        queue->front = queue->rear = NULL;
     }else{
-        t_node * current = list->front;
+        t_node * current = queue->front;
         t_node * prev = NULL;
         while(current != NULL && current->p->pid != pid){
             prev = current; 
@@ -81,11 +81,11 @@ void delete_child(children_list list, int16_t pid, uint8_t free_process){
         if(current == NULL){
             return;
         }
-        if(current == list->front){
-            list->front = current->next;
+        if(current == queue->front){
+            queue->front = current->next;
         }
-        else if(current == list->rear){
-            list->rear = prev;
+        else if(current == queue->rear){
+            queue->rear = prev;
             prev->next = NULL;
         }
         else{
@@ -98,27 +98,57 @@ void delete_child(children_list list, int16_t pid, uint8_t free_process){
             process_counter--;
         }
         mm_free(current);
-        list->size--;
+        queue->size--;
     }
 }
 
 // Checks whether the list is empty
-uint64_t childless(children_list list){
-    return list->size == 0;
+uint64_t childless(children_queue queue){
+    return queue->size == 0;
 }
 
 // Frees children list
-void free_children_list(children_list list, uint8_t free_process){
-    if(list->size > 0){
-        t_node * current = list->front;
+void free_children_queue(children_queue queue, uint8_t free_process){
+    if(queue->size > 0){
+        t_node * current = queue->front;
         t_node * next = NULL;
         while(current != NULL){
             next = current->next;
-            delete_child(list, current->p->pid, free_process);
+            delete_child(queue, current->p->pid, free_process);
             current = next;
         }
     }
-    mm_free(list);
+    mm_free(queue);
+}
+
+// Concatenate lists
+void adopt_children(children_queue adoptive_p, children_queue children){
+    adoptive_p->rear->next = children->front;
+    adoptive_p->rear = children->rear;
+    adoptive_p->size += children->size;
+}
+
+// Adds a process to the end of the queue -> same as add_child 
+void enqueue(waiting_processes_queue queue, int16_t pid){
+    add_child(queue, process_array[pid]);
+}
+
+// Deletes the first process from the queue 
+int16_t dequeue(waiting_processes_queue queue){
+    if(queue->size == 0)
+        return;
+
+    t_node * aux = queue->front;
+    if(queue->size > 1){
+        queue->front = queue->front->next;
+        queue->size--;
+    }else{
+        queue->front = queue->rear = NULL;
+        queue->size == 0;
+    }
+    int16_t pid_to_ret = aux->p->pid;
+    mm_free(aux);
+    return pid_to_ret;
 }
 
 /*--------------------------------------------------------- Queue Functions Implementations ---------------------------------------------------------*/
@@ -172,7 +202,7 @@ void remove_process_instance(process_queue queue, int16_t pid, uint8_t remove_al
     uint8_t stop = 0;
     do{
         if(current->p->pid == pid){
-            if(ready_queue->size > 0){
+            if(ready_queue->size > 1){
                 if(current == queue->front){
                     queue->front = current->next;
                     queue->rear->next = queue->front;
@@ -185,15 +215,16 @@ void remove_process_instance(process_queue queue, int16_t pid, uint8_t remove_al
                     prev->next = current->next;
                 }
                 queue->size--;
-                current->p->priority--;
+            }
+            else{
+                queue->front = queue->rear = NULL;
+                queue->size = 0;
+            }
+            current->p->priority--;
                 if(current->p->priority == 0 || !remove_all){
                     stop = 1;
                 }
                 mm_free(current);
-            }
-            else{
-                queue->front = queue->rear = NULL;
-            }
         }
         else{
             prev = current;
@@ -214,12 +245,7 @@ uint8_t is_empty(process_queue queue){
     return queue->size == 0;
 }
 
-// Concatenate lists
-void adopt_children(children_list adoptive_p, children_list children){
-    adoptive_p->rear->next = children->front;
-    adoptive_p->rear = children->rear;
-    adoptive_p->size += children->size;
-}
+
 
 /*--------------------------------------------------------- Ready Queue Functions ---------------------------------------------------------*/
 
@@ -321,7 +347,7 @@ int16_t my_create_process(uint64_t function, int16_t ppid, uint8_t priority, uin
         initial_rsp += PROCESS_STACK_SIZE / sizeof(uint64_t);
         new_process->base_pointer = (uint64_t)initial_rsp;
         new_process->stack_pointer = _setup_stack_structure_asm((uint64_t)initial_rsp, function, argc, (uint64_t)argv);
-        new_process->child_list = initialize_children_list();
+        new_process->child_list = initialize_children_queue();
                                                               // rdi        rsi      rdx  rcx
         add_to_ready_queue(new_process);
         process_array[new_process->pid] = new_process;
@@ -377,7 +403,7 @@ int16_t my_kill(int16_t pid){
     adopt_children(process_array[INIT_PID]->child_list, p->child_list);
 
     // set children freeeeee (but not free the process resources, just free them from the list)
-    free_children_list(p->child_list, 0);
+    free_children_queue(p->child_list, 0);
     p->child_list = NULL;
 
     return EXIT_SUCCESS;
@@ -527,7 +553,7 @@ static void create_idle_process(){
     idle_process->base_pointer = (uint64_t)initial_rsp;
     char * argv[] = {idle_process->name, NULL};
     idle_process->stack_pointer = _setup_stack_structure_asm((uint64_t)initial_rsp, (uint64_t)idle, 1, (uint64_t)argv);
-    idle_process->child_list = initialize_children_list();
+    idle_process->child_list = initialize_children_queue();
     process_array[0] = idle_process;
     process_counter++;
     _sti();
