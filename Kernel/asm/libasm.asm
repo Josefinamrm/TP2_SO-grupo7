@@ -7,6 +7,8 @@ GLOBAL getSeconds
 GLOBAL force_timer_tick
 GLOBAL inb 
 GLOBAL outb 
+GLOBAL acquire
+GLOBAL release
 
 section .text
 	
@@ -170,6 +172,29 @@ outb:
 	out dx, al       ; Escribir el byte de al al puerto dx
 
 	popf
+	mov rsp, rbp
+	pop rbp
+	ret
+
+acquire:
+	push rbp
+	mov rbp, rsp
+	
+	mov al, 0
+.retry:
+	xchg al, [rdi]
+	test al, al
+	jz .retry
+	mov rsp, rbp
+	pop rbp
+	ret
+
+release:
+	push rbp
+	mov rbp, rsp
+	
+	mov [rdi], 1
+
 	mov rsp, rbp
 	pop rbp
 	ret

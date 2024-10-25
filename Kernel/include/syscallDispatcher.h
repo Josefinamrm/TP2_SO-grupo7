@@ -19,7 +19,6 @@
 
 extern char getScanCode();
 extern int getTime(int timeUnit);
-extern void _hlt();
 
 uint64_t ksys_read(uint64_t fd, uint64_t buffer, uint64_t count);
 uint64_t ksys_write(uint64_t fd, uint64_t buffer, uint64_t count);

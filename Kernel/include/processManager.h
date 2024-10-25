@@ -21,33 +21,41 @@
 // sería mas facil en el momento de crear el proceso decirle si escribe a la terminal o si escribe a un pipe (agodio)
 enum fd {STDIN=0, STDOUT, STDERR};
 
-typedef struct queue_info * children_list;
+typedef struct queue_info * children_queue;
 
 typedef struct queue_info * process_queue;
 
+typedef struct queue_info * waiting_processes_queue;
+
 typedef struct p * process;
 
-/*--------------------------------------------------------- List Functions  ---------------------------------------------------------*/
+/*--------------------------------------------------------- Process List Functions  ---------------------------------------------------------*/
 
-// Initializes children list
-children_list initialize_children_list();
+// Initializes children queue
+children_queue initialize_children_queue();
 
-// Adds a process to the end of the children list
-void add_child(children_list list, process child);
+// Adds a process to the end of the children queue
+void add_child(children_queue queue, process child);
 
-// Deletes a process from the children list, but doesn´t free the process
-void delete_child(children_list list, int16_t pid, uint8_t free_process);
+// Deletes a process from the children queue, but doesn´t free the process
+void delete_child(children_queue queue, int16_t pid, uint8_t free_process);
 
-// Checks whether the list is empty
-uint64_t childless(children_list list);
+// Checks whether the queue is empty
+uint64_t childless(children_queue queue);
 
-// Frees children list
-void free_children_list(children_list list, uint8_t free_process);
+// Frees children queue
+void free_children_queue(children_queue queue, uint8_t free_process);
 
-// Concatenate lists
-void adopt_children(children_list adoptive_p, children_list children);
+// Concatenate queues
+void adopt_children(children_queue adoptive_p, children_queue children);
 
-/*--------------------------------------------------------- Queue Functions ---------------------------------------------------------*/
+// Adds a process to the end of the queue -> same as add_child 
+void enqueue(waiting_processes_queue queue, int16_t pid);
+
+// Deletes the first process from the queue from the list, returns its pid
+int16_t dequeue(waiting_processes_queue queue);
+
+/*--------------------------------------------------------- Process Queue Functions ---------------------------------------------------------*/
 
 // Initializes queue
 process_queue initialize_queue();
