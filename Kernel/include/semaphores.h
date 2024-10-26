@@ -15,9 +15,10 @@ void sem_open(char * name, int value);
 
 void sem_close(char * name);
 
-void sem_post(sem_t * semaphore);
+void sem_post(char * name);
 
-void sem_wait(sem_t * semaphore);
+void sem_wait(char * name);
+
 
 
 #endif
