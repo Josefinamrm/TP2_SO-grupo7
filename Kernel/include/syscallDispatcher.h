@@ -10,6 +10,7 @@
 #include <sound.h>
 #include "processManager.h"
 #include "memoryManager.h"
+#include <semaphores.h>
 
 #define STDIN 0
 #define STDOUT 1
@@ -51,5 +52,9 @@ uint64_t ksys_free(void * ptr);
 uint64_t ksys_unused_space();
 uint64_t ksys_occupied_space();
 uint64_t ksys_total_space();
+uint64_t ksys_sem_open(char * name, int value);
+uint64_t ksys_sem_close(char * name);
+uint64_t ksys_sem_post(sem_t * semaphore);
+uint64_t ksys_sem_wait(sem_t * semaphore);
 
 #endif

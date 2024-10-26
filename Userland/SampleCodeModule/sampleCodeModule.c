@@ -3,7 +3,7 @@
 #include <shell.h>
 
 #define INPUT_SIZE 100 
-#define COMMAND_COUNT 14
+#define COMMAND_COUNT 15
 #define CANT_REGS 18
 #define TRUE 1
 #define FALSE 0
@@ -22,7 +22,8 @@ void beep();
 void testprocess();
 void testprio();
 void ps();
-void memoryinfo();
+void mem();
+void testsynchro(); 
 
 static char buffer[INPUT_SIZE] = {0};
 static int bufferIndex = 0;
@@ -44,7 +45,8 @@ static Command commands[] = {
     {"testprocess", testprocess, "Crea el proceso test_process"},
     {"testprio", testprio, "Crea procesos con distintas prioridades"},
     {"ps", ps, "Muestra los procesos y sus estados"},
-    {"memoryinfo", memoryinfo, "Muestra informacion de la memoria"},
+    {"mem", mem, "Muestra informacion de la memoria"},
+    {"testsynchro", testsynchro, ""}
 };
 
 void parse_command(char *str) {
@@ -252,9 +254,16 @@ void ps() {
         usys_wait_processes(pid);
 }
 
-void memoryinfo() {
+void mem() {
     char * argv[] = {"memoryinfo", NULL};
     int pid = usys_create_process((uint64_t)memoryinfo_ps, usys_get_pid(), 1, 1, argv); 
+    if(foreground) 
+        usys_wait_processes(pid);
+}
+
+void testsynchro() {
+    char * argv[] = {"test synchro", NULL};
+    int pid = usys_create_process((uint64_t)testsynchro_ps, usys_get_pid(), 1, 1, argv); 
     if(foreground) 
         usys_wait_processes(pid);
 }
