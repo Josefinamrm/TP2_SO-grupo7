@@ -69,16 +69,6 @@ int _occupied_space();
 
 int _total_space();
 
-// semaphore syscalls
-
-void _sem_open(char * name, int value);
-
-void _sem_close(char * name);
-
-void _sem_post(char * name);
-
-void _sem_wait(char * name);
-
 #endif
 
 

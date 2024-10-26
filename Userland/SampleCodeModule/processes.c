@@ -32,8 +32,3 @@ void memoryinfo_ps() {
     print("-------------------------------------------------------\n");
     usys_exit();
 }
-
-void testsynchro_ps(uint64_t argc, char *argv[]){
-    test_sync(argc,argv);
-    usys_exit();
-}

@@ -36,12 +36,6 @@ GLOBAL _unused_space
 GLOBAL _occupied_space
 GLOBAL _total_space
 
-;semaphores
-
-GLOBAL _sem_open
-GLOBAL _sem_close
-GLOBAL _sem_post
-GLOBAL _sem_wait
 
 section .text
 
@@ -393,50 +387,6 @@ _total_space:
     mov rbp, rsp 
 
     mov rax, 31
-    int 80h 
-
-    mov rsp, rbp 
-    pop rbp 
-    ret
-
-_sem_open:
-    push rbp 
-    mov rbp, rsp 
-
-    mov rax, 32
-    int 80h 
-
-    mov rsp, rbp 
-    pop rbp 
-    ret
-
-_sem_close:
-    push rbp 
-    mov rbp, rsp 
-
-    mov rax, 33
-    int 80h 
-
-    mov rsp, rbp 
-    pop rbp 
-    ret
-
-_sem_post:
-    push rbp 
-    mov rbp, rsp 
-
-    mov rax, 34
-    int 80h 
-
-    mov rsp, rbp 
-    pop rbp 
-    ret
-
-_sem_wait:
-    push rbp 
-    mov rbp, rsp 
-
-    mov rax, 35
     int 80h 
 
     mov rsp, rbp 

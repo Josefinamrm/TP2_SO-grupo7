@@ -193,7 +193,7 @@ release:
 	push rbp
 	mov rbp, rsp
 	
-	mov byte [rdi], 1
+	mov [rdi], 1
 
 	mov rsp, rbp
 	pop rbp

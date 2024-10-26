@@ -1,5 +1,6 @@
 #ifndef USER_SYSCALLS_H
 #define USER_SYSCALLS_H
+#include <stdint.h>
 #include <interrupts.h>
 
 #define STDIN 0
@@ -74,15 +75,5 @@ int usys_unused_space();
 int usys_occupied_space();
 
 int usys_total_space();
-
-// semaphores syscalls
-
-void usys_sem_open(char * name, int value);
-
-void usys_sem_close(char * name);
-
-void usys_sem_post(char * name);
-
-void usys_sem_wait(char * name);
 
 #endif
