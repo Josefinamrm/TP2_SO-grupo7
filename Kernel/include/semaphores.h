@@ -4,14 +4,23 @@
 #include <lib.h>
 #include <processManager.h>
 
+#define MAX_SEM 400
+
 typedef struct{
     char * name;
-    int value;
-    waiting_processes_queue wp_queue;
-    uint8_t lock;
+    int * value;
 } sem_t; 
 
-void sem_open(char * name, int value);
+
+typedef struct{
+    sem_t * sem;
+    uint8_t count;
+    waiting_processes_queue wp_queue;
+    uint8_t lock;
+} sem_block;
+
+// return 0 on creation, 1 on open, -1 on error
+uint8_t sem_open(char * name, int value);
 
 void sem_close(char * name);
 

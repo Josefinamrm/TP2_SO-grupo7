@@ -61,9 +61,9 @@ int64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx
         case 26:
             return ksys_malloc(rdi);
         case 27:
-            return ksys_realloc((void *)rsi, rdx);
+            return ksys_realloc((void *)rdi, rsi);
         case 28:
-            return ksys_free((void *)rsi);
+            return ksys_free((void *)rdi);
         case 29:    
             return ksys_unused_space();
         case 30:
@@ -71,13 +71,13 @@ int64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx
         case 31:
             return ksys_total_space();
         case 32:
-            return ksys_sem_open((char *)rsi, rdx);
+            return ksys_sem_open((char *)rdi, rsi);
         case 33:
-            return ksys_sem_close((char *)rsi);
+            return ksys_sem_close((char *)rdi);
         case 34:
-            return ksys_sem_post((char *)rsi);
+            return ksys_sem_post((char *)rdi);
         case 35:    
-            return ksys_sem_wait((char *)rsi);
+            return ksys_sem_wait((char *)rdi);
     }
 
 
@@ -279,8 +279,7 @@ uint64_t ksys_total_space(){
 }
 
 uint64_t ksys_sem_open(char * name, int value){
-    sem_open(name, value);
-    return FINISH_SUCCESFULLY;
+    return sem_open(name, value);
 }
 
 uint64_t ksys_sem_close(char * name){

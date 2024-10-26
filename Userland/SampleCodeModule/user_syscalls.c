@@ -128,8 +128,8 @@ int usys_total_space(){
     return _total_space();
 }
 
-void usys_sem_open(char * name, int value){
-    _sem_open(name, value);
+uint8_t usys_sem_open(char * name, int value){
+    return _sem_open(name, value);
 }
 
 void usys_sem_close(char * name){

@@ -71,7 +71,7 @@ int _total_space();
 
 // semaphore syscalls
 
-void _sem_open(char * name, int value);
+uint8_t _sem_open(char * name, int value);
 
 void _sem_close(char * name);
 

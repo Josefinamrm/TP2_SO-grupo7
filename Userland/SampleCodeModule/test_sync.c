@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "user_syscalls.h"
 #include "test_util.h"
-
+#include <processes.h>
 
 #define SEM_ID "sem"
 #define TOTAL_PAIR_PROCESSES 2
@@ -21,21 +21,28 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
   int8_t inc;
   int8_t use_sem;
 
-  if (argc != 3)
+  if (argc != 4){
     return -1;
+  }
 
-  if ((n = satoi(argv[0])) <= 0)
+  if ((n = satoi(argv[1])) <= 0){
     return -1;
-  if ((inc = satoi(argv[1])) == 0)
+  }
+  if ((inc = satoi(argv[2])) == 0){
     return -1;
-  if ((use_sem = satoi(argv[2])) < 0)
+  }
+  if ((use_sem = satoi(argv[3])) < 0){
     return -1;
+  }
 
-  // if (use_sem)
-  //   if (!usys_sem_open(SEM_ID, 1)) {
-  //     print("test_sync: ERROR opening semaphore\n");
-  //     return -1;
-  //   }
+
+  if (use_sem){
+    if (usys_sem_open(SEM_ID, 1) == -1) {
+      print("test_sync: ERROR opening semaphore\n");
+      return -1;
+    }
+  }
+
 
   uint64_t i;
   for (i = 0; i < n; i++) {
@@ -54,19 +61,19 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
 
 uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
   uint64_t pids[2 * TOTAL_PAIR_PROCESSES];
-
-  if (argc != 2)
+  if (argc != 3){
     return -1;
+  }
 
-  char *argvDec[] = {argv[0], "-1", argv[1], NULL};
-  char *argvInc[] = {argv[0], "1", argv[1], NULL};
+  char *argvDec[] = {"process_inc1", argv[1], "-1", argv[2], NULL};
+  char *argvInc[] = {"process_inc2",argv[1], "1", argv[2], NULL};
 
   global = 0;
 
   uint64_t i;
   for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
-    pids[i] = usys_create_process(my_process_inc, usys_get_pid(),1, 3, argvDec);
-    pids[i + TOTAL_PAIR_PROCESSES] = usys_create_process(my_process_inc, usys_get_pid(),1, 3, argvInc);
+    pids[i + TOTAL_PAIR_PROCESSES] = usys_create_process(my_process_inc_ps, usys_get_pid(),1, 4, argvInc);
+    pids[i] = usys_create_process(my_process_inc_ps, usys_get_pid(),1, 4, argvDec);
   }
 
   for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
@@ -74,7 +81,9 @@ uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
     usys_wait_processes(pids[i + TOTAL_PAIR_PROCESSES]);
   }
 
-  print("Final value: %d\n", global);
+  print("Final value:");
+  print_dec(global);
+  print("\n");
 
   return 0;
 }
