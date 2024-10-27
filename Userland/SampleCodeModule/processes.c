@@ -1,4 +1,5 @@
 #include <processes.h>
+#include <test_sync.h>
 
 void ps_ps(){
     usys_ps();
@@ -30,5 +31,15 @@ void memoryinfo_ps() {
     print_dec(usys_unused_space());
     print("\n");
     print("-------------------------------------------------------\n");
+    usys_exit();
+}
+
+void testsynchro_ps(uint64_t argc, char *argv[]){
+    test_sync(argc,argv);
+    usys_exit();
+}
+
+void my_process_inc_ps(uint64_t argc, char *argv[]){
+    my_process_inc(argc,argv);
     usys_exit();
 }

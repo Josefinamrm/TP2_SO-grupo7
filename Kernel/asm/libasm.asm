@@ -192,7 +192,7 @@ acquire:
 release:
 	push rbp
 	mov rbp, rsp
-	
+
 	mov byte[rdi], 1
 
 	mov rsp, rbp

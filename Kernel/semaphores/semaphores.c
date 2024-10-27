@@ -1,6 +1,6 @@
 #include <semaphores.h>
 
-sem_block * sem_array[SEM_QTTY] = {0};
+sem_block * sem_array[MAX_SEM] = {0};
 
 uint16_t sem_counter = 0;
 
@@ -8,7 +8,7 @@ uint16_t sem_counter = 0;
 static int16_t next_available_position(){
     uint8_t found = 0;
     int16_t to_ret = -1;
-    for(int i = 0; i < SEM_QTTY && !found; i++){
+    for(int i = 0; i < MAX_SEM && !found; i++){
         if(sem_array[i] == NULL){
             found = 1;
             to_ret = i;
@@ -33,7 +33,7 @@ static int strcmp(const char *s1, const char *s2){
 // Checks whether semaphore exists, if it exists it returns the id else returns -1
 static int16_t get_sem_id(char * name){
     uint16_t id = -1;
-    for(int i = 0, j = sem_counter; i < SEM_QTTY && j > 0; i++){
+    for(int i = 0, j = sem_counter; i < MAX_SEM && j > 0; i++){
         if(sem_array[i] != NULL){
             if(strcmp(name, sem_array[i]->sem->name) == 0){
                 return i;
@@ -51,7 +51,7 @@ static int16_t get_sem_id(char * name){
 int16_t my_sem_open(char * name, int value){
     _cli();
 
-    if(name == NULL || value < 0 || sem_counter == SEM_QTTY){
+    if(name == NULL || value < 0 || sem_counter == MAX_SEM){
         return FINISH_ON_ERROR;
     }
 
@@ -138,9 +138,3 @@ void my_sem_wait(char * name){
     }
 }
 
-/* tendria que hacer de alguna forma que, cuando yo me bloqueo en un semaforo me pongo en la lista de espera de ese
-    semaforo
-    por lo general siempre va a haber un proceso que cree el semaforo y que otro lo abra. entonces podria poner en cada
-    proceso un array de semaforos o una lista de semaforos y todos los procesos bloqueados esperando al semaforo en esa lista ?
-    
- */ 

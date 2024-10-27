@@ -127,3 +127,19 @@ int usys_occupied_space(){
 int usys_total_space(){
     return _total_space();
 }
+
+uint8_t usys_sem_open(char * name, int value){
+    return _sem_open(name, value);
+}
+
+void usys_sem_close(char * name){
+    _sem_close(name);
+}
+
+void usys_sem_post(char * name){
+    _sem_post(name);
+}
+
+void usys_sem_wait(char * name){
+    _sem_wait(name);
+}
