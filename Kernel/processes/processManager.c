@@ -144,7 +144,7 @@ int16_t dequeue(waiting_processes_queue queue){
         queue->size--;
     }else{
         queue->front = queue->rear = NULL;
-        queue->size == 0;
+        queue->size = 0;
     }
     int16_t pid_to_ret = aux->p->pid;
     mm_free(aux);
@@ -262,7 +262,9 @@ static uint32_t remove_from_ready_queue(int16_t pid){
     if(process_array[pid] == NULL){
         return EXIT_FAILURE;
     }
+    uint8_t prio = process_array[pid]->priority;
     remove_process_instance(ready_queue, pid, 0);
+    process_array[pid]->priority = prio;
     return FINISH_SUCCESFULLY;
 }
 
@@ -271,14 +273,40 @@ static uint32_t remove_from_ready_queue(int16_t pid){
 // Backs up rsp register 
 static void backup_current_process(uint64_t rsp){
     ready_queue->front->p->stack_pointer = rsp;
-    ready_queue->front->p->state = READY;
 }
 
 
 // Sets next running process
 static uint64_t setup_next_running_process(){
+
+    uint64_t next_running_pid;
+    // Check if the current process is blocked or killed, if so remove it from the list
+    if(ready_queue->front->p->state == BLOCKED || ready_queue->front->p->state == KILLED){
+        remove_from_ready_queue(ready_queue->front->p->pid);
+        if(ready_queue->size == 0){
+            return process_array[0]->stack_pointer;
+        }else{
+            return ready_queue->front->p->stack_pointer;
+        }
+    }else{
+        // change prior process to ready state
+        ready_queue->front->p->state = READY;
+    }
+
+
+    // Move to the next process in the list
     ready_queue->rear = ready_queue->front;
     ready_queue->front = ready_queue->front->next;
+
+    // Check if the next is a blocked or killed process, if so remove it from the list
+    if(ready_queue->front->p->state == BLOCKED || ready_queue->front->p->state == KILLED){
+        remove_from_ready_queue(ready_queue->front->p->pid);
+        if(ready_queue->size == 0){
+            return process_array[0]->stack_pointer;
+        }
+    }
+
+    // Returns current running process
     ready_queue->front->p->state = RUNNING;
     return ready_queue->front->p->stack_pointer;
 }
@@ -290,10 +318,6 @@ uint64_t next_running_process(uint64_t current_rsp){
         // backs up idle rsp
         process_array[0]->stack_pointer = current_rsp;
         idle_running = 0;
-    }else if(ready_queue->front->p->state == KILLED){
-        remove_from_ready_queue(ready_queue->front->p->pid);
-        // the front of the list will now change to the next process, so i return that one if there are any
-        return ready_queue->size == 0 ? process_array[0]->stack_pointer : ready_queue->front->p->stack_pointer;
     }else{
         backup_current_process(current_rsp);
     }
@@ -354,7 +378,7 @@ int16_t my_create_process(uint64_t function, int16_t ppid, uint8_t priority, uin
         add_child(process_array[new_process->ppid]->child_list, new_process);
 
         process_counter++;
-        _sti();
+        
     }
     _sti();
     return new_pid;
@@ -393,7 +417,7 @@ int16_t my_kill(int16_t pid){
     if(p == NULL) return FINISH_ON_ERROR;
     
     p->state = KILLED;
-    
+
     // init adopts children, if it has
     t_node * aux = p->child_list->front;
     while(aux != NULL){
@@ -416,7 +440,7 @@ int16_t my_block(int16_t pid){
     if(process_array[pid] == NULL) return FINISH_ON_ERROR;    
 
     process_array[pid]->state = BLOCKED;
-    remove_all_process_instances(ready_queue, pid);
+    if(ready_queue->front->p->pid == pid) force_timer_tick();
 
     return EXIT_SUCCESS;
 }
@@ -484,7 +508,9 @@ void my_wait(int16_t pid){
         t_node * aux = p->child_list->front;
         while(aux != NULL){
             if(aux->p->state == KILLED){
+                t_node * save = aux;
                 delete_child(p->child_list, aux->p->pid, 1);
+                aux = save->next;
             }
             else{
                 my_yield();
@@ -572,29 +598,27 @@ void idle(){
     _idle();
 }
 
-// void process_1(){
-//     printArray("Soy proceso 1\n");
-//     timer_wait(3);
-//     printArray("termine el proces 1\n");
-//     my_exit();
-// }
-
-// void process_2(){
-//     printArray("Soy proceso 2\n");
-//     timer_wait(3);
-//     printArray("termine el proces 2\n");   
-//     my_exit();
-// }
+uint64_t test_sync(uint64_t argc, char *argv[]);
 
 void init_process(){
-    // char * argv2[] = { "proceso_2", "3" ,NULL}; 
-    // char * argv1[] = { "proceso_1", "3" ,NULL};
-    char * argv[] = {"userland", NULL};
-    // my_create_process((uint64_t) process_1, my_getpid(), 1, 1, argv1);
-    // my_create_process((uint64_t) process_2, my_getpid(), 1, 1, argv2);
-    my_create_process((uint64_t)USERLAND_DIREC, my_getpid(), 1, 1, argv);
+    //char * argv[] = {"userland", NULL};
+    //my_create_process((uint64_t)USERLAND_DIREC, my_getpid(), 1, 1, argv);
+    char * argv[] = {"test_sync", "1", "1", NULL};
+    my_create_process((uint64_t)test_sync, INIT_PID, 1, 3, argv);
 
     my_wait(-1);
-    my_exit(my_getpid());
+    printArray("termina el init\n");
+    my_exit();
+    /* char * argv1[] = { "proceso_1", "3" ,NULL};
+ 
+    int pid = my_create_process((uint64_t) process_1, my_getpid(), 1, 1, argv1);
+
+    timer_wait(3);
+    my_block(pid);
+    printArray("despues de bloquearlo\n");
+    timer_wait(1);
+    my_unblock(pid);
+    my_wait(-1);
+    my_exit(); */
 }
 
