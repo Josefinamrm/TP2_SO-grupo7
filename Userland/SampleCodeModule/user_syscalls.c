@@ -109,11 +109,11 @@ void * usys_malloc(unsigned int nbytes){
 }
 
 void * usys_realloc(void * ptr, uint64_t new_size){
-    return _realloc(ptr, new_size);
+    return _realloc((uint64_t)ptr, new_size);
 } 
 
 void usys_free(void * ptr){
-    _free(ptr);
+    _free((uint64_t)ptr);
 }
 
 int usys_unused_space(){
@@ -129,17 +129,17 @@ int usys_total_space(){
 }
 
 uint8_t usys_sem_open(char * name, int value){
-    return _sem_open(name, value);
+    return _sem_open((uint64_t)name, (uint64_t)value);
 }
 
 void usys_sem_close(char * name){
-    _sem_close(name);
+    _sem_close((uint64_t)name);
 }
 
 void usys_sem_post(char * name){
-    _sem_post(name);
+    _sem_post((uint64_t)name);
 }
 
 void usys_sem_wait(char * name){
-    _sem_wait(name);
+    _sem_wait((uint64_t)name);
 }

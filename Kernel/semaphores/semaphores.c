@@ -130,11 +130,9 @@ void my_sem_wait(char * name){
             enqueue(sem_array[sem_block_id]->wp_queue, pid);
             release(&(sem_array[sem_block_id]->lock));
             my_block(pid);          // ??
-        }
-        else{
-            sem_array[sem_block_id]->sem->value--;
-            release(&(sem_array[sem_block_id]->lock));
-        }
+        }         
+        sem_array[sem_block_id]->sem->value--;
+        release(&(sem_array[sem_block_id]->lock));
     }
 }
 

@@ -91,7 +91,7 @@ void print_prompt_icon() {
 int main()
 {
     print("Bienvenido a ");
-    print_color(GREEN,"OUR_OS\n"); 
+    print_color(GREEN,"OUR_OS\n");
     print("Ingrese uno de los siguientes comandos:\n");
     for(int i = 1; i < COMMAND_COUNT-1 ; i++){
             print_color(LIGHT_BLUE, commands[i].name_id);
@@ -123,7 +123,7 @@ int main()
             foreground = TRUE;
         }
     } 
-    return 0;
+    _exit();
 }
 
 void help() {

@@ -59,9 +59,9 @@ void _exit();
 
 void * _malloc(uint64_t nbytes);
 
-void * _realloc(void * ptr, uint64_t new_size); 
+void * _realloc(uint64_t ptr, uint64_t new_size); 
 
-void _free(void * ptr);
+void _free(uint64_t ptr);
 
 int _unused_space();
 
@@ -71,13 +71,13 @@ int _total_space();
 
 // semaphore syscalls
 
-uint8_t _sem_open(char * name, int value);
+int16_t _sem_open(uint64_t name, uint64_t value);
 
-void _sem_close(char * name);
+void _sem_close(uint64_t name);
 
-void _sem_post(char * name);
+void _sem_post(uint64_t name);
 
-void _sem_wait(char * name);
+void _sem_wait(uint64_t name);
 
 #endif
 

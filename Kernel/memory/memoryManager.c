@@ -35,9 +35,9 @@ void mm_init(uint64_t memory_start, uint64_t size){
 
 
 // MALLOC
-void * mm_malloc(unsigned int nbytes){
+void * mm_malloc(uint64_t nbytes){
     Header *current;
-    unsigned nuints;
+    uint64_t nuints;
 
     nuints = (nbytes + header_size - 1)/header_size + 1;
 

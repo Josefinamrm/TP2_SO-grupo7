@@ -17,7 +17,7 @@
 void mm_init(uint64_t memory_start, uint64_t size);
 
 // Returns a pointer to the memory block
-void * mm_malloc(unsigned int nbytes);
+void * mm_malloc(uint64_t nbytes);
 
 // Returns a pointer to a new memory block of size new_size, reallocating the info contained in ptr
 void * mm_realloc(void * ptr, uint64_t new_size); 

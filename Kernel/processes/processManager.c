@@ -93,8 +93,8 @@ void delete_child(children_queue queue, int16_t pid, uint8_t free_process){
         }
         if(free_process){
             process_array[current->p->pid] = NULL;
-            mm_free(current->p->base_pointer);
-            mm_free(current->p);
+            mm_free((void *)current->p->base_pointer);
+            mm_free((void *)current->p);
             process_counter--;
         }
         mm_free(current);
@@ -136,7 +136,7 @@ void enqueue(waiting_processes_queue queue, int16_t pid){
 // Deletes the first process from the queue 
 int16_t dequeue(waiting_processes_queue queue){
     if(queue->size == 0)
-        return;
+        return -1;
 
     t_node * aux = queue->front;
     if(queue->size > 1){
@@ -279,7 +279,6 @@ static void backup_current_process(uint64_t rsp){
 // Sets next running process
 static uint64_t setup_next_running_process(){
 
-    uint64_t next_running_pid;
     // Check if the current process is blocked or killed, if so remove it from the list
     if(ready_queue->front->p->state == BLOCKED || ready_queue->front->p->state == KILLED){
         remove_from_ready_queue(ready_queue->front->p->pid);
@@ -462,7 +461,7 @@ void my_yield(){
 }
 
 
-static my_wait_process(int16_t pid){
+static void my_wait_process(int16_t pid){
 
     process p = process_array[my_getpid()];
 
@@ -601,13 +600,9 @@ void idle(){
 uint64_t test_sync(uint64_t argc, char *argv[]);
 
 void init_process(){
-    //char * argv[] = {"userland", NULL};
-    //my_create_process((uint64_t)USERLAND_DIREC, my_getpid(), 1, 1, argv);
-    char * argv[] = {"test_sync", "1", "1", NULL};
-    my_create_process((uint64_t)test_sync, INIT_PID, 1, 3, argv);
-
+    char * argv[] = {"userland", NULL};
+    my_create_process((uint64_t)USERLAND_DIREC, my_getpid(), 1, 1, argv);
     my_wait(-1);
-    printArray("termina el init\n");
     my_exit();
     /* char * argv1[] = { "proceso_1", "3" ,NULL};
  

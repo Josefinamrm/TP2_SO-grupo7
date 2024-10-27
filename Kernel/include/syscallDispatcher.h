@@ -46,15 +46,15 @@ uint64_t ksys_yield();
 uint64_t ksys_ps();
 uint64_t ksys_wait_processes(uint64_t pid);
 uint64_t ksys_exit();
-uint64_t ksys_malloc(unsigned int nbytes);
-uint64_t ksys_realloc(void * ptr, uint64_t new_size); 
-uint64_t ksys_free(void * ptr);
+uint64_t ksys_malloc(uint64_t nbytes);
+uint64_t ksys_realloc(uint64_t ptr, uint64_t new_size); 
+uint64_t ksys_free(uint64_t ptr);
 uint64_t ksys_unused_space();
 uint64_t ksys_occupied_space();
 uint64_t ksys_total_space();
-uint64_t ksys_sem_open(char * name, int value);
-uint64_t ksys_sem_close(char * name);
-uint64_t ksys_sem_post(sem_t * semaphore);
-uint64_t ksys_sem_wait(sem_t * semaphore);
+uint64_t ksys_sem_open(uint64_t name, uint64_t value);
+uint64_t ksys_sem_close(uint64_t name);
+uint64_t ksys_sem_post(uint64_t name);
+uint64_t ksys_sem_wait(uint64_t name);
 
 #endif

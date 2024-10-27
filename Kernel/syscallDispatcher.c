@@ -61,9 +61,9 @@ int64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx
         case 26:
             return ksys_malloc(rdi);
         case 27:
-            return ksys_realloc((void *)rdi, rsi);
+            return ksys_realloc(rdi, rsi);
         case 28:
-            return ksys_free((void *)rdi);
+            return ksys_free(rdi);
         case 29:    
             return ksys_unused_space();
         case 30:
@@ -71,13 +71,13 @@ int64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx
         case 31:
             return ksys_total_space();
         case 32:
-            return ksys_sem_open((char *)rdi, rsi);
+            return ksys_sem_open(rdi, rsi);
         case 33:
-            return ksys_sem_close((char *)rdi);
+            return ksys_sem_close(rdi);
         case 34:
-            return ksys_sem_post((char *)rdi);
+            return ksys_sem_post(rdi);
         case 35:    
-            return ksys_sem_wait((char *)rdi);
+            return ksys_sem_wait(rdi);
     }
 
 
@@ -253,16 +253,16 @@ uint64_t ksys_exit(){
     return FINISH_SUCCESFULLY;
 }
 
-uint64_t ksys_malloc(unsigned int nbytes){
+uint64_t ksys_malloc(uint64_t nbytes){
     return (uint64_t) mm_malloc(nbytes);
 }
 
-uint64_t ksys_realloc(void * ptr, uint64_t new_size){
-    return (uint64_t) mm_realloc(ptr, new_size);
+uint64_t ksys_realloc(uint64_t ptr, uint64_t new_size){
+    return (uint64_t) mm_realloc((void *)ptr, new_size);
 }
 
-uint64_t ksys_free(void * ptr){
-    mm_free(ptr);
+uint64_t ksys_free(uint64_t ptr){
+    mm_free((void *)ptr);
     return FINISH_SUCCESFULLY;
 }
 
@@ -278,22 +278,22 @@ uint64_t ksys_total_space(){
     return (uint64_t) mm_total_space();
 }
 
-uint64_t ksys_sem_open(char * name, int value){
-    return sem_open(name, value);
+uint64_t ksys_sem_open(uint64_t name, uint64_t value){
+    return my_sem_open((char *)name, (int)value);
 }
 
-uint64_t ksys_sem_close(char * name){
-    sem_close(name);
+uint64_t ksys_sem_close(uint64_t name){
+    my_sem_close((char *)name);
     return FINISH_SUCCESFULLY;
 }
 
-uint64_t ksys_sem_post(sem_t * semaphore){
-    sem_post(semaphore);
+uint64_t ksys_sem_post(uint64_t name){
+    my_sem_post((char *)name);
     return FINISH_SUCCESFULLY;
 }
 
-uint64_t ksys_sem_wait(sem_t * semaphore){
-    sem_wait(semaphore);
+uint64_t ksys_sem_wait(uint64_t name){
+    my_sem_wait((char *)name);
     return FINISH_SUCCESFULLY;
 }
 
