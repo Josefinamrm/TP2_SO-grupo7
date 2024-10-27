@@ -144,7 +144,7 @@ int16_t dequeue(waiting_processes_queue queue){
         queue->size--;
     }else{
         queue->front = queue->rear = NULL;
-        queue->size == 0;
+        queue->size = 0;
     }
     int16_t pid_to_ret = aux->p->pid;
     mm_free(aux);
