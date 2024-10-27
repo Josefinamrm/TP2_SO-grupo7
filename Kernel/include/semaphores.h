@@ -3,21 +3,31 @@
 
 #include <lib.h>
 #include <processManager.h>
+#define SEM_QTTY 256
 
 typedef struct{
     char * name;
     int value;
+} sem_t;
+
+typedef struct{
+    sem_t * sem;
     waiting_processes_queue wp_queue;
+    uint16_t times_opened;
     uint8_t lock;
-} sem_t; 
+} sem_block;
 
-void sem_open(char * name, int value);
+// Opens semaphore if it exists, if not it creates it and opens it
+int16_t my_sem_open(char * name, int value);
 
-void sem_close(char * name);
+// Closes sempahore and "deletes" it, returns 0 on success, -1 on failure
+void my_sem_close(char * name);
 
-void sem_post(sem_t * semaphore);
+// Increments the value of the sempahore
+void my_sem_post(char * name);
 
-void sem_wait(sem_t * semaphore);
+// Decrements the value of the semaphore, blocks if it goes "below" 0
+void my_sem_wait(char * name);
 
 
 #endif

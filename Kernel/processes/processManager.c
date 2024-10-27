@@ -290,7 +290,7 @@ uint64_t next_running_process(uint64_t current_rsp){
         // backs up idle rsp
         process_array[0]->stack_pointer = current_rsp;
         idle_running = 0;
-    }else if(ready_queue->front->p->state == KILLED){
+    }else if(ready_queue->front->p->state == KILLED || ready_queue->front->p->state == BLOCKED){
         remove_from_ready_queue(ready_queue->front->p->pid);
         // the front of the list will now change to the next process, so i return that one if there are any
         return ready_queue->size == 0 ? process_array[0]->stack_pointer : ready_queue->front->p->stack_pointer;
@@ -572,27 +572,13 @@ void idle(){
     _idle();
 }
 
-// void process_1(){
-//     printArray("Soy proceso 1\n");
-//     timer_wait(3);
-//     printArray("termine el proces 1\n");
-//     my_exit();
-// }
-
-// void process_2(){
-//     printArray("Soy proceso 2\n");
-//     timer_wait(3);
-//     printArray("termine el proces 2\n");   
-//     my_exit();
-// }
+uint64_t test_sync(uint64_t argc, char *argv[]);
 
 void init_process(){
-    // char * argv2[] = { "proceso_2", "3" ,NULL}; 
-    // char * argv1[] = { "proceso_1", "3" ,NULL};
-    char * argv[] = {"userland", NULL};
-    // my_create_process((uint64_t) process_1, my_getpid(), 1, 1, argv1);
-    // my_create_process((uint64_t) process_2, my_getpid(), 1, 1, argv2);
-    my_create_process((uint64_t)USERLAND_DIREC, my_getpid(), 1, 1, argv);
+    //char * argv[] = {"userland", NULL};
+    //my_create_process((uint64_t)USERLAND_DIREC, my_getpid(), 1, 1, argv);
+    char * argv[] = {"test_sync", "1", "1", NULL};
+    my_create_process((uint64_t)test_sync, INIT_PID, 1, 3, argv);
 
     my_wait(-1);
     my_exit(my_getpid());

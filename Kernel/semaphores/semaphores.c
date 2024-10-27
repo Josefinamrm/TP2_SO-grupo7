@@ -1,36 +1,140 @@
 #include <semaphores.h>
 
-void sem_open(char * name, int value){
-    sem_t * semaphore = (sem_t *) mm_malloc(sizeof(sem_t));
-    semaphore->name = name;
-    semaphore->value = value;
-    semaphore->lock = 1;
-    semaphore->wp_queue = initialize_children_queue();          // change maybe
-}
+sem_block * sem_array[SEM_QTTY] = {0};
 
-void sem_close(char * name){
-    // estructura?
-}
+uint16_t sem_counter = 0;
 
-void sem_post(sem_t * semaphore){
-    acquire(semaphore->lock);
-    semaphore->value++;
-    int16_t pid = dequeue(semaphore->wp_queue);
-    my_unblock(pid);
-    acquire(semaphore->lock);
-}
-
-void sem_wait(sem_t * semaphore){
-    acquire(semaphore->lock);
-    if(semaphore->value == 0){
-        int16_t pid = my_getpid();
-        my_block(pid);          // ??
-        enqueue(semaphore->wp_queue, pid);
+// Returns next available id for sempahores
+static int16_t next_available_position(){
+    uint8_t found = 0;
+    int16_t to_ret = -1;
+    for(int i = 0; i < SEM_QTTY && !found; i++){
+        if(sem_array[i] == NULL){
+            found = 1;
+            to_ret = i;
+        }
     }
-    else{
-        semaphore->value--;
+    return to_ret;
+}
+
+
+
+// Compares 2 strings
+static int strcmp(const char *s1, const char *s2){
+    while (*s1 == *s2++) {
+        if (*s1++ == 0)
+			return 0;
     }
-    release(semaphore->lock);
+	return (*s1 - *--s2);
+}
+
+
+
+// Checks whether semaphore exists, if it exists it returns the id else returns -1
+static int16_t get_sem_id(char * name){
+    uint16_t id = -1;
+    for(int i = 0, j = sem_counter; i < SEM_QTTY && j > 0; i++){
+        if(sem_array[i] != NULL){
+            if(strcmp(name, sem_array[i]->sem->name) == 0){
+                return i;
+            }else{
+                j--;
+            }
+        }
+    }
+    return id;
+}
+
+
+
+// Opens semaphore if it exists, if not it creates it and opens it
+int16_t my_sem_open(char * name, int value){
+    _cli();
+
+    if(name == NULL || value < 0 || sem_counter == SEM_QTTY){
+        return FINISH_ON_ERROR;
+    }
+
+    int16_t sem_block_id = get_sem_id(name);
+    sem_block * new_sem_block;
+
+    if(sem_block_id == -1){
+        uint8_t sem_id = next_available_position();
+        new_sem_block = (sem_block *) mm_malloc(sizeof(sem_block));
+        new_sem_block->sem = (sem_t *) mm_malloc(sizeof(sem_t));
+
+        new_sem_block->sem->name = name;
+        new_sem_block->sem->value = value;
+        new_sem_block->lock = 1;
+        new_sem_block->wp_queue = initialize_children_queue();          // change maybe
+        new_sem_block->times_opened = 1;
+        sem_array[sem_id] = new_sem_block;
+        sem_counter++;
+    }else{
+        sem_array[sem_block_id]->times_opened++;
+    }
+    _sti();
+    return FINISH_SUCCESFULLY;
+}
+
+
+
+// Closes sempahore and "deletes" it
+void my_sem_close(char * name){
+
+    int16_t sem_block_id = get_sem_id(name);
+
+    if(sem_block_id == -1){
+        return FINISH_ON_ERROR;
+    }
+
+    if(sem_array[sem_block_id]->times_opened > 1){
+        sem_array[sem_block_id]->times_opened--;
+    }else{
+        mm_free(sem_array[sem_block_id]->sem);
+        free_children_queue(sem_array[sem_block_id]->wp_queue, 0);
+        mm_free(sem_array[sem_block_id]);
+        sem_array[sem_block_id] = NULL;
+    }
+    return FINISH_SUCCESFULLY;
+}
+
+
+
+// Increments the value of the sempahore
+void my_sem_post(char * name){
+    int16_t sem_block_id = get_sem_id(name);
+
+    if(sem_block_id != -1){
+        acquire(&(sem_array[sem_block_id]->lock));
+        if(sem_array[sem_block_id]->sem->value == 0){
+            int16_t pid = dequeue(sem_array[sem_block_id]->wp_queue);
+            my_unblock(pid);
+        }
+        sem_array[sem_block_id]->sem->value++;
+        release(&(sem_array[sem_block_id]->lock));
+    }
+}
+
+
+
+// Decrements the value of the semaphore, blocks if it goes "below" 0
+void my_sem_wait(char * name){
+
+    int16_t sem_block_id = get_sem_id(name);
+
+    if(sem_block_id != -1){
+        acquire(&(sem_array[sem_block_id]->lock));
+        if(sem_array[sem_block_id]->sem->value == 0){
+            int16_t pid = my_getpid();
+            enqueue(sem_array[sem_block_id]->wp_queue, pid);
+            my_block(pid);          // ??
+        }
+        else{
+            sem_array[sem_block_id]->sem->value--;
+        }
+        release(&(sem_array[sem_block_id]->lock));
+        }
 }
 
 /* tendria que hacer de alguna forma que, cuando yo me bloqueo en un semaforo me pongo en la lista de espera de ese
@@ -38,4 +142,4 @@ void sem_wait(sem_t * semaphore){
     por lo general siempre va a haber un proceso que cree el semaforo y que otro lo abra. entonces podria poner en cada
     proceso un array de semaforos o una lista de semaforos y todos los procesos bloqueados esperando al semaforo en esa lista ?
     
- */
+ */ 

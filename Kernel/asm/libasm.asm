@@ -182,7 +182,7 @@ acquire:
 	
 	mov al, 0
 .retry:
-	xchg al, [rdi]
+	xchg al, byte[rdi]
 	test al, al
 	jz .retry
 	mov rsp, rbp
@@ -193,7 +193,7 @@ release:
 	push rbp
 	mov rbp, rsp
 	
-	mov [rdi], 1
+	mov byte[rdi], 1
 
 	mov rsp, rbp
 	pop rbp
