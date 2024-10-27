@@ -290,7 +290,7 @@ uint64_t next_running_process(uint64_t current_rsp){
         // backs up idle rsp
         process_array[0]->stack_pointer = current_rsp;
         idle_running = 0;
-    }else if(ready_queue->front->p->state == KILLED || ready_queue->front->p->state == BLOCKED){
+    }else if(ready_queue->front->p->state == KILLED ){
         remove_from_ready_queue(ready_queue->front->p->pid);
         // the front of the list will now change to the next process, so i return that one if there are any
         return ready_queue->size == 0 ? process_array[0]->stack_pointer : ready_queue->front->p->stack_pointer;
@@ -416,7 +416,6 @@ int16_t my_block(int16_t pid){
     if(process_array[pid] == NULL) return FINISH_ON_ERROR;    
 
     process_array[pid]->state = BLOCKED;
-    remove_all_process_instances(ready_queue, pid);
 
     return EXIT_SUCCESS;
 }
