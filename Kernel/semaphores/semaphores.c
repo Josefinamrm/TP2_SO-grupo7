@@ -128,13 +128,14 @@ void my_sem_wait(char * name){
         if(sem_array[sem_block_id]->sem->value == 0){
             int16_t pid = my_getpid();
             enqueue(sem_array[sem_block_id]->wp_queue, pid);
+            release(&(sem_array[sem_block_id]->lock));
             my_block(pid);          // ??
         }
         else{
             sem_array[sem_block_id]->sem->value--;
+            release(&(sem_array[sem_block_id]->lock));
         }
-        release(&(sem_array[sem_block_id]->lock));
-        }
+    }
 }
 
 /* tendria que hacer de alguna forma que, cuando yo me bloqueo en un semaforo me pongo en la lista de espera de ese
