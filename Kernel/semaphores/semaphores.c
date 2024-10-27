@@ -49,8 +49,7 @@ static int16_t get_sem_id(char * name){
 
 // Opens semaphore if it exists, if not it creates it and opens it
 int16_t my_sem_open(char * name, int value){
-    _cli();
-
+    
     if(name == NULL || value < 0 || sem_counter == MAX_SEM){
         return FINISH_ON_ERROR;
     }
@@ -73,7 +72,7 @@ int16_t my_sem_open(char * name, int value){
     }else{
         sem_array[sem_block_id]->times_opened++;
     }
-    _sti();
+    
     return FINISH_SUCCESFULLY;
 }
 
