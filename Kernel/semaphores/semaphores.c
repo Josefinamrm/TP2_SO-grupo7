@@ -86,7 +86,7 @@ void my_sem_close(char * name){
     int16_t sem_block_id = get_sem_id(name);
 
     if(sem_block_id == -1){
-        return FINISH_ON_ERROR;
+        return ;
     }
 
     if(sem_array[sem_block_id]->times_opened > 1){
@@ -97,7 +97,7 @@ void my_sem_close(char * name){
         mm_free(sem_array[sem_block_id]);
         sem_array[sem_block_id] = NULL;
     }
-    return FINISH_SUCCESFULLY;
+    return ;
 }
 
 
