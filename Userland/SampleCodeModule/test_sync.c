@@ -58,7 +58,7 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
   if (use_sem)
     usys_sem_close(SEM_ID);
 
-  return 0;
+   return 0;
 }
 
 uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}

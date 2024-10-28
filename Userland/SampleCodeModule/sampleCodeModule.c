@@ -5,7 +5,7 @@
 #include <shell.h>
 
 #define INPUT_SIZE 100 
-#define COMMAND_COUNT 15
+#define COMMAND_COUNT 16
 #define CANT_REGS 18
 #define TRUE 1
 #define FALSE 0
@@ -26,6 +26,7 @@ void testprio();
 void ps();
 void mem();
 void testsynchro(); 
+void testnosynchro();
 
 static char buffer[INPUT_SIZE] = {0};
 static int bufferIndex = 0;
@@ -48,7 +49,8 @@ static Command commands[] = {
     {"testprio", testprio, "Crea procesos con distintas prioridades"},
     {"ps", ps, "Muestra los procesos y sus estados"},
     {"mem", mem, "Muestra informacion de la memoria"},
-    {"testsynchro", testsynchro, ""}
+    {"testsynchro", testsynchro, "Crea el proceso para testear sincronización CON semaforos"},
+    {"testnosynchro", testnosynchro, "Crea el proceso para testear sincronización CON semaforos"}
 };
 
 void parse_command(char *str) {
@@ -125,7 +127,8 @@ int main()
             foreground = TRUE;
         }
     } 
-    _exit();
+    usys_exit();
+    return 0;
 }
 
 void help() {
@@ -265,6 +268,13 @@ void mem() {
 
 void testsynchro() {
     char * argv[] = {"test synchro", "5", "1", NULL};
+    int pid = usys_create_process((uint64_t)testsynchro_ps, usys_get_pid(), 1, 3, argv); 
+    if(foreground) 
+        usys_wait_processes(pid);
+}
+
+void testnosynchro() {
+    char * argv[] = {"test synchro", "5", "0", NULL};
     int pid = usys_create_process((uint64_t)testsynchro_ps, usys_get_pid(), 1, 3, argv); 
     if(foreground) 
         usys_wait_processes(pid);

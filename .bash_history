@@ -93,3 +93,91 @@ cd Toolchain
 make clean all
 cd ..
 make clean all
+clear
+cd Toolchain
+cd root
+cd Toolchain
+make clean all
+cd ..
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+clear
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+cd toolchain
+cd root
+cd toolchain
+make clean all
+cd ..
+make clean all
+make clean all
+make clean all
