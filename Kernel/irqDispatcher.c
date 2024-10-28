@@ -16,7 +16,7 @@ uint64_t irqDispatcher(uint64_t irq, uint64_t rsp) {
 			return int_21();
 			break; 
 	}
-	return;
+	return 0;
 }
 
 uint64_t int_20(uint64_t rsp) {

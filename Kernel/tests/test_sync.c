@@ -51,9 +51,8 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
   if (use_sem)
     my_sem_close(SEM_ID);
 
-    printArray("por salir de test_sync\n");
-
   my_exit();
+  return 0;
 }
 
 uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
@@ -84,4 +83,5 @@ uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
   putChar('\n');
 
   my_exit();
+  return 0;
 }
