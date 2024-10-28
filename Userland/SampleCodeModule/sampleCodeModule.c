@@ -50,7 +50,7 @@ static Command commands[] = {
     {"ps", ps, "Muestra los procesos y sus estados"},
     {"mem", mem, "Muestra informacion de la memoria"},
     {"testsynchro", testsynchro, "Crea el proceso para testear sincronización CON semaforos"},
-    {"testnosynchro", testnosynchro, "Crea el proceso para testear sincronización CON semaforos"}
+    {"testnosynchro", testnosynchro, "Crea el proceso para testear sincronización SIN semaforos"}
 };
 
 void parse_command(char *str) {

@@ -181,3 +181,22 @@ cd ..
 make clean all
 make clean all
 make clean all
+cd root
+cd toolchain
+make clean all
+cd ..
+make clean all
+make clean all
+make clean all
+clear
+make clean all
+make clean all
+clear
+make clean all
+clear
+clear
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
