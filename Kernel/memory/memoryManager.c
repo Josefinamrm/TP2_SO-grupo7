@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /* 
 
     Se mantiene una lista con todos los nodos de memoria, libre o ocupada
@@ -94,6 +96,10 @@ void mm_free(void * ptr){
 
 void * mm_realloc(void * ptr, uint64_t new_size){
     char * to_return = (void *) mm_malloc(new_size);
+
+    if(to_return == NULL){
+        return NULL;
+    }
 
     // Obtain block memory size
     Header * ptr_hd = (Header *) ptr - 1;

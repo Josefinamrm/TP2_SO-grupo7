@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <user_syscalls.h>
 #include <interrupts.h>
 
@@ -128,7 +130,7 @@ int usys_total_space(){
     return _total_space();
 }
 
-uint8_t usys_sem_open(char * name, int value){
+int16_t usys_sem_open(char * name, int value){
     return _sem_open((uint64_t)name, (uint64_t)value);
 }
 

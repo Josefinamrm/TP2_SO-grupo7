@@ -6,7 +6,7 @@
 
 // Info about free memory
 #define FREE_MEM_START 0x0000000000600000 // Data from Pure64 Manual
-#define TOTAL_HEADER_UNITS 8388608 + 1
+#define TOTAL_HEADER_UNITS (8388608 + 1)
 
 // List node state
 #define FREE 0
