@@ -102,6 +102,8 @@ int16_t my_create_process(uint64_t function, int16_t ppid, uint8_t priority, uin
 // Exits the current process, killing it
 void my_exit();
 
+void my_exit_foreground();
+
 // Changes process priority
 void my_nice(int16_t pid, uint8_t newPrio);
 

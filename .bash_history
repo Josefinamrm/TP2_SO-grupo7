@@ -200,3 +200,46 @@ make clean all
 make clean all
 make clean all
 make clean all
+cd root
+ls
+clear
+ls
+cd Toolchain
+make clean all
+cd ..
+make clean all
+clear
+cd Toolchain
+make clean all
+cd ..
+make clean all
+make clean all
+make clean all
+clear
+cd Toolchain
+make clean all
+cd ..
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+clear
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all

@@ -2,6 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <processes.h>
 #include <test_sync.h>
+#include <shell.h>
 
 void ps_ps(){
     usys_ps();
@@ -22,11 +23,15 @@ void memoryinfo_ps() {
 
     print("-------------------------------------------------------\n");
     print("Total space: ");
+    usys_wait(5);
     print_dec(usys_total_space());
+    usys_wait(5);
     print("\n");
 
     print("Occupied space: ");
+    usys_wait(5);
     print_dec(usys_occupied_space());
+    usys_wait(5);
     print("\n");
 
     print("Unused space: ");

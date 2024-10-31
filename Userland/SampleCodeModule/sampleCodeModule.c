@@ -239,43 +239,43 @@ void play_eliminator() {
 }
 
 void testprocess() {
-    char * argv[] = {"test processes", "3" ,NULL};
-    int pid = usys_create_process((uint64_t)testprocess_ps, usys_get_pid() , 1 , 2, argv);
+    char * argv[] = {"test processes",foreground, "3" ,NULL};
+    int pid = usys_create_process((uint64_t)testprocess_ps,  usys_get_pid() , 1 , 3, argv);
     if(foreground) 
         usys_wait_processes(pid);
 }
 
 void testprio() {
-    char * argv[] = {"test prio", NULL};
-    int pid = usys_create_process((uint64_t)testprio_ps, usys_get_pid(), 1, 1, argv);
+    char * argv[] = {"test prio", foreground, NULL};
+    int pid = usys_create_process((uint64_t)testprio_ps, usys_get_pid(), 1, 2, argv);
     if(foreground) 
         usys_wait_processes(pid);
 }
 
 void ps() {
-    char * argv[] = {"ps", NULL};
-    int pid = usys_create_process((uint64_t)ps_ps, usys_get_pid(), 1, 1, argv); 
+    char * argv[] = {"ps", foreground, NULL};
+    int pid = usys_create_process((uint64_t)ps_ps, usys_get_pid(), 1, 2, argv); 
     if(foreground) 
         usys_wait_processes(pid);
 }
 
 void mem() {
-    char * argv[] = {"memoryinfo", NULL};
-    int pid = usys_create_process((uint64_t)memoryinfo_ps, usys_get_pid(), 1, 1, argv); 
+    char * argv[] = {"memoryinfo", foreground, NULL};
+    int pid = usys_create_process((uint64_t)memoryinfo_ps, usys_get_pid(), 1, 2, argv); 
     if(foreground) 
         usys_wait_processes(pid);
 }
 
 void testsynchro() {
-    char * argv[] = {"test synchro", "5", "1", NULL};
-    int pid = usys_create_process((uint64_t)testsynchro_ps, usys_get_pid(), 1, 3, argv); 
+    char * argv[] = {"test synchro", foreground, "5", "1", NULL};
+    int pid = usys_create_process((uint64_t)testsynchro_ps, usys_get_pid(), 1, 4, argv); 
     if(foreground) 
         usys_wait_processes(pid);
 }
 
 void testnosynchro() {
-    char * argv[] = {"test synchro", "5", "0", NULL};
-    int pid = usys_create_process((uint64_t)testsynchro_ps, usys_get_pid(), 1, 3, argv); 
+    char * argv[] = {"test synchro", foreground, "5", "0", NULL};
+    int pid = usys_create_process((uint64_t)testsynchro_ps, usys_get_pid(), 1, 4, argv); 
     if(foreground) 
         usys_wait_processes(pid);
 }
