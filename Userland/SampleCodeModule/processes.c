@@ -50,3 +50,20 @@ void my_process_inc_ps(uint64_t argc, char *argv[]){
     my_process_inc(argc,argv);
     usys_exit();
 }
+
+void loop_ps(){
+    while(1){
+        print("Hola! Soy el proceso nro ");
+        print_dec(usys_get_pid());
+        print("\n");
+        usys_wait(4000);
+    }
+    usys_exit();
+}
+
+
+void cat_ps(){
+    char echo[15];
+    usys_read(1, echo, 15);
+    usys_exit();
+}

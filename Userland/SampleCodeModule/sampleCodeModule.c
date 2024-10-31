@@ -5,7 +5,7 @@
 #include <shell.h>
 
 #define INPUT_SIZE 100 
-#define COMMAND_COUNT 16
+#define COMMAND_COUNT 18
 #define CANT_REGS 18
 #define TRUE 1
 #define FALSE 0
@@ -27,6 +27,8 @@ void ps();
 void mem();
 void testsynchro(); 
 void testnosynchro();
+void loop();
+void cat();
 
 static char buffer[INPUT_SIZE] = {0};
 static int bufferIndex = 0;
@@ -50,7 +52,9 @@ static Command commands[] = {
     {"ps", ps, "Muestra los procesos y sus estados"},
     {"mem", mem, "Muestra informacion de la memoria"},
     {"testsynchro", testsynchro, "Crea el proceso para testear sincronización CON semaforos"},
-    {"testnosynchro", testnosynchro, "Crea el proceso para testear sincronización SIN semaforos"}
+    {"testnosynchro", testnosynchro, "Crea el proceso para testear sincronización SIN semaforos"},
+    {"loop", loop, "Imprime saludo y ID cada 2 segundos"},
+    {"cat", cat, "Imprime el stdin tal como lo recibe"}
 };
 
 void parse_command(char *str) {
@@ -239,7 +243,7 @@ void play_eliminator() {
 }
 
 void testprocess() {
-    char * argv[] = {"test processes",foreground, "3" ,NULL};
+    char * argv[] = {"test processes", foreground, "3" ,NULL};
     int pid = usys_create_process((uint64_t)testprocess_ps,  usys_get_pid() , 1 , 3, argv);
     if(foreground) 
         usys_wait_processes(pid);
@@ -277,5 +281,19 @@ void testnosynchro() {
     char * argv[] = {"test synchro", foreground, "5", "0", NULL};
     int pid = usys_create_process((uint64_t)testsynchro_ps, usys_get_pid(), 1, 4, argv); 
     if(foreground) 
+        usys_wait_processes(pid);
+}
+
+void loop(){
+    char * argv[] = {"loop", foreground, NULL};
+    int pid = usys_create_process((uint64_t) loop_ps, usys_get_pid(), 1, 2, argv);
+    if(foreground)
+        usys_wait_processes(pid);
+}
+
+void cat(){
+    char * argv[] = {"cat", NULL};
+    int pid = usys_create_process((uint64_t) cat_ps, usys_get_pid(), 1, 1, argv);
+    if(foreground)
         usys_wait_processes(pid);
 }
