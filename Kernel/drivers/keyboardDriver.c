@@ -111,6 +111,8 @@ void keyboard_handler()
 
                 if(my_getpid() > 2){
                     my_exit_foreground();
+                }else{
+                    my_exit();
                 }
                 return;
             }

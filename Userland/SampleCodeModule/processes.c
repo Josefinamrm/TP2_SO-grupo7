@@ -63,7 +63,5 @@ void loop_ps(){
 
 
 void cat_ps(){
-    char echo[15];
-    usys_read(1, echo, 15);
-    usys_exit();
+    
 }
