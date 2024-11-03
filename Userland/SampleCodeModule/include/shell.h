@@ -14,6 +14,7 @@ typedef struct Command {
     char* name_id;
     void (*func) (char * param);
     char* desc;
+    char* usage;
 } Command;
 
 #endif

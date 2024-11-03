@@ -18,9 +18,7 @@ uint32_t uint_to_base(uint64_t value, char *buffer, uint32_t base);
 
 void _invalid_opcode_exception(void);
 
-int parse_command_arg(char * str);
-
-char * check_back(char * str, char * cmd);
+int parse_command_arg(char * str, char *arguments[]);
 
 int strcmp(const char *s1, const char *s2);
 

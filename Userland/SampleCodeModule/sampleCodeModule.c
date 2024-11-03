@@ -5,11 +5,11 @@
 #include <shell.h>
 
 #define INPUT_SIZE 100 
-#define COMMAND_COUNT 18
+#define COMMAND_COUNT 17
 #define CANT_REGS 18
 #define TRUE 1
 #define FALSE 0
-
+#define MAX_ARGS 10
 
 void help();
 void divzero();
@@ -35,59 +35,54 @@ static int bufferIndex = 0;
 static int currentFontSize;
 static int gameActive = 0;
 static char foreground = TRUE;
+static int argC=0;
+static char *arguments[MAX_ARGS] = {0};
 
 static Command commands[] = {
-    {"help", help, "Muestra la lista de comandos"},
-    {"divzero", divzero, "Simula la excepcion de division por 0"},
-    {"invopcode", invopcode, "Simula la excepcion de opcode invalida"},
-    {"time", time, "Muestra la hora actual"},
-    {"inforeg", inforeg, "Imprime los registros capturados por CTRL"},
-    {"eliminator", play_eliminator, "Inicia el juego de eliminator"},
-    {"zoomin", zoomin, "Aumenta el tamanio de la letra"},
-    {"zoomout", zoomout, "Disminuye el tamanio de la letra"},
-    {"clear", clear_shell, "Limpia la shell"},
-    {"beep", beep, "Emite un beep"},
-    {"testprocess", testprocess, "Crea el proceso test_process"},
-    {"testprio", testprio, "Crea procesos con distintas prioridades"},
-    {"ps", ps, "Muestra los procesos y sus estados"},
-    {"mem", mem, "Muestra informacion de la memoria"},
-    {"testsynchro", testsynchro, "Crea el proceso para testear sincronización CON semaforos"},
-    {"testnosynchro", testnosynchro, "Crea el proceso para testear sincronización SIN semaforos"},
-    {"loop", loop, "Imprime saludo y ID cada 2 segundos"},
-    {"cat", cat, "Imprime el stdin tal como lo recibe"}
+    {"help", help, "Muestra la lista de comandos.","No recibe argumentos."},
+    {"divzero", divzero, "Simula la excepcion de division por 0.","No recibe argumentos."},
+    {"invopcode", invopcode, "Simula la excepcion de opcode invalida.","No recibe argumentos."},
+    {"time", time, "Muestra la hora actual.","No recibe argumentos."},
+    {"inforeg", inforeg, "Imprime los registros capturados por CTRL.","No recibe argumentos."},
+    {"eliminator", play_eliminator, "Inicia el juego de eliminator.","No recibe argumentos."},
+    {"zoomin", zoomin, "Aumenta el tamanio de la letra.", "No recibe argumentos."},
+    {"zoomout", zoomout, "Disminuye el tamanio de la letra.", "No recibe argumentos."},
+    {"clear", clear_shell, "Limpia la shell.", "No recibe argumentos."},
+    {"beep", beep, "Emite un beep.","No recibe argumentos."},
+    {"testprocess", testprocess, "Crea el proceso test_process.","Recibe 1 argumento: Cantidad de procesos a crear."},
+    {"testprio", testprio, "Crea procesos con distintas prioridades.","No recibe argumentos."},
+    {"ps", ps, "Muestra los procesos y sus estados.","No recibe argumentos."},
+    {"mem", mem, "Muestra informacion de la memoria.","No recibe argumentos."},
+    {"testsynchro", testsynchro, "Crea el proceso para testear sincronizacion CON semaforos.","Recibe dos argumentos: cantidad de incrementos o decrementos y 1 o 0 (CON o SIN semáforos)."},
+    {"loop", loop, "Imprime saludo y ID cada 2 segundos.","No recibe argumentos."},
+    {"cat", cat, "Imprime el stdin tal como lo recibe.","No recibe argumentos."}
 };
 
 void parse_command(char *str) {
-    char argument[] = {0};
 
     if (strcmp(str, "")==0) {
         return;
     }
 
-    int argC = parse_command_arg(str);
-    char cmd[10] = {0};
+    argC = parse_command_arg(str, arguments);
 
-    char valid_cmd = TRUE;
+    char * cmd = arguments[0];
+
 
     if (argC > 1) {
-        char * flag = check_back(str, cmd);
-        if(strcmp(flag, "b") == 0){
+        if(strcmp(arguments[1], "b") == 0){
             foreground = FALSE;
             str = cmd;
         }
-        else{
-            valid_cmd = FALSE;
-        }
     }
 
-    if(valid_cmd){
-        for (int i = 0; i < COMMAND_COUNT; i++) {
-            if (strcmp(str, commands[i].name_id) == 0) {
-                (*commands[i].func)(argument);
-                return;
-            }
-        } 
-    }    
+    for (int i = 0; i < COMMAND_COUNT; i++) {
+        if (strcmp(cmd, commands[i].name_id) == 0) {
+            (*commands[i].func)(cmd);
+            return;
+        }
+    } 
+        
     print_error("Error: comando no diponible. Ingrese \"help\" para ver los comandos disponibles.\n");
 }
 
@@ -99,14 +94,22 @@ void print_prompt_icon() {
 int main()
 {
     print("Bienvenido a ");
-    print_color(GREEN,"OUR_OS\n");
-    print("Ingrese uno de los siguientes comandos:\n");
-    for(int i = 1; i < COMMAND_COUNT-1 ; i++){
-            print_color(LIGHT_BLUE, commands[i].name_id);
-            print(" | ");
-    } 
-    print_color(LIGHT_BLUE, commands[COMMAND_COUNT-1].name_id);
-    print("\nIngrese \"help\" para la descripcion los comandos.\n");
+    print_color(BLUE,"DORY_OS\n");
+    // print("Ingrese uno de los siguientes comandos:\n");
+    // for(int i = 1; i < COMMAND_COUNT-1 ; i++){
+    //         print_color(LIGHT_BLUE, commands[i].name_id);
+    //         print(" | ");
+    // } 
+    // print_color(LIGHT_BLUE, commands[COMMAND_COUNT-1].name_id);
+
+    print_color(GRAY,"Ingrese ");
+    print_color(WHITE,"\"help\" ");
+    print_color(GRAY,"para ver los comandos disponibles.\n");
+
+    print_color(GRAY, "Presione ");
+    print_color(WHITE, "\"b\" ");
+    print_color(GRAY, "luego del comando para ejecutar en background.\n");
+
     char c;
     int running = 1; 
     currentFontSize = usys_get_font_size();
@@ -129,24 +132,71 @@ int main()
                 buffer[bufferIndex++] = c;
             }
             foreground = TRUE;
+            argC = 0;
         }
     } 
     usys_exit();
     return 0;
 }
 
+
+/* --------------------------- Common functions ------------------------------------------------------------------------*/
+
+static int no_arguments_func(char * func){
+    if((foreground && argC > 1) || (!foreground && argC > 2)){
+        print_error("Error: el comando ");
+        print(func);
+        print_error(" no recibe argumentos.\n");
+        return -1;
+    }
+    return 0;
+}
+
+static void missing_arguments(char * func){
+    print_error("Error: faltan argumentos para el comando ");
+    print(func);
+    print_error(".\n");
+}
+
+static void too_many_arguments(char * func){
+    print_error("Error: demasiados argumentos para el comando ");
+    print(func);
+    print_error(".\n");
+}
+
+static int cant_arguments_func(char * func, int cant, int needed){
+    if(!foreground) needed++;
+    if (cant > needed){
+        too_many_arguments(func);
+        return -1;
+    } else if (cant < needed){
+        missing_arguments(func);
+        return -1;
+    }
+    return 0;
+}
+
+/* --------------------------- Commands functions ------------------------------------------------------------------------*/
+
 void help() {
+    print_color(YELLOW, "Hacemos zoom-out para ver los comandos disponibles.\n");
+    zoomout();
     print("Comandos disponibles:\n");
     for(int i = 1; i < COMMAND_COUNT ; i++){
             print("   ");
             print_color(LIGHT_BLUE, commands[i].name_id);
             print(": ");
             print(commands[i].desc);
+            print(" - ");
+            print_color(GRAY, commands[i].usage);
             put_char('\n');
     } 
+    print_color(YELLOW,"Restauramos el tamanio de la letra.\n");
+    zoomin();
 }
 
 void divzero() { 
+    if(no_arguments_func("divzero") ==-1) return;
     int a = 1; //rax??
     int b = 0; 
     if ((a/b) == 1) {
@@ -154,15 +204,18 @@ void divzero() {
     }
 }
 void invopcode() {
+    if(no_arguments_func("invopcode") ==-1) return;
     _invalid_opcode_exception();
 }
 
 void time() {
+    if(no_arguments_func("time") ==-1) return;
     print_color(GREEN, "ART (Argentine Time): UTC/GMT -3 horas\n"); 
     _get_time(); 
 }
 
 void zoomin() {
+    if(no_arguments_func("zoomin") ==-1) return;
     print_color(YELLOW, "Esto va a borrar toda la pantalla. Esta seguro de que quiere proceder?\n");
     print_color(ORANGE, "Indicar Si (Si) o N (No)\n"); 
     char c;
@@ -185,6 +238,7 @@ void zoomin() {
 }
 
 void zoomout() {
+    if(no_arguments_func("zoomout") ==-1) return;
     print_color(YELLOW, "Esto va a borrar toda la pantalla. Esta seguro de que quiere proceder?\n");
     print_color(ORANGE, "Indicar S (Si) o N (No)\n"); 
     char c;
@@ -207,6 +261,7 @@ void zoomout() {
 }
 
 void inforeg() {
+    if(no_arguments_func("inforeg") ==-1) return;
     uint64_t regs[CANT_REGS];
     char *regsNames[CANT_REGS] = {"rax:", "rbx:", "rcx:", "rdx:", "rsi:", "rdi:", "rbp:", "rsp:", "r8:", "r9:",
 					   "r10:", "r11:", "r12:", "r13:", "r14:", "r15:", "rip:", "rflags:"};
@@ -226,15 +281,18 @@ void inforeg() {
     }
 }
 void clear_shell() {
+    if(no_arguments_func("clear") ==-1) return;
     usys_clear_screen();
 }
 
 void beep() {
+    if(no_arguments_func("beep") ==-1) return;
     print_color(GREEN, "BEEP!!\n");
     usys_beep(1000, 10);
 }
 
 void play_eliminator() {
+    if(no_arguments_func("eliminator") ==-1) return;
     gameActive = 1;
     clear_shell();
     eliminator();
@@ -243,13 +301,16 @@ void play_eliminator() {
 }
 
 void testprocess() {
-    char * argv[] = {"test processes", foreground, "3" ,NULL};
+    if(cant_arguments_func("testprocess", argC, 2) == -1) return;
+    char * arg_command = (foreground)? arguments[1] : arguments[2];
+    char * argv[] = {"test processes", foreground, arg_command ,NULL};
     int pid = usys_create_process((uint64_t)testprocess_ps,  usys_get_pid() , 1 , 3, argv);
     if(foreground) 
         usys_wait_processes(pid);
 }
 
 void testprio() {
+    if(no_arguments_func("testprio") ==-1) return;
     char * argv[] = {"test prio", foreground, NULL};
     int pid = usys_create_process((uint64_t)testprio_ps, usys_get_pid(), 1, 2, argv);
     if(foreground) 
@@ -257,6 +318,7 @@ void testprio() {
 }
 
 void ps() {
+    if(no_arguments_func("ps") ==-1) return;
     char * argv[] = {"ps", foreground, NULL};
     int pid = usys_create_process((uint64_t)ps_ps, usys_get_pid(), 1, 2, argv); 
     if(foreground) 
@@ -264,6 +326,7 @@ void ps() {
 }
 
 void mem() {
+    if(no_arguments_func("mem") ==-1) return;
     char * argv[] = {"memoryinfo", foreground, NULL};
     int pid = usys_create_process((uint64_t)memoryinfo_ps, usys_get_pid(), 1, 2, argv); 
     if(foreground) 
@@ -271,20 +334,28 @@ void mem() {
 }
 
 void testsynchro() {
-    char * argv[] = {"test synchro", foreground, "5", "1", NULL};
+    if(cant_arguments_func("testsynchro", argC, 3) == -1) return;
+    char * arg_1 = foreground? arguments[1] : arguments[2];
+    char * arg_2 = foreground? arguments[2] : arguments[3];
+    //char * argv[] = {"test synchro", foreground, "5", "1", NULL};
+    char * argv[] = {"test synchro", foreground, arg_1, arg_2, NULL};
     int pid = usys_create_process((uint64_t)testsynchro_ps, usys_get_pid(), 1, 4, argv); 
     if(foreground) 
         usys_wait_processes(pid);
 }
 
-void testnosynchro() {
-    char * argv[] = {"test synchro", foreground, "5", "0", NULL};
-    int pid = usys_create_process((uint64_t)testsynchro_ps, usys_get_pid(), 1, 4, argv); 
-    if(foreground) 
-        usys_wait_processes(pid);
-}
+// void testnosynchro() {
+//     if(cant_arguments_func("testnosynchro", argC, 2) == -1) return;
+//     char * arg_1 = foreground? arguments[1] : arguments[2];
+//     char * arg_2 = foreground? arguments[2] : arguments[3];
+//     char * argv[] = {"test synchro", foreground, arg_1, arg_2, NULL};
+//     int pid = usys_create_process((uint64_t)testsynchro_ps, usys_get_pid(), 1, 4, argv); 
+//     if(foreground) 
+//         usys_wait_processes(pid);
+// }
 
 void loop(){
+    no_arguments_func("loop");
     char * argv[] = {"loop", foreground, NULL};
     int pid = usys_create_process((uint64_t) loop_ps, usys_get_pid(), 1, 2, argv);
     if(foreground)

@@ -60,21 +60,28 @@
 // "arbol de memoria"
 
 #include "buddy.h"
-
+#include <stdio.h>  
+// #include <memoryManager.h>
 
 uint8_t mem_states[CANT_NODES];
+void * mem = FREE_MEM_START;
+
 uint32_t used_space = 0;
-uint32_t total_space = 64;
+uint32_t total_space = 0;
+
 
 void mm_init(uint64_t memory_start, uint64_t size){
-    for(int i = memory_start; i < memory_start + size; i++){
+    for(int i = 0; i < CANT_NODES; i++){
         mem_states[i] = FREE;
     }
+    total_space = size;
 }
 
-static uint64_t rec_malloc(uint16_t pos, uint64_t cant, uint64_t node_size){
+static uint64_t rec_malloc(uint64_t pos, uint64_t cant, uint64_t node_size){
 
-    if(cant > node_size){
+    printf("pos: %ld - cant: %ld - node_size:%ld\n", pos, cant, node_size);
+
+    if(cant > node_size || node_size < MEM_MIN){
         return -1;
     }
 
@@ -102,8 +109,14 @@ static uint64_t rec_malloc(uint16_t pos, uint64_t cant, uint64_t node_size){
     return pos;
 }
 
-uint64_t mm_malloc(uint64_t nbytes){
-    return rec_malloc(LEFT_CHILD(CANT_NODES), nbytes, total_space);
+void * mm_malloc(uint64_t nbytes){
+    printf("cant_nodes: %d\n", CANT_NODES);
+    uint64_t pos = rec_malloc((CANT_NODES)/2, nbytes, total_space);
+    if(pos == -1){
+        return NULL;
+    }
+    printf("offset: %ld\n", (pos*nbytes));
+    return (void *) (mem + pos*nbytes);
 }
 
 
@@ -144,14 +157,14 @@ static uint32_t rec_free(uint64_t i,  uint64_t pos, uint64_t node_size){
     }
 }
 
-void mm_free(int pos){
-    if(pos < 0){
+void mm_free(void * ptr){
+    if(ptr ==  NULL){
         return;
     }
     else{
-
-       rec_free(LEFT_CHILD(CANT_NODES), pos, total_space);
-       return;
+        uint64_t pos = (ptr - mem)/MEM_MIN;
+        rec_free(LEFT_CHILD(CANT_NODES), pos, total_space);
+        return;
     }
 }
 

@@ -139,32 +139,53 @@ int strcmp(const char *s1, const char *s2){
 	return (*s1 - *--s2);
 }
 
-int parse_command_arg(char * str) {
-    int argC = 1;
-    for (int i = 0; str[i] != '\0'; i++) {
-        if (str[i] == ' ') {
-            argC++; 
-        } 
+int parse_command_arg(char * str, char * arguments[]) {
+    int argC = 0;
+    char *start = str;
+
+    while (*str != '\0') {
+        while(*start == ' ') { // ignore spaces
+            start++;
+        }
+        if (*start == '\0') {
+            break;
+        }
+
+        // calculate length of argument
+        char *end = start;
+        while (*end != ' ' && *end != '\0') {
+            end++;
+        }
+        int len = end - start;
+
+        // allocate memory for argument
+        arguments[argC] = (char *) usys_malloc(len + 1);
+        strcpy(arguments[argC], start);
+        arguments[argC][len] = '\0'; // null-terminate
+
+        // move to next argument
+        argC++;
+        start = end;
     }
     return argC;
 }
 
-char * check_back(char * str, char * cmd) {
-    int i = 0;
+// char * check_back(char * str, char * cmd) {
+//     int i = 0;
     
-    while (str[i] != '\0' && str[i] != ' ') {
-        cmd[i] = str[i]; 
-        i++;
-    }
+//     while (str[i] != '\0' && str[i] != ' ') {
+//         cmd[i] = str[i]; 
+//         i++;
+//     }
 
-    cmd[i] = '\0'; 
+//     cmd[i] = '\0'; 
 
-    if (str[i] == ' ') {
-        return &str[i + 1];
-    }
+//     if (str[i] == ' ') {
+//         return &str[i + 1];
+//     }
     
-    return NULL;
-}
+//     return NULL;
+// }
 
 
 void udraw_frame(uint32_t color, uint64_t x, uint64_t y, uint64_t size_x, uint64_t size_y, uint64_t thickness) {
