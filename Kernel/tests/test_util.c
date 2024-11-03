@@ -1,5 +1,8 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <stdint.h>
 #include <stdio.h>
+#include <videoDriver.h>
 
 // Random
 static uint32_t m_z = 362436069;
@@ -59,6 +62,7 @@ void bussy_wait(uint64_t n) {
 }
 
 void endless_loop() {
+  printArray("inside endless_loop\n");
   while (1)
     ;
 }

@@ -11,6 +11,8 @@
 #include <idtLoader.h>
 #include <stdint.h>
 
+#define USERLAND_DIREC 0x400000
+
 
 void _irq00Handler(void);
 void _irq01Handler(void);
@@ -30,13 +32,16 @@ void _sti(void);
 
 void _hlt(void);
 
+void _idle(void);
+
 void _setUser();
 
 void picMasterMask(uint8_t mask);
 
 void picSlaveMask(uint8_t mask);
 
-//Termina la ejecución de la cpu.
-void haltcpu(void);
+
+uint64_t _setup_stack_structure_asm(uint64_t top_stack, uint64_t function, uint64_t argc, uint64_t argv);
+
 
 #endif /* INTERRUPS_H_ */

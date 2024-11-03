@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <user_syscalls.h>
 #include <interrupts.h>
 
@@ -61,4 +63,85 @@ int usys_get_time() {
 
 void flush_buffer(){
     _flush_buffer();
+}
+
+uint64_t usys_get_pid(){
+    return _get_pid();
+}
+
+int64_t usys_create_process(uint64_t function, int16_t ppid, uint8_t priority, uint64_t argc, char ** argv){
+    return _create_process(function, (uint64_t)ppid, (uint64_t)priority, argc, (uint64_t)argv);
+}
+
+void usys_nice(int16_t pid, uint8_t newPrio){
+    _nice((uint64_t)pid, (uint64_t)newPrio);
+}
+
+int64_t usys_kill(int16_t pid){
+    return _kill((uint64_t)pid);
+}
+
+int64_t usys_block(int16_t pid){
+    return _block((uint64_t)pid);
+}
+
+int64_t usys_unblock(int16_t pid){
+   return _unblock((uint64_t)pid);
+}
+
+void usys_yield(){
+    _yield();
+}
+
+void usys_wait_processes(int16_t pid){
+    _wait_processes((uint64_t)pid);
+}
+
+void usys_ps(){
+    _ps();
+}
+
+void usys_exit(){
+    _exit();
+}
+
+
+void * usys_malloc(unsigned int nbytes){
+    return _malloc((uint64_t)nbytes);
+}
+
+void * usys_realloc(void * ptr, uint64_t new_size){
+    return _realloc((uint64_t)ptr, new_size);
+} 
+
+void usys_free(void * ptr){
+    _free((uint64_t)ptr);
+}
+
+int usys_unused_space(){
+    return _unused_space();
+}
+
+int usys_occupied_space(){
+    return _occupied_space();
+}
+
+int usys_total_space(){
+    return _total_space();
+}
+
+int16_t usys_sem_open(char * name, int value){
+    return _sem_open((uint64_t)name, (uint64_t)value);
+}
+
+void usys_sem_close(char * name){
+    _sem_close((uint64_t)name);
+}
+
+void usys_sem_post(char * name){
+    _sem_post((uint64_t)name);
+}
+
+void usys_sem_wait(char * name){
+    _sem_wait((uint64_t)name);
 }
