@@ -7,6 +7,14 @@
 #define STDERR 2
 #define LASTIN 3
 
+typedef struct{
+    uint64_t function;
+    int16_t ppid;
+    uint8_t priority;
+    uint64_t argc;
+    char ** argv;
+}parameters_structure;
+
 
 int usys_read(int fd, char * buf, int size);
 
