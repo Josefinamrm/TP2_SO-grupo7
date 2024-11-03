@@ -358,7 +358,6 @@ int16_t my_getpid(){
 
 // después veo que hago en el caso border  ###############################  ME QUEDE ACA
 int16_t my_create_process(uint64_t function, int16_t ppid, uint8_t priority, uint64_t argc, char ** argv){
-    _cli();
     int16_t new_pid = next_available_pid();
     if(new_pid > 0 && argc > 0){
         process new_process = (process) mm_malloc(sizeof(struct p));
@@ -381,7 +380,6 @@ int16_t my_create_process(uint64_t function, int16_t ppid, uint8_t priority, uin
         process_counter++;
         
     }
-    _sti();
     return new_pid;
 }
 
@@ -568,7 +566,6 @@ void my_ps(){
 
 // Creates idle process
 static void create_idle_process(){
-    _cli();
     process idle_process = (process) mm_malloc(sizeof(struct p));
     idle_process->name = "Idle";
     idle_process->pid = 0;
@@ -583,7 +580,6 @@ static void create_idle_process(){
     idle_process->child_list = initialize_children_queue();
     process_array[0] = idle_process;
     process_counter++;
-    _sti();
 }
 
 
