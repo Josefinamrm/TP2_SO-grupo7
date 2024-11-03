@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <user_syscalls.h>
 #include <ucolors.h>
+#include <stddef.h>
+
 #define INPUT_SIZE 100
 
 void print(char *arr);
@@ -17,6 +19,8 @@ uint32_t uint_to_base(uint64_t value, char *buffer, uint32_t base);
 void _invalid_opcode_exception(void);
 
 int parse_command_arg(char * str);
+
+char * check_back(char * str, char * cmd);
 
 int strcmp(const char *s1, const char *s2);
 
@@ -35,6 +39,8 @@ void print_error(char * string);
 void int_to_string(int num, char* buf, int dim);
 
 void print_score(uint32_t fontColor, uint32_t backgroundColor, uint64_t x, uint64_t y, int num);
+
+void print_dec(int num);
 
 void udraw_array(uint32_t fontColor, uint32_t backgroundColor, int x, int y, char *arr);
 

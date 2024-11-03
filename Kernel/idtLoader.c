@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <stdint.h>
 #include <idtLoader.h>
 #include <defs.h>
@@ -34,7 +36,6 @@ void load_idt() {
   picMasterMask(0xFC); 
   picSlaveMask(0xFF);
 
-	_sti();
 }
 
 static void setup_IDT_entry (int index, uint64_t offset) {

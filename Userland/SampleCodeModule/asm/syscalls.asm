@@ -14,6 +14,35 @@ GLOBAL _print_rect
 GLOBAL _get_time
 GLOBAL _draw_array
 GLOBAL _flush_buffer
+
+; processes:
+GLOBAL _get_pid
+GLOBAL _create_process
+GLOBAL _nice
+GLOBAL _kill
+GLOBAL _block
+GLOBAL _unblock
+GLOBAL _yield
+GLOBAL _wait_processes
+GLOBAL _ps
+GLOBAL _exit
+
+; memory:
+
+GLOBAL _malloc
+GLOBAL _realloc
+GLOBAL _free
+GLOBAL _unused_space
+GLOBAL _occupied_space
+GLOBAL _total_space
+
+;semaphores
+
+GLOBAL _sem_open
+GLOBAL _sem_close
+GLOBAL _sem_post
+GLOBAL _sem_wait
+
 section .text
 
 _read: 
@@ -188,6 +217,226 @@ _flush_buffer:
     mov rbp, rsp 
 
     mov rax, 15
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_get_pid:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 16
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_create_process:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 17
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_nice:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 18
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_kill:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 19
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_block:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 20
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_unblock:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 21
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_yield:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 22
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_wait_processes:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 23
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_ps:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 24
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_exit:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 25
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_malloc:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 26
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_realloc:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 27
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_free:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 28
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_unused_space:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 29
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_occupied_space:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 30
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_total_space:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 31
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_sem_open:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 32
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_sem_close:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 33
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_sem_post:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 34
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_sem_wait:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 35
     int 80h 
 
     mov rsp, rbp 

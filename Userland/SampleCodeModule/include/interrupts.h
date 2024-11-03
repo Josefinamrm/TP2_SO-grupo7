@@ -35,6 +35,49 @@ uint64_t _draw_array(uint64_t fontColor, uint64_t backgroundColor, uint64_t x, u
 
 uint64_t _flush_buffer();
 
+uint64_t _get_pid();
+
+int64_t _create_process(uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint64_t argv);
+
+void _nice(uint64_t pid, uint64_t newPrio);
+
+int64_t _kill(uint64_t pid);
+
+int64_t _block(uint64_t pid);
+
+int64_t _unblock(uint64_t pid);
+
+void _yield();
+
+void _wait_processes(uint64_t pid);
+
+void _ps();
+
+void _exit();
+
+// memory syscalls
+
+void * _malloc(uint64_t nbytes);
+
+void * _realloc(uint64_t ptr, uint64_t new_size); 
+
+void _free(uint64_t ptr);
+
+int _unused_space();
+
+int _occupied_space();
+
+int _total_space();
+
+// semaphore syscalls
+
+int16_t _sem_open(uint64_t name, uint64_t value);
+
+void _sem_close(uint64_t name);
+
+void _sem_post(uint64_t name);
+
+void _sem_wait(uint64_t name);
 
 #endif
 

@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /* videoDriver */
 #include <videoDriver.h>
 #include <bitmapFont.h>
@@ -54,7 +56,7 @@ VBEInfoPtr VBE_mode_info = (VBEInfoPtr)0x0000000000005C00;
 
 void drawPixel(uint32_t hexColor, uint64_t x, uint64_t y)
 {
-	if (x >= 0 && x < VBE_mode_info->width && y >= 0 && y < VBE_mode_info->height)
+	if (x < VBE_mode_info->width && y < VBE_mode_info->height)
 	{
 		uint8_t *framebuffer = (uint8_t *)VBE_mode_info->framebuffer;
 		uint64_t offset = (x * ((VBE_mode_info->bpp) / 8)) + (y * VBE_mode_info->pitch);
@@ -66,7 +68,7 @@ void drawPixel(uint32_t hexColor, uint64_t x, uint64_t y)
 
 void copyPixel(uint64_t new_x, uint64_t new_y, uint64_t old_x, uint64_t old_y)
 {
-	if (new_x >= 0 && new_x < VBE_mode_info->width && new_y >= 0 && new_y < VBE_mode_info->height)
+	if (new_x < VBE_mode_info->width && new_y < VBE_mode_info->height)
 	{
 		uint8_t *framebuffer = (uint8_t *)VBE_mode_info->framebuffer;
 		uint64_t oldOffset = (old_x * ((VBE_mode_info->bpp) / 8)) + (old_y * VBE_mode_info->pitch);

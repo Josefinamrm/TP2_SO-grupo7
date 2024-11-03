@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <stdint.h>
 #include <string.h>
 #include <lib.h>
@@ -5,13 +7,15 @@
 #include <naiveConsole.h>
 #include <videoDriver.h>
 #include <idtLoader.h>
+#include "memoryManager.h"
 
 #include <keyboardDriver.h>
 #include "include/idtLoader.h"
 #include <interrupts.h>
 #include <sound.h>
 #include <time.h>
-
+#include "dory.h"
+#include "processManager.h"
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -56,20 +60,12 @@ void *initializeKernelBinary()
 }
 
 int main()
-{
-	load_idt(); 	// Cargar la tabla de descriptores de interrupciones (IDT)
-
-	printArray("antes de entrar al test\n");
-
-
-	// test mm
-	int argc = 1;
-	char * argv[] = {"63488", NULL};
-	test_mm(argc, argv);
-
-
-	_setUser(); 	// Cambiar a modo usuario
-
+{	
+	_cli();
+	load_idt();
+	mm_init(FREE_MEM_START, TOTAL_HEADER_UNITS - 1);
+	init_function();
+	_sti();
 	printArray("You shouldn't be here chief..."); 	// Imprimir un mensaje (esto no debería ocurrir)
 
 	return 0;

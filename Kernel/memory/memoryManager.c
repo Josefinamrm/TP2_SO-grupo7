@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /* 
 
     Se mantiene una lista con todos los nodos de memoria, libre o ocupada
@@ -35,9 +37,9 @@ void mm_init(uint64_t memory_start, uint64_t size){
 
 
 // MALLOC
-void * mm_malloc(unsigned int nbytes){
+void * mm_malloc(uint64_t nbytes){
     Header *current;
-    unsigned nuints;
+    uint64_t nuints;
 
     nuints = (nbytes + header_size - 1)/header_size + 1;
 
@@ -92,8 +94,28 @@ void mm_free(void * ptr){
     }
 }
 
+void * mm_realloc(void * ptr, uint64_t new_size){
+    char * to_return = (void *) mm_malloc(new_size);
 
-// Función auxiliar usada por mm_occupied_space y por mm_free_space
+    if(to_return == NULL){
+        return NULL;
+    }
+
+    // Obtain block memory size
+    Header * ptr_hd = (Header *) ptr - 1;
+    int size = ptr_hd->s.size * sizeof(Header);
+
+    // Copy data from old pointer to new pointer
+    for (int i = 0; i < size; i++){
+        to_return[i] = ((char *) ptr)[i];
+    }
+
+    mm_free(ptr);
+    return (void *) to_return;
+}
+
+
+// auxiliary function used in mm_occupied_space and mm_free_space
 static int calculate_space(int condition){
     Header * current;
     int total = 0;

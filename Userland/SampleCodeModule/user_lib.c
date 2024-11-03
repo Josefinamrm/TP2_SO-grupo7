@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <user_syscalls.h>
 #include <user_lib.h>
 
@@ -122,6 +124,13 @@ void print_score(uint32_t fontColor, uint32_t backgroundColor, uint64_t x, uint6
 }
 
 
+void print_dec(int num){
+    char buf[256];
+    int_to_string(num, buf, 256);
+    print(buf);
+}
+
+
 int strcmp(const char *s1, const char *s2){
     while (*s1 == *s2++) {
         if (*s1++ == 0)
@@ -139,6 +148,24 @@ int parse_command_arg(char * str) {
     }
     return argC;
 }
+
+char * check_back(char * str, char * cmd) {
+    int i = 0;
+    
+    while (str[i] != '\0' && str[i] != ' ') {
+        cmd[i] = str[i]; 
+        i++;
+    }
+
+    cmd[i] = '\0'; 
+
+    if (str[i] == ' ') {
+        return &str[i + 1];
+    }
+    
+    return NULL;
+}
+
 
 void udraw_frame(uint32_t color, uint64_t x, uint64_t y, uint64_t size_x, uint64_t size_y, uint64_t thickness) {
 	usys_print_rect(color, x, y, size_x, thickness); 

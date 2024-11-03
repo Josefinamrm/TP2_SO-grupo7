@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <keyboardDriver.h>
 
 /* Disposición del teclado en inglés (US) */
@@ -86,11 +88,11 @@ void keyboard_handler()
     {
         capsFlag = !capsFlag;
     }
-    else if (scanCode >= 0 && scanCode < 128 && scanCodeTable[scanCode] != 0)
+    else if (scanCode < 90 && scanCodeTable[scanCode] != 0)
     {
         if (scanCodeTable[scanCode] >= 'a' && scanCodeTable[scanCode] <= 'z')
         { // si es una letra
-            if ((shiftFlag && !capsFlag) || (!shiftFlag && capsFlag))
+            if (shiftFlag ^ capsFlag)
             { // mayuscula
                 addToBuffer(shiftScanCodeTable[scanCode]);
             }

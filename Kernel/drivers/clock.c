@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <clock.h>
 #include <lib.h>
 
@@ -40,7 +42,7 @@ void timeToStr(char* reserve) {
 
     uint8_t s, m, h = hours();
     
-    reserve[0] = (h/10) % 10 + '0';
+    reserve[0] = (h/10) + '0';
     reserve[1] = h % 10 + '0';
 
     m = minutes();
