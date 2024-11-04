@@ -11,15 +11,14 @@
 #include "time.h"
 
 #define MAX_PROCESS 200
+#define MAX_FD 200
 #define PROCESS_STACK_SIZE 4096
 #define FINISH_SUCCESFULLY 0
 #define FINISH_ON_ERROR -1
 
+enum Type {STDIN = 0, STDOUT, STDERR, PIPE};
 
 // IDEA: CAMBIAR LA IMPL DE LISTA Y PROCESO A OTRO FILE NO POR AHORA
-
-// sería mas facil en el momento de crear el proceso decirle si escribe a la terminal o si escribe a un pipe (agodio)
-enum fd {STDIN=0, STDOUT, STDERR};
 
 typedef struct queue_info * children_queue;
 
@@ -28,6 +27,8 @@ typedef struct queue_info * process_queue;
 typedef struct queue_info * waiting_processes_queue;
 
 typedef struct p * process;
+
+typedef struct fd_struct * fd;
 
 /*--------------------------------------------------------- Process List Functions  ---------------------------------------------------------*/
 
@@ -90,6 +91,13 @@ uint8_t is_ready_queue_empty();
 
 // Returns the next available pid
 int16_t next_available_pid();
+
+/*--------------------------------------------------------- File Descriptor Functions Implementations ---------------------------------------------------------*/
+
+// mapping -> pipe ?
+fd * create_fd(enum Type type);
+
+void close_fd(uint8_t fd_number);
 
 /*--------------------------------------------------------- Syscalls ---------------------------------------------------------*/
 

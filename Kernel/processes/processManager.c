@@ -4,10 +4,16 @@
 #include "processManager.h"
 #define INIT_PID 1
 uint8_t idle_running;
-enum State {READY, RUNNING, BLOCKED, KILLED, ZOMBIE};
-
+enum State {READY = 0, RUNNING, BLOCKED, KILLED, ZOMBIE};
 
 /*--------------------------------------------------------- Process Control Structure ---------------------------------------------------------*/
+
+struct{
+    enum Type type;
+    // mapping to ... -> pipe
+    uint8_t open;
+    uint8_t read;
+}fd_struct;
 
 struct p{
 
@@ -19,7 +25,8 @@ struct p{
     uint64_t stack_pointer;
     uint64_t base_pointer;
     struct queue_info * child_list;
- 
+    fd file_descriptors[MAX_FD];
+
 };
 
 /*--------------------------------------------------------- Ready Process Queue ---------------------------------------------------------*/
@@ -347,6 +354,23 @@ int16_t next_available_pid(){
     return FINISH_ON_ERROR;
 }
 
+/*--------------------------------------------------------- File Descriptor Functions Implementations ---------------------------------------------------------*/
+
+static int16_t next_available_fd_number(fd file_descriptors[]){
+    for(int i=0; i < MAX_FD; i++){
+        if(file_descriptors[i] == NULL){
+            return i;
+        }
+    }
+    return FINISH_ON_ERROR;
+}
+
+// mapping -> pipe ?
+fd * create_fd(enum Type type, int16_t pid){
+    int16_t new_fd = next_available_fd_number()
+}
+
+void close_fd(uint8_t fd_number);
 
 /*--------------------------------------------------------- Process Syscall Implementations ---------------------------------------------------------*/
 
@@ -478,20 +502,6 @@ static void my_wait_process(int16_t pid){
             my_yield();
         }
     }
-    
-
-    /* t_node * current = p->child_list->front;
-    while(current != NULL && current->p->pid != pid){
-        current = current->next;
-    }
-
-
-        while(current->p->state == KILLED){
-            delete_child(p->child_list, current->p->pid, 1);
-
-        }
-        
-            force_timer_tick(); */
     
 }
 
