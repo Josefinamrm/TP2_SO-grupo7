@@ -17,11 +17,10 @@
 #define FINISH_ON_ERROR -1
 
 enum Type {STDIN = 0, STDOUT, STDERR, PIPE};
+enum Permission {READ = 0, WRITE};
 
 // IDEA: CAMBIAR LA IMPL DE LISTA Y PROCESO A OTRO FILE NO POR AHORA
 
-// sería mas facil en el momento de crear el proceso decirle si escribe a la terminal o si escribe a un pipe (agodio)
-enum fd {STDIN=0, STDOUT, STDERR};
 
 typedef struct{
     uint64_t function;
@@ -100,13 +99,11 @@ uint64_t idle_process_rsp();
 // Returns wether ready queue is empty (1) or not (0)
 uint8_t is_ready_queue_empty();
 
-// Returns the next available pid
-int16_t next_available_pid();
 
 /*--------------------------------------------------------- File Descriptor Functions Implementations ---------------------------------------------------------*/
 
 // mapping -> pipe ?
-fd * create_fd(enum Type type);
+int16_t open_fd(enum Type type, enum Permission permission, int16_t pipe_id, int16_t process_pid);
 
 void close_fd(uint8_t fd_number);
 

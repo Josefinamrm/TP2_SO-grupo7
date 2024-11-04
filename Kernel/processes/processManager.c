@@ -8,12 +8,12 @@ enum State {READY = 0, RUNNING, BLOCKED, KILLED, ZOMBIE};
 
 /*--------------------------------------------------------- Process Control Structure ---------------------------------------------------------*/
 
-struct{
+struct fd_struct{
     enum Type type;
-    // mapping to ... -> pipe
+    int16_t pipe_id;
     uint8_t open;
-    uint8_t read;
-}fd_struct;
+    uint8_t permission;
+};
 
 struct p{
 
@@ -345,7 +345,7 @@ uint8_t is_ready_queue_empty(){
 }
 
 // Returns the next available pid
-int16_t next_available_pid(){
+static int16_t next_available_pid(){
     for(int i=0; i < MAX_PROCESS; i++){
         if(process_array[i] == NULL){
             return i;
@@ -366,11 +366,34 @@ static int16_t next_available_fd_number(fd file_descriptors[]){
 }
 
 // mapping -> pipe ?
-fd * create_fd(enum Type type, int16_t pid){
-    int16_t new_fd = next_available_fd_number()
+int16_t open_fd(enum Type type, enum Permission permission, int16_t pipe_id, int16_t process_pid){
+
+    process p = process_array[process_pid];
+    int16_t fd_number = next_available_fd_number(p->file_descriptors);
+
+    if(fd_number > 0){
+
+        fd new_fd = (fd) mm_malloc(sizeof(struct fd_struct));
+        new_fd->open = 1;
+        new_fd->permission = permission;
+        new_fd->pipe_id = pipe_id;
+        new_fd->type = type;
+        p->file_descriptors[fd_number] = new_fd;
+        return fd_number;
+    }
+
+    return FINISH_ON_ERROR;
 }
 
-void close_fd(uint8_t fd_number);
+
+void close_fd(uint8_t fd_number){
+    process p = process_array[my_getpid()];
+    if(fd_number > MAX_FD || p->file_descriptors[fd_number] == NULL){
+        return;
+    }
+    mm_free(p->file_descriptors[fd_number]);
+    p->file_descriptors[fd_number] = NULL;
+}
 
 /*--------------------------------------------------------- Process Syscall Implementations ---------------------------------------------------------*/
 
@@ -398,6 +421,7 @@ int16_t my_create_process(parameters_structure * params){
         new_process->child_list = initialize_children_queue();
         add_to_ready_queue(new_process);
         process_array[new_process->pid] = new_process;
+        initialize_std_fd(new_pid);
         add_child(process_array[new_process->ppid]->child_list, new_process);
 
         process_counter++;
@@ -573,6 +597,13 @@ void my_ps(){
 
 /*--------------------------------------------------------- Base Processes and Functions ---------------------------------------------------------*/
 
+// Initializes standard file descriptors -> maybe change ?
+static void initialize_std_fd(int16_t pid){
+    open_fd(STDIN, READ, -1, pid);
+    open_fd(STDOUT, WRITE, -1, pid);
+    open_fd(STDERR, WRITE, -1, pid);
+}
+
 // Creates idle process
 static void create_idle_process(){
     process idle_process = (process) mm_malloc(sizeof(struct p));
@@ -588,12 +619,12 @@ static void create_idle_process(){
     idle_process->stack_pointer = _setup_stack_structure_asm((uint64_t)initial_rsp, (uint64_t)idle, 1, (uint64_t)argv);
     idle_process->child_list = initialize_children_queue();
     process_array[0] = idle_process;
+    initialize_std_fd(0);
     process_counter++;
 }
 
 
 void init_function(){
-
     ready_queue = initialize_queue();
     create_idle_process();
 }
