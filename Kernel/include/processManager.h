@@ -20,6 +20,17 @@ enum Type {STDIN = 0, STDOUT, STDERR, PIPE};
 
 // IDEA: CAMBIAR LA IMPL DE LISTA Y PROCESO A OTRO FILE NO POR AHORA
 
+// sería mas facil en el momento de crear el proceso decirle si escribe a la terminal o si escribe a un pipe (agodio)
+enum fd {STDIN=0, STDOUT, STDERR};
+
+typedef struct{
+    uint64_t function;
+    int16_t ppid;
+    uint8_t priority;
+    uint64_t argc;
+    char ** argv;
+}parameters_structure;
+
 typedef struct queue_info * children_queue;
 
 typedef struct queue_info * process_queue;
@@ -105,7 +116,7 @@ void close_fd(uint8_t fd_number);
 int16_t my_getpid();
 
 // Creates a new process
-int16_t my_create_process(uint64_t function, int16_t ppid, uint8_t priority, uint64_t argc, char ** argv);
+int16_t my_create_process(parameters_structure * params);
 
 // Exits the current process, killing it
 void my_exit();

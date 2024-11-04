@@ -43,7 +43,7 @@ int64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx
         case 16:
             return ksys_getpid();
         case 17:
-            return ksys_create_process(rdi, rsi, rdx, rcx, r8);
+            return ksys_create_process(rdi);
         case 18:
             return ksys_nice(rdi, rsi);
         case 19:
@@ -210,9 +210,9 @@ uint64_t ksys_getpid(){
 }
 
 
-int64_t ksys_create_process(uint64_t function, uint64_t ppid, uint64_t priority, uint64_t argc, uint64_t argv)
+int64_t ksys_create_process(uint64_t params)
 {
-    return my_create_process(function, (int16_t)ppid, (uint8_t)priority, argc, (char **)argv);
+    return my_create_process((parameters_structure *) params);
 }
 
 uint64_t ksys_nice(uint64_t pid, uint64_t newPrio){
