@@ -96,7 +96,9 @@ int main()
 {
     print("Bienvenido a ");
     print_color(GREEN,"OUR_OS\n");
-    print("Ingrese uno de los siguientes comandos:\n");
+    testsynchro();
+    while(1);
+    /* print("Ingrese uno de los siguientes comandos:\n");
     for(int i = 1; i < COMMAND_COUNT-1 ; i++){
             print_color(LIGHT_BLUE, commands[i].name_id);
             print(" | ");
@@ -128,7 +130,7 @@ int main()
         }
     } 
     usys_exit();
-    return 0;
+    return 0; */
 }
 
 void help() {
@@ -267,7 +269,7 @@ void mem() {
 }
 
 void testsynchro() {
-    char * argv[] = {"test synchro", "7", "1", NULL};
+    char * argv[] = {"test synchro", "10", "1", NULL};
     int pid = usys_create_process((uint64_t)testsynchro_ps, usys_get_pid(), 1, 3, argv); 
     if(foreground) 
         usys_wait_processes(pid);
