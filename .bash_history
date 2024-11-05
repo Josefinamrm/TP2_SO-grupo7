@@ -182,6 +182,7 @@ make clean all
 make clean all
 make clean all
 cd root
+<<<<<<< HEAD
 ./tgdb
 ./tgdb
 ./tgdb
@@ -194,3 +195,23 @@ cd root
 ./tgdb
 ./tgdb
 exit
+=======
+cd toolchain
+make clean all
+cd ..
+make clean all
+make clean all
+make clean all
+clear
+make clean all
+make clean all
+clear
+make clean all
+clear
+clear
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+>>>>>>> de7b4dd22a7dd137ce9b93c8de2babe0a0a7dba0
