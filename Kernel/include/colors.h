@@ -11,5 +11,7 @@
 #define PINK 0x00F33AF6
 #define PURPLE 0x00CB3AF6
 #define WHITE 0x00FFFFFF
+#define GRAY 0x00bebebe
+#define BLUE 0x000000FF
 
 #endif

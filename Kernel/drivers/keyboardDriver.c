@@ -8,7 +8,7 @@ static char scanCodeTable[] =
         0, ESC_KEY, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\b',
         '\t',
         'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\n',
-        0 /*LCtrl*/,
+        LCTRL_KEY,
         'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '|',
         LSHIFT_KEY, '\\', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/',
         0 /*RShift*/, '*', 0 /*LAlt*/, ' ' /*Space bar*/, 0 /*Caps Lock*/,
@@ -23,7 +23,7 @@ static char shiftScanCodeTable[] =
         0, ESC_KEY, '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '\b',
         '\t',
         'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', '\n',
-        0 /* LCtrl */,
+        LCTRL_KEY /* LCtrl */,
         'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '"', '|',
         LSHIFT_KEY, '\\', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '?',
         0 /* RShift */, '*', 0 /* LAlt */, ' ' /* Space bar */, 0 /* Caps Lock */,
@@ -33,6 +33,7 @@ static char shiftScanCodeTable[] =
 };
 
 static int shiftFlag = 0;
+static int ctrlFlag = 0;
 static int capsFlag = 0;
 
 int writeIndex = 0, readIndex = 0;
@@ -84,6 +85,14 @@ void keyboard_handler()
     { 
         shiftFlag = 0;
     }
+    else if (scanCode == LCTRL_KEY)
+    {
+        ctrlFlag = 1;
+    }
+    else if (scanCode == LCTRL_RELEASE_KEY)
+    {
+        ctrlFlag = 0;
+    }
     else if (scanCode == CAPS_LOCK)
     {
         capsFlag = !capsFlag;
@@ -95,6 +104,17 @@ void keyboard_handler()
             if (shiftFlag ^ capsFlag)
             { // mayuscula
                 addToBuffer(shiftScanCodeTable[scanCode]);
+            }
+            if(ctrlFlag && scanCodeTable[scanCode] == 'c')
+            {
+                printArray("^C");
+
+                if(my_getpid() > 2){
+                    my_exit_foreground();
+                }else{
+                    my_exit();
+                }
+                return;
             }
             else
             {

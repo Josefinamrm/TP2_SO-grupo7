@@ -110,6 +110,8 @@ int16_t my_create_process(parameters_structure * params);
 // Exits the current process, killing it
 void my_exit();
 
+void my_exit_foreground();
+
 // Changes process priority
 void my_nice(int16_t pid, uint8_t newPrio);
 
