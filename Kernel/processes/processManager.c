@@ -365,21 +365,20 @@ int16_t my_getpid(){
 
 
 // después veo que hago en el caso border  ###############################  ME QUEDE ACA
-int16_t my_create_process(uint64_t function, int16_t ppid, uint8_t priority, uint64_t argc, char ** argv){
-    _cli();
+int16_t my_create_process(parameters_structure * params){
     int16_t new_pid = next_available_pid();
-    if(new_pid > 0 && argc > 0){
+    if(new_pid > 0 && params->argc > 0){
         process new_process = (process) mm_malloc(sizeof(struct p));
         // is this correct? should i memcopy?
-        new_process->name = argv[0];
+        new_process->name = params->argv[0];
         new_process->pid = new_pid;
-        new_process->ppid = ppid;
-        new_process->priority = priority;
+        new_process->ppid = params->ppid;
+        new_process->priority = params->priority;
         new_process->state = READY;
         uint64_t * initial_rsp = (uint64_t *) mm_malloc(PROCESS_STACK_SIZE);
         initial_rsp += PROCESS_STACK_SIZE / sizeof(uint64_t);
         new_process->base_pointer = (uint64_t)initial_rsp;
-        new_process->stack_pointer = _setup_stack_structure_asm((uint64_t)initial_rsp, function, argc, (uint64_t)argv);
+        new_process->stack_pointer = _setup_stack_structure_asm((uint64_t)initial_rsp, params->function, params->argc, (uint64_t)params->argv);
         new_process->child_list = initialize_children_queue();
                                                               // rdi        rsi      rdx  rcx
         new_process->foreground = (uint8_t)argv[1];
@@ -390,7 +389,6 @@ int16_t my_create_process(uint64_t function, int16_t ppid, uint8_t priority, uin
         process_counter++;
         
     }
-    _sti();
     return new_pid;
 }
 
@@ -580,7 +578,6 @@ void my_ps(){
 
 // Creates idle process
 static void create_idle_process(){
-    _cli();
     process idle_process = (process) mm_malloc(sizeof(struct p));
     idle_process->name = "Idle";
     idle_process->pid = 0;
@@ -595,7 +592,6 @@ static void create_idle_process(){
     idle_process->child_list = initialize_children_queue();
     process_array[0] = idle_process;
     process_counter++;
-    _sti();
 }
 
 
@@ -607,7 +603,8 @@ void init_function(){
 
 void idle(){
     char * argv[] = {"Init", NULL};
-    my_create_process((uint64_t)init_process, 0, 1, 1, argv);
+    parameters_structure params = {(uint64_t)init_process, 0, 1, 1, argv};
+    my_create_process(&params);
     _idle();
 }
 
@@ -615,7 +612,8 @@ uint64_t test_sync(uint64_t argc, char *argv[]);
 
 void init_process(){
     char * argv[] = {"userland", NULL};
-    my_create_process((uint64_t)USERLAND_DIREC, my_getpid(), 1, 1, argv);
+    parameters_structure params = {(uint64_t)USERLAND_DIREC, my_getpid(), 1, 1, argv};
+    my_create_process(&params);
     my_wait(-1);
     my_exit();
 }
