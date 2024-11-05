@@ -12,7 +12,7 @@
 int64_t global; // shared memory
 
 void slowInc(int64_t *p, int64_t inc) {
-  uint64_t aux = *p;
+  int64_t aux = *p;
   usys_yield(); // This makes the race condition highly probable
   aux += inc;
   *p = aux;
@@ -67,8 +67,8 @@ uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
     return -1;
   }
 
-  char *argvDec[] = {"process_inc1", argv[1], "-1", argv[2], NULL};
-  char *argvInc[] = {"process_inc2",argv[1], "1", argv[2], NULL};
+  char *argvDec[] = {"process_dec", argv[1], "-1", argv[2], NULL};
+  char *argvInc[] = {"process_inc",argv[1], "1", argv[2], NULL};
 
   global = 0;
 

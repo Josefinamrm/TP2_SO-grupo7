@@ -181,3 +181,16 @@ cd ..
 make clean all
 make clean all
 make clean all
+cd root
+./tgdb
+./tgdb
+./tgdb
+./tgdb
+./tgdb
+./tgdb
+./tgdb
+./tgdb
+./tgdb
+./tgdb
+./tgdb
+exit

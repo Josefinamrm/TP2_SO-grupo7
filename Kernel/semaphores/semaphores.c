@@ -1,6 +1,7 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <semaphores.h>
+#include <videoDriver.h>
 
 sem_block * sem_array[MAX_SEM] = {0};
 
@@ -51,6 +52,9 @@ static int16_t get_sem_id(char * name){
 
 // Opens semaphore if it exists, if not it creates it and opens it
 int16_t my_sem_open(char * name, int value){
+    printArray("proceso abre el semaforo con pid ");
+    printDec(my_getpid());
+    putChar('\n');
     
     if(name == NULL || value < 0 || sem_counter == MAX_SEM){
         return FINISH_ON_ERROR;
@@ -111,8 +115,16 @@ void my_sem_post(char * name){
         if(sem_array[sem_block_id]->sem->value == 0){
             int16_t pid = dequeue(sem_array[sem_block_id]->wp_queue);
             my_unblock(pid);
+            printArray("Despues de desbloquear proceso");
+            printDec(pid);
+            putChar('\n');
         }
         sem_array[sem_block_id]->sem->value++;
+        printArray("post a semaforo que ahora tiene valor ");
+        printDec(sem_array[sem_block_id]->sem->value);
+        printArray(" por parte de ");
+        printDec(my_getpid());
+            putChar('\n');
         release(&(sem_array[sem_block_id]->lock));
     }
 }
@@ -130,9 +142,19 @@ void my_sem_wait(char * name){
             int16_t pid = my_getpid();
             enqueue(sem_array[sem_block_id]->wp_queue, pid);
             release(&(sem_array[sem_block_id]->lock));
+            printArray("Bloqueo proceso");
+            printDec(pid);
+            putChar('\n');
             my_block(pid);          // ??
-        }         
+            acquire(&(sem_array[sem_block_id]->lock));
+        }
         sem_array[sem_block_id]->sem->value--;
+        printArray("wait a semaforo que ahora tiene valor");
+        printDec(sem_array[sem_block_id]->sem->value);
+        printArray(" por parte de ");
+        printDec(my_getpid());
+                    putChar('\n');
+
         release(&(sem_array[sem_block_id]->lock));
     }
 }
