@@ -10,9 +10,9 @@ enum State {READY = 0, RUNNING, BLOCKED, KILLED, ZOMBIE};
 
 struct fd_struct{
     enum Type type;
-    int16_t pipe_id;
+    int16_t id;
     uint8_t open;
-    uint8_t permission;
+    enum Permission permission;
 };
 
 struct p{
