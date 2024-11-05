@@ -2,6 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 #include "processManager.h"
+
 #define INIT_PID 1
 uint8_t idle_running;
 enum State {READY, RUNNING, BLOCKED, KILLED, ZOMBIE};
@@ -599,7 +600,6 @@ static void create_idle_process(){
 
 
 void init_function(){
-
     ready_queue = initialize_queue();
     foreground_process = (process) mm_malloc(sizeof(struct p));
     create_idle_process();
@@ -618,16 +618,5 @@ void init_process(){
     my_create_process((uint64_t)USERLAND_DIREC, my_getpid(), 1, 1, argv);
     my_wait(-1);
     my_exit();
-    /* char * argv1[] = { "proceso_1", "3" ,NULL};
- 
-    int pid = my_create_process((uint64_t) process_1, my_getpid(), 1, 1, argv1);
-
-    timer_wait(3);
-    my_block(pid);
-    printArray("despues de bloquearlo\n");
-    timer_wait(1);
-    my_unblock(pid);
-    my_wait(-1);
-    my_exit(); */
 }
 

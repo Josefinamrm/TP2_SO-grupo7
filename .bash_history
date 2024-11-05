@@ -317,3 +317,42 @@ cd toolchain
 make clean all
 cd ..
 make clean all
+cd root
+clear
+cd toolchain
+make clean all
+cd ..
+make clean all
+make clean all
+cd ..
+cd root
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all

@@ -7,7 +7,7 @@
 #include <naiveConsole.h>
 #include <videoDriver.h>
 #include <idtLoader.h>
-#include "memoryManager.h"
+#include <memoryManager.h>
 
 #include <keyboardDriver.h>
 #include "include/idtLoader.h"
