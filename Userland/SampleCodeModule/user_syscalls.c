@@ -70,7 +70,8 @@ uint64_t usys_get_pid(){
 }
 
 int64_t usys_create_process(uint64_t function, int16_t ppid, uint8_t priority, uint64_t argc, char ** argv){
-    return _create_process(function, (uint64_t)ppid, (uint64_t)priority, argc, (uint64_t)argv);
+    parameters_structure params = {function, ppid, priority, argc, argv};
+    return _create_process((uint64_t)&params);
 }
 
 void usys_nice(int16_t pid, uint8_t newPrio){

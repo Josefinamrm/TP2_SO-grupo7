@@ -182,36 +182,160 @@ make clean all
 make clean all
 make clean all
 cd root
-<<<<<<< HEAD
-./tgdb
-./tgdb
-./tgdb
-./tgdb
-./tgdb
-./tgdb
-./tgdb
-./tgdb
-./tgdb
-./tgdb
-./tgdb
-exit
-=======
-cd toolchain
+
+cd root
+ls
+clear
+ls
+cd Toolchain
+make clean all
+cd ..
+make clean all
+clear
+cd Toolchain
 make clean all
 cd ..
 make clean all
 make clean all
 make clean all
 clear
+cd Toolchain
+make clean all
+cd ..
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+clear
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+cd root
+clear
+cd toolchain
+clear
+make clean all
+cd ..
+clean all
+make clean all
+make clean all
+make clean all
+make clean all
 make clean all
 make clean all
 clear
 make clean all
 clear
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+clear
+make clean all
+clear
+make clean all
+cear
+clear
+make clean all
+make clean all
+make clean all
 clear
 make clean all
 make clean all
 make clean all
 make clean all
 make clean all
->>>>>>> de7b4dd22a7dd137ce9b93c8de2babe0a0a7dba0
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+clear
+make clean all
+make clean
+make clean all
+make clean all
+clear
+make clean all
+clear
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+clear
+make clean all
+clear
+cd root
+make clean all
+clear
+cd toolchain
+make clean all
+cd ..
+make clean all
+cd root
+clear
+cd toolchain
+make clean all
+cd ..
+make clean all
+make clean all
+cd ..
+cd root
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all
+make clean all

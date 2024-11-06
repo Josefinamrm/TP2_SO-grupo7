@@ -7,7 +7,7 @@
 #include <naiveConsole.h>
 #include <videoDriver.h>
 #include <idtLoader.h>
-#include "memoryManager.h"
+#include <memoryManager.h>
 
 #include <keyboardDriver.h>
 #include "include/idtLoader.h"
@@ -62,6 +62,7 @@ void *initializeKernelBinary()
 int main()
 {	
 	_cli();
+	//dory_start();
 	load_idt();
 	mm_init(FREE_MEM_START, TOTAL_HEADER_UNITS - 1);
 	init_function();

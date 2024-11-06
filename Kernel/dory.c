@@ -12,7 +12,7 @@ static int middle_y = MAX_HEIGHT_PX / 2;
 
 void dory_start(){
 
-    drawArray(TURQUOISE, BLACK, middle_x - 82, middle_y - 12, "DORY OS");
+    drawArray(BLUE, BLACK, middle_x - 82, middle_y - 12, "DORY OS");
     timer_wait(3);
     clearScreen();
 }

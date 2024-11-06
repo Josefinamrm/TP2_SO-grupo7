@@ -19,12 +19,12 @@ print("Dentro de test processes\n");
   uint8_t alive = 0;
   uint8_t action;
   uint64_t max_processes;
-  char *argvAux[] = {"test process", NULL};
+  char *argvAux[] = {"test process",0, NULL};
 
-  if (argc != 2)
+  if (argc != 3)
     return -1;
 
-  if ((max_processes = satoi(argv[1])) <= 0)
+  if ((max_processes = satoi(argv[2])) <= 0)
     return -1;
 
   p_rq p_rqs[max_processes];

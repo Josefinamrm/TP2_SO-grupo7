@@ -23,17 +23,17 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
   int8_t inc;
   int8_t use_sem;
 
-  if (argc != 4){
+  if (argc != 5){
     return -1;
   }
 
-  if ((n = satoi(argv[1])) <= 0){
+  if ((n = satoi(argv[2])) <= 0){
     return -1;
   }
-  if ((inc = satoi(argv[2])) == 0){
+  if ((inc = satoi(argv[3])) == 0){
     return -1;
   }
-  if ((use_sem = satoi(argv[3])) < 0){
+  if ((use_sem = satoi(argv[4])) < 0){
     return -1;
   }
 
@@ -63,19 +63,19 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
 
 uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
   uint64_t pids[2 * TOTAL_PAIR_PROCESSES];
-  if (argc != 3){
+  if (argc != 4){
     return -1;
   }
 
-  char *argvDec[] = {"process_dec", argv[1], "-1", argv[2], NULL};
-  char *argvInc[] = {"process_inc",argv[1], "1", argv[2], NULL};
+  char *argvDec[] = {"process_inc1", 0, argv[2], "-1", argv[3], NULL};
+  char *argvInc[] = {"process_inc2", 0, argv[2], "1", argv[3], NULL};
 
   global = 0;
 
   uint64_t i;
   for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
-    pids[i + TOTAL_PAIR_PROCESSES] = usys_create_process((uint64_t)my_process_inc_ps, usys_get_pid(),1, 4, argvInc);
-    pids[i] = usys_create_process((uint64_t)my_process_inc_ps, usys_get_pid(),1, 4, argvDec);
+    pids[i + TOTAL_PAIR_PROCESSES] = usys_create_process((uint64_t)my_process_inc_ps, usys_get_pid(),1, 5, argvInc);
+    pids[i] = usys_create_process((uint64_t)my_process_inc_ps, usys_get_pid(),1, 5, argvDec);
   }
 
   for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
