@@ -43,7 +43,7 @@ int64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx
         case 16:
             return ksys_getpid();
         case 17:
-            return ksys_create_process(rdi);
+            return ksys_create_process(rdi, rsi, rdx, rcx, r8);
         case 18:
             return ksys_nice(rdi, rsi);
         case 19:
@@ -92,34 +92,64 @@ uint64_t ksys_read(uint64_t fd, uint64_t buffer, uint64_t count)
     int i = 0;
     char c;
     char *buff = (char *)buffer;
-    if (fd == STDIN)
+    int16_t fd_type = get_type((int16_t)fd);
+
+    if(fd == -1){
+        FINISH_ON_ERROR;
+    }
+
+    switch (fd)
     {
-        while (i < count && (c = get_char_from_buffer()) != 0)
-        {
+    case STDIN:
+        while(i<count){
+            c = get_char_from_buffer();
+            buff[i++] = c;
+        }
+        break;
+
+    case PIPE:
+        break;
+    
+    default:
+        break;
+    }
+
+    return i;
+
+    /* if (fd == STDIN){
+        while (i < count && (c = get_char_from_buffer()) != 0){
             buff[i++] = c;
         }
         return i;
     }
-    else if (fd == LASTIN)
-    {
-        while (i < count && (c = get_last_char_from_buffer()) != 0)
-        {
+    else if (fd == LASTIN){
+        while (i < count && (c = get_last_char_from_buffer()) != 0){
             buff[i++] = c;
         }
         return i;
     }
-    return 0;
+    return 0; */
 }
 
+// check error 
 uint64_t ksys_write(uint64_t fd, uint64_t buffer, uint64_t count)
 {
-    if (fd == STDOUT)
-    {
-        printArrayOfDimWithColor(WHITE, BLACK, (char *)buffer, count);
+    int16_t fd_type = get_type((int16_t)fd);
+    if(fd == -1){
+        return FINISH_ON_ERROR;
     }
-    else if (fd == STDERR)
+    switch (fd_type)
     {
+    case STDERR:
         printArrayOfDimWithColor(RED, BLACK, (char *)buffer, count);
+        break;
+    
+    case PIPE:
+        break;
+    
+    default:
+        printArrayOfDimWithColor(WHITE, BLACK, (char *)buffer, count);
+        break;
     }
     return count;
 }
@@ -210,9 +240,9 @@ uint64_t ksys_getpid(){
 }
 
 
-int64_t ksys_create_process(uint64_t params)
+int64_t ksys_create_process(uint64_t function, uint64_t argv, uint64_t foreground, uint64_t read_fd, uint64_t write_fd)
 {
-    return my_create_process((parameters_structure *) params);
+    return my_create_process(function, (char **)argv, (uint8_t)foreground, (int16_t)read_fd, (int16_t)write_fd);
 }
 
 uint64_t ksys_nice(uint64_t pid, uint64_t newPrio){
