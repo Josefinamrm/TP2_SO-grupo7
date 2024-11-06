@@ -5,7 +5,7 @@
 #include <shell.h>
 
 #define INPUT_SIZE 100 
-#define COMMAND_COUNT 17
+#define COMMAND_COUNT 19
 #define CANT_REGS 18
 #define TRUE 1
 #define FALSE 0
@@ -26,9 +26,10 @@ void testprio();
 void ps();
 void mem();
 void testsynchro(); 
-void testnosynchro();
 void loop();
 void cat();
+void wc();
+void filter();
 
 static char buffer[INPUT_SIZE] = {0};
 static int bufferIndex = 0;
@@ -55,7 +56,9 @@ static Command commands[] = {
     {"mem", mem, "Muestra informacion de la memoria.","No recibe argumentos."},
     {"testsynchro", testsynchro, "Crea el proceso para testear sincronizacion CON semaforos.","Recibe dos argumentos: cantidad de incrementos o decrementos y 1 o 0 (CON o SIN semáforos)."},
     {"loop", loop, "Imprime saludo y ID cada 2 segundos.","No recibe argumentos."},
-    {"cat", cat, "Imprime el stdin tal como lo recibe.","No recibe argumentos."}
+    {"cat", cat, "Imprime el stdin tal como lo recibe.","No recibe argumentos."},
+    {"wc", wc, "Cuenta la cantidad de palabras en el stdin.","No recibe argumentos."},
+    {"filter", filter, "Filtra el stdin y muestra solo las letras.","No recibe argumentos."}
 };
 
 void parse_command(char *str) {
@@ -117,6 +120,7 @@ int main()
     //         print(" | ");
     // } 
     // print_color(LIGHT_BLUE, commands[COMMAND_COUNT-1].name_id);
+
 
     /* print_color(GRAY,"Ingrese ");
     print_color(WHITE,"\"help\" ");
@@ -379,8 +383,22 @@ void loop(){
 }
 
 void cat(){
-    char * argv[] = {"cat", NULL};
-    int pid = usys_create_process((uint64_t) cat_ps, usys_get_pid(), 1, 1, argv);
+    char * argv[] = {"cat", foreground, NULL};
+    int pid = usys_create_process((uint64_t) cat_ps, usys_get_pid(), 1, 2, argv);
+    if(foreground)
+        usys_wait_processes(pid);
+}
+
+void wc(){
+    char * argv[] = {"wc", foreground, NULL};
+    int pid = usys_create_process((uint64_t) wc_ps, usys_get_pid(), 1, 2, argv);
+    if(foreground)
+        usys_wait_processes(pid);
+}
+
+void filter(){
+    char * argv[] = {"filter", foreground, NULL};
+    int pid = usys_create_process((uint64_t) filter_ps, usys_get_pid(), 1, 2, argv);
     if(foreground)
         usys_wait_processes(pid);
 }

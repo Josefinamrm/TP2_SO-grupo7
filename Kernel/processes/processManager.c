@@ -457,7 +457,6 @@ int16_t my_create_process(uint64_t function, char ** argv, uint8_t foreground, i
                                                               // rdi        rsi      rdx  rcx
         new_process->foreground = foreground;
         process_array[new_pid] = new_process;
-        
         add_to_ready_queue(new_process);
         initialize_fd(new_pid, new_process->ppid, read_fd, write_fd);
         add_child(process_array[new_process->ppid]->child_list, new_process);
