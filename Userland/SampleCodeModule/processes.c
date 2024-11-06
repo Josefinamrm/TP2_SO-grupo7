@@ -63,5 +63,88 @@ void loop_ps(){
 
 
 void cat_ps(){
-    
+    char buffer[100];
+    int bufferIndex = 0;
+    char c;
+    char reading = 1;
+    while (reading) {  // if ESC 
+        c = get_char();  // non-blocking read
+        if (c != 0) {
+            if (c == '\b' && bufferIndex > 0) {
+                bufferIndex--;
+                put_char(c);
+            } else if (c == '\n') {
+                print("\n");
+                buffer[bufferIndex] = '\0';  // Null-terminate the command
+                reading = 0;
+            } else if (c != '\b') {
+                put_char(c);
+                buffer[bufferIndex++] = c;
+           }
+        }
+    } 
+    usys_write(STDOUT, buffer, bufferIndex);
+    print("\n");
+    usys_exit();
+}
+
+
+void wc_ps(){
+    char * buffer;
+    int bufferIndex = 0;
+    int count = 1;
+    char c;
+    char reading = 1;
+    while (reading) {
+        c = get_char();
+        if (c != 0) {
+            if (c == '\b' && bufferIndex > 0) {
+                bufferIndex--;
+                put_char(c);
+            } else if (c == '\n') {
+                print("\n");
+                buffer[bufferIndex] = '\0';  // Null-terminate the command
+                reading = 0;
+           }else if(c == ' ' || c == '\n'){
+                put_char(c);
+               count++;
+            } else if (c != '\b') {
+                put_char(c);
+                buffer[bufferIndex++] = c;
+           }
+        }
+    } 
+    print_dec(count);
+    print("\n");
+    usys_exit();    
+}
+
+void filter_ps(){
+    char buffer[100];
+    int bufferIndex = 0;
+    char c;
+    char reading = 1;
+    while (reading) {  // if ESC 
+        c = get_char();  // non-blocking read
+        if (c != 0) {
+            if (c == '\b' && bufferIndex > 0) {
+                bufferIndex--;
+                put_char(c);
+            } else if (c == '\n') {
+                print("\n");
+                buffer[bufferIndex] = '\0';  // Null-terminate the command
+                reading = 0;
+            } 
+            else if(c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u'){
+                put_char(c);
+            }
+            else if (c != '\b') {
+                put_char(c);
+                buffer[bufferIndex++] = c;
+           }
+        }
+    } 
+    usys_write(STDOUT, buffer, bufferIndex);
+    print("\n");
+    usys_exit();
 }
