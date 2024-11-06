@@ -365,6 +365,7 @@ int16_t my_getpid(){
 
 
 // después veo que hago en el caso border  ###############################  ME QUEDE ACA
+
 int16_t my_create_process(parameters_structure * params){
     int16_t new_pid = next_available_pid();
     if(new_pid > 0 && params->argc > 0){
