@@ -11,23 +11,15 @@
 #include "time.h"
 
 #define MAX_PROCESS 200
+#define MAX_FD 200
 #define PROCESS_STACK_SIZE 4096
 #define FINISH_SUCCESFULLY 0
 #define FINISH_ON_ERROR -1
 
+enum Type {STDIN = 0, STDOUT, STDERR, PIPE};
+enum Permission {READ = 0, WRITE};
 
 // IDEA: CAMBIAR LA IMPL DE LISTA Y PROCESO A OTRO FILE NO POR AHORA
-
-// sería mas facil en el momento de crear el proceso decirle si escribe a la terminal o si escribe a un pipe (agodio)
-enum fd {STDIN=0, STDOUT, STDERR};
-
-typedef struct{
-    uint64_t function;
-    int16_t ppid;
-    uint8_t priority;
-    uint64_t argc;
-    char ** argv;
-}parameters_structure;
 
 typedef struct queue_info * children_queue;
 
@@ -36,6 +28,8 @@ typedef struct queue_info * process_queue;
 typedef struct queue_info * waiting_processes_queue;
 
 typedef struct p * process;
+
+typedef struct fd_struct * fd;
 
 /*--------------------------------------------------------- Process List Functions  ---------------------------------------------------------*/
 
@@ -96,8 +90,13 @@ uint64_t idle_process_rsp();
 // Returns wether ready queue is empty (1) or not (0)
 uint8_t is_ready_queue_empty();
 
-// Returns the next available pid
-int16_t next_available_pid();
+
+/*--------------------------------------------------------- File Descriptor Functions Implementations ---------------------------------------------------------*/
+
+// mapping -> pipe ?
+int16_t open_fd(enum Type type, enum Permission permission, int16_t pipe_id, int16_t process_pid);
+
+void close_fd(uint8_t fd_number);
 
 /*--------------------------------------------------------- Syscalls ---------------------------------------------------------*/
 

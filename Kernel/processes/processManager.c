@@ -5,10 +5,16 @@
 
 #define INIT_PID 1
 uint8_t idle_running;
-enum State {READY, RUNNING, BLOCKED, KILLED, ZOMBIE};
-
+enum State {READY = 0, RUNNING, BLOCKED, KILLED, ZOMBIE};
 
 /*--------------------------------------------------------- Process Control Structure ---------------------------------------------------------*/
+
+struct fd_struct{
+    enum Type type;
+    int16_t id;
+    uint8_t open;
+    enum Permission permission;
+};
 
 struct p{
 
@@ -20,9 +26,9 @@ struct p{
     uint64_t stack_pointer;
     uint64_t base_pointer;
     struct queue_info * child_list;
+    fd file_descriptors[MAX_FD];
+    uint8_t foreground; 
 
-    uint8_t foreground; // 1 if process is in foreground, 0 if not
- 
 };
 
 /*--------------------------------------------------------- Ready Process Queue ---------------------------------------------------------*/
@@ -346,7 +352,7 @@ uint8_t is_ready_queue_empty(){
 }
 
 // Returns the next available pid
-int16_t next_available_pid(){
+static int16_t next_available_pid(){
     for(int i=0; i < MAX_PROCESS; i++){
         if(process_array[i] == NULL){
             return i;
@@ -355,6 +361,46 @@ int16_t next_available_pid(){
     return FINISH_ON_ERROR;
 }
 
+/*--------------------------------------------------------- File Descriptor Functions Implementations ---------------------------------------------------------*/
+
+static int16_t next_available_fd_number(fd file_descriptors[]){
+    for(int i=0; i < MAX_FD; i++){
+        if(file_descriptors[i] == NULL){
+            return i;
+        }
+    }
+    return FINISH_ON_ERROR;
+}
+
+// mapping -> pipe ?
+int16_t open_fd(enum Type type, enum Permission permission, int16_t pipe_id, int16_t process_pid){
+
+    process p = process_array[process_pid];
+    int16_t fd_number = next_available_fd_number(p->file_descriptors);
+
+    if(fd_number > 0){
+
+        fd new_fd = (fd) mm_malloc(sizeof(struct fd_struct));
+        new_fd->open = 1;
+        new_fd->permission = permission;
+        new_fd->id = pipe_id;
+        new_fd->type = type;
+        p->file_descriptors[fd_number] = new_fd;
+        return fd_number;
+    }
+
+    return FINISH_ON_ERROR;
+}
+
+
+void close_fd(uint8_t fd_number){
+    process p = process_array[my_getpid()];
+    if(fd_number > MAX_FD || p->file_descriptors[fd_number] == NULL){
+        return;
+    }
+    mm_free(p->file_descriptors[fd_number]);
+    p->file_descriptors[fd_number] = NULL;
+}
 
 /*--------------------------------------------------------- Process Syscall Implementations ---------------------------------------------------------*/
 
@@ -365,7 +411,8 @@ int16_t my_getpid(){
 
 
 // después veo que hago en el caso border  ###############################  ME QUEDE ACA
-int16_t my_create_process(parameters_structure * params){
+
+int16_t my_create_process(uint64_t function, char ** argv, uint8_t foreground, ){
     int16_t new_pid = next_available_pid();
     if(new_pid > 0 && params->argc > 0){
         process new_process = (process) mm_malloc(sizeof(struct p));
@@ -384,6 +431,7 @@ int16_t my_create_process(parameters_structure * params){
         new_process->foreground = (uint8_t)params->argv[1];
         add_to_ready_queue(new_process);
         process_array[new_process->pid] = new_process;
+        initialize_std_fd(new_pid);
         add_child(process_array[new_process->ppid]->child_list, new_process);
 
         process_counter++;
@@ -490,20 +538,6 @@ static void my_wait_process(int16_t pid){
         }
     }
     
-
-    /* t_node * current = p->child_list->front;
-    while(current != NULL && current->p->pid != pid){
-        current = current->next;
-    }
-
-
-        while(current->p->state == KILLED){
-            delete_child(p->child_list, current->p->pid, 1);
-
-        }
-        
-            force_timer_tick(); */
-    
 }
 
 // Waits for all children to die -> free del stack pointer
@@ -576,6 +610,13 @@ void my_ps(){
 
 /*--------------------------------------------------------- Base Processes and Functions ---------------------------------------------------------*/
 
+// Initializes standard file descriptors -> maybe change ?
+static void initialize_std_fd(int16_t pid){
+    open_fd(STDIN, READ, -1, pid);
+    open_fd(STDOUT, WRITE, -1, pid);
+    open_fd(STDERR, WRITE, -1, pid);
+}
+
 // Creates idle process
 static void create_idle_process(){
     process idle_process = (process) mm_malloc(sizeof(struct p));
@@ -591,6 +632,7 @@ static void create_idle_process(){
     idle_process->stack_pointer = _setup_stack_structure_asm((uint64_t)initial_rsp, (uint64_t)idle, 1, (uint64_t)argv);
     idle_process->child_list = initialize_children_queue();
     process_array[0] = idle_process;
+    initialize_std_fd(0);
     process_counter++;
 }
 
@@ -617,4 +659,3 @@ void init_process(){
     my_wait(-1);
     my_exit();
 }
-

@@ -50,3 +50,38 @@ void * memcpy(void * destination, const void * source, uint64_t length)
 
 	return destination;
 }
+
+
+//función auxiliar
+static void reverse_string(char* str, int length) {
+    int start = 0;
+    int end = length - 1;
+    while (start < end) {
+        char temp = str[start];
+        str[start] = str[end];
+        str[end] = temp;
+        start++;
+        end--;
+    }
+}
+
+void int_to_string(int num, char* buf, int dim) {
+    int index = 0;
+
+    if (num == 0) {
+        if (dim > 1) {
+            buf[index++] = '0';
+            buf[index] = '\0';
+        }
+        return;
+    }
+
+    while (num != 0 && index < dim - 1) {
+        int digit = num % 10;
+        buf[index++] = digit + '0';
+        num /= 10;
+    }
+
+    buf[index] = '\0';
+    reverse_string(buf, index);
+}

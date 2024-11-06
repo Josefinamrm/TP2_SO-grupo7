@@ -1,6 +1,7 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <semaphores.h>
+#include <videoDriver.h>
 
 sem_block * sem_array[MAX_SEM] = {0};
 
@@ -108,7 +109,7 @@ void my_sem_post(char * name){
 
     if(sem_block_id != -1){
         acquire(&(sem_array[sem_block_id]->lock));
-        if(sem_array[sem_block_id]->sem->value == 0){
+        if(!is_empty(sem_array[sem_block_id]->wp_queue) && sem_array[sem_block_id]->sem->value == 0){
             int16_t pid = dequeue(sem_array[sem_block_id]->wp_queue);
             my_unblock(pid);
         }
@@ -126,14 +127,15 @@ void my_sem_wait(char * name){
 
     if(sem_block_id != -1){
         acquire(&(sem_array[sem_block_id]->lock));
-        if(sem_array[sem_block_id]->sem->value == 0){
+        while(sem_array[sem_block_id]->sem->value == 0){
             int16_t pid = my_getpid();
             enqueue(sem_array[sem_block_id]->wp_queue, pid);
             release(&(sem_array[sem_block_id]->lock));
-            my_block(pid);          // ??
-        }         
-        sem_array[sem_block_id]->sem->value--;
-        release(&(sem_array[sem_block_id]->lock));
+            my_block(pid);
+        }
+            sem_array[sem_block_id]->sem->value--;
+            release(&(sem_array[sem_block_id]->lock));
+        
     }
 }
 
