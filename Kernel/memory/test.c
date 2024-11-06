@@ -74,20 +74,23 @@
 //     // printf("%p\n",mm_malloc(5120));
 
 
-//     // printf("\n");
-//     void *ptr1 = mm_malloc(4096); // Solicitar 4KB
-//     void *ptr2 = mm_malloc(8192); // Solicitar 8KB
-//     void *ptr3 = mm_malloc(2048); // Solicitar 2KB
+//     void *ptr1 = mm_malloc(10240);
+//     printf("\n");
+//     void *ptr2 = mm_malloc(14336); 
+//     printf("\n");
+//     void *ptr3 = mm_malloc(5120); 
+//     printf("\n");
 
 //     // Imprimir estado de memoria
 //     printf("Espacio ocupado: %d bytes\n", mm_occupied_space());
 //     printf("Espacio no utilizado: %d bytes\n", mm_unused_space());
 
 //     // Libera bloques de memoria
+//     mm_free(ptr1);
+//     printf("\n");
 //     mm_free(ptr2);
-//      mm_free(ptr1);
+//     printf("\n");
 //     mm_free(ptr3);
-
 //     printf("\n");   
 
 //     // Imprimir estado de memoria después de liberar
