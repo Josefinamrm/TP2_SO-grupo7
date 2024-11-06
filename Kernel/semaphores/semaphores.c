@@ -52,9 +52,6 @@ static int16_t get_sem_id(char * name){
 
 // Opens semaphore if it exists, if not it creates it and opens it
 int16_t my_sem_open(char * name, int value){
-    printArray("proceso abre el semaforo con pid ");
-    printDec(my_getpid());
-    putChar('\n');
     
     if(name == NULL || value < 0 || sem_counter == MAX_SEM){
         return FINISH_ON_ERROR;
@@ -112,19 +109,11 @@ void my_sem_post(char * name){
 
     if(sem_block_id != -1){
         acquire(&(sem_array[sem_block_id]->lock));
-        if(sem_array[sem_block_id]->sem->value == 0){
+        if(!is_empty(sem_array[sem_block_id]->wp_queue) && sem_array[sem_block_id]->sem->value == 0){
             int16_t pid = dequeue(sem_array[sem_block_id]->wp_queue);
             my_unblock(pid);
-            printArray("Despues de desbloquear proceso");
-            printDec(pid);
-            putChar('\n');
         }
         sem_array[sem_block_id]->sem->value++;
-        printArray("post a semaforo que ahora tiene valor ");
-        printDec(sem_array[sem_block_id]->sem->value);
-        printArray(" por parte de ");
-        printDec(my_getpid());
-            putChar('\n');
         release(&(sem_array[sem_block_id]->lock));
     }
 }
@@ -138,24 +127,15 @@ void my_sem_wait(char * name){
 
     if(sem_block_id != -1){
         acquire(&(sem_array[sem_block_id]->lock));
-        if(sem_array[sem_block_id]->sem->value == 0){
+        while(sem_array[sem_block_id]->sem->value == 0){
             int16_t pid = my_getpid();
             enqueue(sem_array[sem_block_id]->wp_queue, pid);
             release(&(sem_array[sem_block_id]->lock));
-            printArray("Bloqueo proceso");
-            printDec(pid);
-            putChar('\n');
-            my_block(pid);          // ??
-            acquire(&(sem_array[sem_block_id]->lock));
+            my_block(pid);
         }
-        sem_array[sem_block_id]->sem->value--;
-        printArray("wait a semaforo que ahora tiene valor");
-        printDec(sem_array[sem_block_id]->sem->value);
-        printArray(" por parte de ");
-        printDec(my_getpid());
-                    putChar('\n');
-
-        release(&(sem_array[sem_block_id]->lock));
+            sem_array[sem_block_id]->sem->value--;
+            release(&(sem_array[sem_block_id]->lock));
+        
     }
 }
 
