@@ -13,6 +13,8 @@
 #define MAX_PROCESS 200
 #define MAX_FD 200
 #define PROCESS_STACK_SIZE 4096
+#define DEFAULT_PRIO 1
+
 #define FINISH_SUCCESFULLY 0
 #define FINISH_ON_ERROR -1
 
@@ -67,6 +69,10 @@ process_queue initialize_queue();
 void add_process_instance(process_queue queue, process p, uint8_t add_all);
 
 
+// Adds all instances of the process in the queue
+void add_all_process_instances(process_queue queue, process p);
+
+
 // Removes all or one instance of the process in the queue
 void remove_process_instance(process_queue queue, int16_t pid, uint8_t remove_all);
 
@@ -98,13 +104,15 @@ int16_t open_fd(enum Type type, enum Permission permission, int16_t pipe_id, int
 
 void close_fd(uint8_t fd_number);
 
+int16_t get_type(int16_t fd_number);
+
 /*--------------------------------------------------------- Syscalls ---------------------------------------------------------*/
 
 // Returns the pid of the current process
 int16_t my_getpid();
 
 // Creates a new process
-int16_t my_create_process(parameters_structure * params);
+int16_t my_create_process(uint64_t function, char ** argv, uint8_t foreground, int16_t read_fd, int16_t write_fd);
 
 // Exits the current process, killing it
 void my_exit();

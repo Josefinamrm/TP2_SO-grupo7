@@ -65,6 +65,7 @@ int main()
 	//dory_start();
 	load_idt();
 	mm_init(FREE_MEM_START, TOTAL_HEADER_UNITS - 1);
+	initialize_keyboard_driver();
 	init_function();
 	_sti();
 	printArray("You shouldn't be here chief..."); 	// Imprimir un mensaje (esto no debería ocurrir)

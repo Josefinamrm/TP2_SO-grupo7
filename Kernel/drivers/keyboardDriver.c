@@ -41,24 +41,57 @@ int writeIndex = 0, readIndex = 0;
 // Buffer circular para almacenar caracteres
 char buffer[BUFFER_SIZE] = {0};
 
+// Semáforos
+char * empty_slots = "keyboard_empty_slots";
+char * filled_slots = "keyboard_filled_slots";
+// Opcional creo
+char * mutex = "keyboard_mutex";         
+
+
+void initialize_keyboard_driver(){
+    my_sem_open(empty_slots, BUFFER_SIZE);
+    my_sem_open(filled_slots, 0);
+    my_sem_open(mutex, 1);
+}
+
+
+
 /* Función para agregar un carácter al buffer */
 static void addToBuffer(char c)
 {
-    if (writeIndex >= BUFFER_SIZE)
-    {
+    if (writeIndex >= BUFFER_SIZE){
         writeIndex = 0;
     }
+
+    my_sem_wait(empty_slots);
+    my_sem_wait(mutex);
     buffer[writeIndex++] = c;
+    my_sem_post(mutex);
+    my_sem_post(filled_slots);
+
 }
+
+
 
 /* Función para obtener un carácter del buffer */
 char get_char_from_buffer()
 {
-    if (readIndex == writeIndex)
+    if (readIndex >= BUFFER_SIZE){
+        readIndex = 0;
+    }
+
+    char to_ret;
+    my_sem_wait(filled_slots);
+    my_sem_wait(mutex);
+    to_ret = buffer[readIndex++];
+    my_sem_post(mutex);
+    my_sem_post(empty_slots);
+    return to_ret;
+    /* if (readIndex == writeIndex)
         return 0;
     if (readIndex >= BUFFER_SIZE)
         readIndex = 0;
-    return (buffer[readIndex++]);
+    return (buffer[readIndex++]); */
 }
 
 /* Función para obtener el último carácter ingresado en el buffer --> para el juego */

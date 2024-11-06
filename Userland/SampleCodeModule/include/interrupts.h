@@ -37,7 +37,7 @@ uint64_t _flush_buffer();
 
 uint64_t _get_pid();
 
-int64_t _create_process(uint64_t params);
+int64_t _create_process(uint64_t function, uint64_t argv, uint64_t foreground, uint64_t read_fd, uint64_t write_fd);
 
 void _nice(uint64_t pid, uint64_t newPrio);
 

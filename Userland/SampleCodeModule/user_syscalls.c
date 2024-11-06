@@ -69,9 +69,8 @@ uint64_t usys_get_pid(){
     return _get_pid();
 }
 
-int64_t usys_create_process(uint64_t function, int16_t ppid, uint8_t priority, uint64_t argc, char ** argv){
-    parameters_structure params = {function, ppid, priority, argc, argv};
-    return _create_process((uint64_t)&params);
+int64_t usys_create_process(uint64_t function, char ** argv, uint8_t foreground, int16_t read_fd, int16_t write_fd){
+    return _create_process(function, (uint64_t) argv, (uint64_t)foreground, (uint64_t)read_fd, (uint64_t)write_fd);
 }
 
 void usys_nice(int16_t pid, uint8_t newPrio){

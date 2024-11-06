@@ -7,14 +7,6 @@
 #define STDERR 2
 #define LASTIN 3
 
-typedef struct{
-    uint64_t function;
-    int16_t ppid;
-    uint8_t priority;
-    uint64_t argc;
-    char ** argv;
-}parameters_structure;
-
 
 int usys_read(int fd, char * buf, int size);
 
@@ -51,7 +43,7 @@ void flush_buffer();
 
 uint64_t usys_get_pid();
 
-int64_t usys_create_process(uint64_t function, int16_t ppid, uint8_t priority, uint64_t argc, char ** argv);
+int64_t usys_create_process(uint64_t function, char ** argv, uint8_t foreground, int16_t read_fd, int16_t write_fd);
 
 void usys_nice(int16_t pid, uint8_t new_prio);
 

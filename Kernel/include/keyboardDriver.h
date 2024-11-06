@@ -8,6 +8,7 @@
 #include <lib.h>
 #include <processManager.h>
 #include <videoDriver.h>
+#include <semaphores.h>
 
 #define ENTER_KEY 0x1C
 #define LSHIFT_KEY 0x2a
@@ -18,6 +19,8 @@
 #define LCTRL_RELEASE_KEY 0x9D
 
 #define BUFFER_SIZE 256 // verlo desp 
+
+void initialize_keyboard_driver();
 
 void keyboard_handler(); 
 

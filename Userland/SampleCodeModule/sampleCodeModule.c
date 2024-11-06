@@ -95,6 +95,22 @@ int main()
 {
     print("Bienvenido a ");
     print_color(BLUE,"DORY_OS\n");
+    print_color(GRAY,"Ingrese ");
+    print_color(WHITE,"\"help\" ");
+    print_color(GRAY,"para ver los comandos disponibles.\n");
+
+    print_color(GRAY, "Presione ");
+    print_color(WHITE, "\"b\" ");
+    print_color(GRAY, "luego del comando para ejecutar en background.\n");
+
+    char c;
+    int running = 1; 
+    currentFontSize = usys_get_font_size();
+    print_prompt_icon();
+    while (running){
+        c = get_char();
+        put_char(c);
+    }
     // print("Ingrese uno de los siguientes comandos:\n");
     // for(int i = 1; i < COMMAND_COUNT-1 ; i++){
     //         print_color(LIGHT_BLUE, commands[i].name_id);
@@ -102,7 +118,7 @@ int main()
     // } 
     // print_color(LIGHT_BLUE, commands[COMMAND_COUNT-1].name_id);
 
-    print_color(GRAY,"Ingrese ");
+    /* print_color(GRAY,"Ingrese ");
     print_color(WHITE,"\"help\" ");
     print_color(GRAY,"para ver los comandos disponibles.\n");
 
@@ -136,7 +152,7 @@ int main()
         }
     } 
     usys_exit();
-    return 0;
+    return 0; */
 }
 
 
