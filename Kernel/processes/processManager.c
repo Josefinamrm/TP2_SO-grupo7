@@ -2,6 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 #include "processManager.h"
+
 #define INIT_PID 1
 uint8_t idle_running;
 enum State {READY = 0, RUNNING, BLOCKED, KILLED, ZOMBIE};
@@ -21,13 +22,13 @@ struct p{
     int16_t pid;
     int16_t ppid;
     uint8_t priority;
-    uint8_t foregorund;
     enum State state;
     uint64_t stack_pointer;
     uint64_t base_pointer;
     struct queue_info * child_list;
     fd file_descriptors[MAX_FD];
-    
+    uint8_t foreground; 
+
 };
 
 /*--------------------------------------------------------- Ready Process Queue ---------------------------------------------------------*/
@@ -50,6 +51,8 @@ process_queue ready_queue;
 process process_array[MAX_PROCESS];
 
 uint8_t process_counter = 0;
+
+process foreground_process;
 
 /*--------------------------------------------------------- List Functions Implementations ---------------------------------------------------------*/
 
@@ -317,6 +320,9 @@ static uint64_t setup_next_running_process(){
 
     // Returns current running process
     ready_queue->front->p->state = RUNNING;
+    if(ready_queue->front->p->foreground == 1){
+        foreground_process = ready_queue->front->p;
+    }
     return ready_queue->front->p->stack_pointer;
 }
 
@@ -405,6 +411,7 @@ int16_t my_getpid(){
 
 
 // después veo que hago en el caso border  ###############################  ME QUEDE ACA
+
 int16_t my_create_process(uint64_t function, char ** argv, uint8_t foreground, ){
     int16_t new_pid = next_available_pid();
     if(new_pid > 0 && params->argc > 0){
@@ -420,6 +427,8 @@ int16_t my_create_process(uint64_t function, char ** argv, uint8_t foreground, )
         new_process->base_pointer = (uint64_t)initial_rsp;
         new_process->stack_pointer = _setup_stack_structure_asm((uint64_t)initial_rsp, params->function, params->argc, (uint64_t)params->argv);
         new_process->child_list = initialize_children_queue();
+                                                              // rdi        rsi      rdx  rcx
+        new_process->foreground = (uint8_t)params->argv[0];
         add_to_ready_queue(new_process);
         process_array[new_process->pid] = new_process;
         initialize_std_fd(new_pid);
@@ -438,6 +447,10 @@ void my_exit(){
     force_timer_tick();
 }
 
+void my_exit_foreground(){
+    my_kill(foreground_process->pid);
+    force_timer_tick();
+}
 
 // Changes process priority
 void my_nice(int16_t pid, uint8_t new_prio){
@@ -593,7 +606,6 @@ void my_ps(){
         }
         i++;
     }
-    
 }
 
 /*--------------------------------------------------------- Base Processes and Functions ---------------------------------------------------------*/
@@ -627,6 +639,7 @@ static void create_idle_process(){
 
 void init_function(){
     ready_queue = initialize_queue();
+    foreground_process = (process) mm_malloc(sizeof(struct p));
     create_idle_process();
 }
 
@@ -645,15 +658,4 @@ void init_process(){
     my_create_process(&params);
     my_wait(-1);
     my_exit();
-    /* char * argv1[] = { "proceso_1", "3" ,NULL};
- 
-    int pid = my_create_process((uint64_t) process_1, my_getpid(), 1, 1, argv1);
-
-    timer_wait(3);
-    my_block(pid);
-    printArray("despues de bloquearlo\n");
-    timer_wait(1);
-    my_unblock(pid);
-    my_wait(-1);
-    my_exit(); */
 }
