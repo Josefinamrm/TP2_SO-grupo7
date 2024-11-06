@@ -381,7 +381,7 @@ int16_t my_create_process(parameters_structure * params){
         new_process->stack_pointer = _setup_stack_structure_asm((uint64_t)initial_rsp, params->function, params->argc, (uint64_t)params->argv);
         new_process->child_list = initialize_children_queue();
                                                               // rdi        rsi      rdx  rcx
-        new_process->foreground = (uint8_t)params->argv[0];
+        new_process->foreground = (uint8_t)params->argv[1];
         add_to_ready_queue(new_process);
         process_array[new_process->pid] = new_process;
         add_child(process_array[new_process->ppid]->child_list, new_process);
