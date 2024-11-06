@@ -21,15 +21,6 @@ enum Permission {READ = 0, WRITE};
 
 // IDEA: CAMBIAR LA IMPL DE LISTA Y PROCESO A OTRO FILE NO POR AHORA
 
-
-typedef struct{
-    uint64_t function;
-    int16_t ppid;
-    uint8_t priority;
-    uint64_t argc;
-    char ** argv;
-}parameters_structure;
-
 typedef struct queue_info * children_queue;
 
 typedef struct queue_info * process_queue;

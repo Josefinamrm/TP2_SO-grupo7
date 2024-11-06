@@ -21,12 +21,13 @@ struct p{
     int16_t pid;
     int16_t ppid;
     uint8_t priority;
+    uint8_t foregorund;
     enum State state;
     uint64_t stack_pointer;
     uint64_t base_pointer;
     struct queue_info * child_list;
     fd file_descriptors[MAX_FD];
-
+    
 };
 
 /*--------------------------------------------------------- Ready Process Queue ---------------------------------------------------------*/
@@ -376,7 +377,7 @@ int16_t open_fd(enum Type type, enum Permission permission, int16_t pipe_id, int
         fd new_fd = (fd) mm_malloc(sizeof(struct fd_struct));
         new_fd->open = 1;
         new_fd->permission = permission;
-        new_fd->pipe_id = pipe_id;
+        new_fd->id = pipe_id;
         new_fd->type = type;
         p->file_descriptors[fd_number] = new_fd;
         return fd_number;
@@ -404,7 +405,7 @@ int16_t my_getpid(){
 
 
 // después veo que hago en el caso border  ###############################  ME QUEDE ACA
-int16_t my_create_process(parameters_structure * params){
+int16_t my_create_process(uint64_t function, char ** argv, uint8_t foreground, ){
     int16_t new_pid = next_available_pid();
     if(new_pid > 0 && params->argc > 0){
         process new_process = (process) mm_malloc(sizeof(struct p));
@@ -656,4 +657,3 @@ void init_process(){
     my_wait(-1);
     my_exit(); */
 }
-
