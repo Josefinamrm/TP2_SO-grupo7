@@ -71,8 +71,6 @@ static void addToBuffer(char c)
 
 }
 
-
-
 /* Función para obtener un carácter del buffer */
 char get_char_from_buffer()
 {
@@ -149,6 +147,11 @@ void keyboard_handler()
                 }
                 return;
             }
+            if (ctrlFlag && scanCodeTable[scanCode]=='d')
+            {
+                addToBuffer(EOF);
+                return;
+            } 
             else
             {
                 addToBuffer(scanCodeTable[scanCode]);

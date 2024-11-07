@@ -1,6 +1,6 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-#include "syscallDispatcher.h"
+#include <syscallDispatcher.h>
 #include <semaphores.h>
 
 int64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, uint64_t r8, uint64_t rax)
@@ -98,11 +98,15 @@ uint64_t ksys_read(uint64_t fd, uint64_t buffer, uint64_t count)
         FINISH_ON_ERROR;
     }
 
+
     switch (fd)
     {
     case STDIN:
         while(i<count){
             c = get_char_from_buffer();
+            if(c == EOF){
+                return 0; 
+            }
             buff[i++] = c;
         }
         break;
@@ -138,7 +142,7 @@ uint64_t ksys_write(uint64_t fd, uint64_t buffer, uint64_t count)
     if(fd == -1){
         return FINISH_ON_ERROR;
     }
-    switch (fd_type)
+    switch (fd)
     {
     case STDERR:
         printArrayOfDimWithColor(RED, BLACK, (char *)buffer, count);

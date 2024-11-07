@@ -18,6 +18,9 @@
 #define LCTRL_KEY 0x1D
 #define LCTRL_RELEASE_KEY 0x9D
 
+#define EOF (-1)
+
+
 #define BUFFER_SIZE 256 // verlo desp 
 
 void initialize_keyboard_driver();
