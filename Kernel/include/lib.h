@@ -19,6 +19,4 @@ uint8_t inb(uint16_t port);
 void acquire(uint8_t * lock);
 void release(uint8_t * lock);
 
-void int_to_string(int num, char* buf, int dim);
-
 #endif

@@ -22,17 +22,6 @@ static int16_t next_available_position(){
 
 
 
-// Compares 2 strings
-static int strcmp(const char *s1, const char *s2){
-    while (*s1 == *s2++) {
-        if (*s1++ == 0)
-			return 0;
-    }
-	return (*s1 - *--s2);
-}
-
-
-
 // Checks whether semaphore exists, if it exists it returns the id else returns -1
 static int16_t get_sem_id(char * name){
     uint16_t id = -1;
@@ -51,6 +40,7 @@ static int16_t get_sem_id(char * name){
 
 
 // Opens semaphore if it exists, if not it creates it and opens it
+// Returns 0 if successful, -1 on error
 int16_t my_sem_open(char * name, int value){
     
     if(name == NULL || value < 0 || sem_counter == MAX_SEM){

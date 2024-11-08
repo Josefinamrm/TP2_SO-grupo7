@@ -30,7 +30,7 @@ void eliminator()
     }
     usys_clear_screen();
     usys_change_draw_size(3);
-    usys_print_array_of_draw_size(PINK, BLACK, middle_x - strlen("BYE!!") / 2, middle_y, "BYE!!");
+    usys_print_array_of_draw_size(PINK, BLACK, middle_x - stringlen("BYE!!") / 2, middle_y, "BYE!!");
     usys_wait(2000);
     clearMatrix();
     flush_buffer();
@@ -299,8 +299,8 @@ void move_player(Player *player)
 
 void drawStartingScreen()
 {
-    int title_x = middle_x - (strlen("ELIMINATOR") / 2);
-    int string_x = middle_x - (strlen("Presiona la tecla C para Comenzar") / 2);
+    int title_x = middle_x - (stringlen("ELIMINATOR") / 2);
+    int string_x = middle_x - (stringlen("Presiona la tecla C para Comenzar") / 2);
 
     usys_clear_screen();
     udraw_frame(RED, 0, 0, MAX_WIDTH_PX, MAX_HEIGHT_PX, BORDER_SIZE); // outer frame
@@ -346,7 +346,7 @@ void drawEndGame()
 {
     usys_clear_screen();
     usys_change_draw_size(3);
-    int end_x = middle_x - (strlen("SALIR DEL JUEGO")) / 2;
+    int end_x = middle_x - (stringlen("SALIR DEL JUEGO")) / 2;
     usys_print_array_of_draw_size(WHITE, RED, end_x - 40, middle_y - 140, "SALIR DEL JUEGO");
     usys_change_draw_size(2);
     usys_print_array_of_draw_size(YELLOW, BLACK, end_x - 240, middle_y, "Desea salir del juego? Presione S (Si) o N (No)");

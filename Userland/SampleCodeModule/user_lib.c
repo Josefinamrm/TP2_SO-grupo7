@@ -21,27 +21,27 @@ void put_char(char c) {
 }
 
 void print_color(int fontColor, char * string) {
-    usys_write_color(fontColor, string, strlen(string));
+    usys_write_color(fontColor, string, stringlen(string)+1);
 }
 
 
 void print_error(char * string) {
-    usys_write(STDERR, string, strlen(string)); 
+    usys_write(STDERR, string, stringlen(string)+1); 
 }
 
 void print(char * string) {
-    usys_write(STDOUT, string, strlen(string)); 
+    usys_write(STDOUT, string, stringlen(string)+1); 
 }
 
-int strlen(char *arr)
-{
-    int i = 0;
-    while (arr[i++] != '\0')
-        ;
-    return i;
+int stringlen(const char *arr){
+    const char *s = arr;
+    while (*s != '\0') {
+        s++;
+    }
+    return s - arr;
 }
 
-void strcpy(char *destination, const char *source)
+void stringcpy(char *destination, const char *source)
 {
     while (*source != '\0')
     {
@@ -160,7 +160,7 @@ int parse_command_arg(char * str, char * arguments[]) {
 
         // allocate memory for argument
         arguments[argC] = (char *) usys_malloc(len + 1);
-        strcpy(arguments[argC], start);
+        stringcpy(arguments[argC], start);
         arguments[argC][len] = '\0'; // null-terminate
 
         // move to next argument
