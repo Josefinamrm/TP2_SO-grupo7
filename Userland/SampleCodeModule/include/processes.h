@@ -15,5 +15,7 @@ void testsynchro_ps(uint64_t argc, char *argv[]);
 void my_process_inc_ps(uint64_t argc, char *argv[]);
 void loop_ps();
 void cat_ps();
+void wc_ps();
+void filter_ps();
 
 #endif
