@@ -1,7 +1,6 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "syscallDispatcher.h"
-#include <semaphores.h>
 
 int64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, uint64_t r8, uint64_t rax)
 {
@@ -98,8 +97,7 @@ uint64_t ksys_read(uint64_t fd, uint64_t buffer, uint64_t count)
         FINISH_ON_ERROR;
     }
 
-    switch (fd)
-    {
+    switch (fd_type){
     case STDIN:
         while(i<count){
             c = get_char_from_buffer();
@@ -107,7 +105,12 @@ uint64_t ksys_read(uint64_t fd, uint64_t buffer, uint64_t count)
         }
         break;
 
+    // por ahora, después capaz cambiarlo al fd
     case PIPE:
+        int16_t pipe_id = get_id(fd);
+        if(pipe_id != -1){
+            i = read_pipe(pipe_id, (char *)buff, count);
+        }
         break;
     
     default:
@@ -145,6 +148,10 @@ uint64_t ksys_write(uint64_t fd, uint64_t buffer, uint64_t count)
         break;
     
     case PIPE:
+        int16_t pipe_id = get_id(fd);
+        if(pipe_id != -1){
+            return write_pipe(pipe_id, (char *)buffer, count);
+        }
         break;
     
     default:
@@ -242,7 +249,7 @@ uint64_t ksys_getpid(){
 
 int64_t ksys_create_process(uint64_t function, uint64_t argv, uint64_t foreground, uint64_t read_fd, uint64_t write_fd)
 {
-    return my_create_process(function, (char **)argv, (uint8_t)foreground, (int16_t)read_fd, (int16_t)write_fd);
+    return my_create_process(function, (char **)argv, (uint8_t)foreground, (int)read_fd, (int)write_fd);
 }
 
 uint64_t ksys_nice(uint64_t pid, uint64_t newPrio){

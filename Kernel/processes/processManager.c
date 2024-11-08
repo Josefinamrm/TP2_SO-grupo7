@@ -3,17 +3,20 @@
 
 #include "processManager.h"
 
+// Solo para testear pipes:
+#include <syscallDispatcher.h>
+
 #define INIT_PID 1
 uint8_t idle_running;
-enum State {READY = 0, RUNNING, BLOCKED, KILLED, ZOMBIE};
+typedef enum  {READY = 0, RUNNING, BLOCKED, KILLED, ZOMBIE} State;
 
 /*--------------------------------------------------------- Process Control Structure ---------------------------------------------------------*/
 
 struct fd_struct{
-    enum Type type;
+    Type type;
     int16_t id;
     uint8_t open;
-    enum Permission permission;
+    Permission permission;
 };
 
 struct p{
@@ -22,7 +25,7 @@ struct p{
     int16_t pid;
     int16_t ppid;
     uint8_t priority;
-    enum State state;
+    State state;
     uint64_t stack_pointer;
     uint64_t base_pointer;
     struct queue_info * child_list;
@@ -372,13 +375,13 @@ static int16_t next_available_fd_number(fd file_descriptors[]){
     return FINISH_ON_ERROR;
 }
 
-// mapping -> pipe ?
-int16_t open_fd(enum Type type, enum Permission permission, int16_t id, int16_t process_pid){
+
+int16_t open_fd(Type type, Permission permission, int16_t id, int16_t process_pid){
 
     process p = process_array[process_pid];
     int16_t fd_number = next_available_fd_number(p->file_descriptors);
 
-    if(fd_number <= 0){
+    if(fd_number >= 0){
 
         fd new_fd = (fd) mm_malloc(sizeof(struct fd_struct));
         new_fd->open = 1;
@@ -394,13 +397,37 @@ int16_t open_fd(enum Type type, enum Permission permission, int16_t id, int16_t 
 
 
 void close_fd(uint8_t fd_number){
-    process p = process_array[my_getpid()];
-    if(fd_number > MAX_FD || p->file_descriptors[fd_number] == NULL){
+    int16_t pid = my_getpid();
+    fd fd = process_array[pid]->file_descriptors[fd_number];
+    
+    if(fd_number > MAX_FD || fd == NULL){
         return;
     }
-    mm_free(p->file_descriptors[fd_number]);
-    p->file_descriptors[fd_number] = NULL;
+
+    if(fd->type == PIPE){
+        decrease_fds(fd->id, fd->permission);
+    }
+
+    mm_free(fd);
+    process_array[pid]->file_descriptors[fd_number] = NULL;
 }
+
+
+
+void close_type_fds(int16_t id, Type type){
+    process p = process_array[my_getpid()];
+
+    if(type == PIPE){
+        fd * fd_arr = p->file_descriptors;
+        for(int i = 0; i < MAX_FD; i++){
+            if(fd_arr[i] != NULL && fd_arr[i]->id == id){
+                mm_free(fd_arr[i]);
+                fd_arr[i] = NULL;
+            }
+        }
+    }
+}
+
 
 
 int16_t get_type(int16_t fd_number){
@@ -409,6 +436,15 @@ int16_t get_type(int16_t fd_number){
         return FINISH_ON_ERROR;
     }
     return fd->type;
+}
+
+
+int16_t get_id(int16_t fd_number){
+    fd fd = process_array[my_getpid()]->file_descriptors[fd_number];
+    if( fd == NULL ){
+        return FINISH_ON_ERROR;
+    }
+    return fd->id;
 }
 
 
@@ -428,16 +464,16 @@ static uint64_t calculate_argc(char ** argv){
 
 static void initialize_fd(int16_t pid, int16_t ppid, int16_t read_fd, int16_t write_fd){
     fd parent_read_fd = process_array[ppid]->file_descriptors[read_fd];
-    fd parend_write_fd = process_array[ppid]->file_descriptors[write_fd];
+    fd parent_write_fd = process_array[ppid]->file_descriptors[write_fd];
 
     open_fd(parent_read_fd->type, parent_read_fd->permission, parent_read_fd->id, pid);         // stdin
-    open_fd(parend_write_fd->type, parend_write_fd->permission, parend_write_fd->id, pid);      // stdout
+    open_fd(parent_write_fd->type, parent_write_fd->permission, parent_write_fd->id, pid);      // stdout
     open_fd(STDERR, WRITE, -1, pid);
 }
 
 // después veo que hago en el caso border  ###############################  ME QUEDE ACA
 
-int16_t my_create_process(uint64_t function, char ** argv, uint8_t foreground, int16_t read_fd, int16_t write_fd){
+int16_t my_create_process(uint64_t function, char ** argv, uint8_t foreground, int read_fd, int write_fd){
 
     int16_t new_pid = next_available_pid();
     uint64_t argc = calculate_argc(argv);
@@ -677,9 +713,32 @@ void idle(){
     _idle();
 }
 
+
+void read_from_pipe(){
+    char buf[10];
+    int bytes_read = ksys_read(STDIN, buf, 5);
+    printArrayOfDim(buf, bytes_read);
+    my_exit();
+}
+
+void write_to_pipe(){
+    char hola[] = "hola";
+    ksys_write(STDOUT, hola, 5); 
+    my_exit();
+}
+
 void init_process(){
-    char * argv[] = {"userland", NULL};
-    my_create_process((uint64_t)USERLAND_DIREC, argv, 1, STDIN, STDOUT);
+    char* argv1[] = {"read_from_pipe", NULL};
+    char* argv2[] = {"write_to_pipe", NULL};
+
+    int fds[2];
+    if(open_pipe(fds) == -1){
+        printArray("error creando pipes");
+    }
+    my_create_process((uint64_t)read_from_pipe, argv1, 1, fds[0], STDOUT);
+    my_create_process((uint64_t) write_to_pipe, argv2, 1, STDIN, fds[1]);
+    /* char * argv[] = {"userland", NULL};
+    my_create_process((uint64_t)USERLAND_DIREC, argv, 1, STDIN, STDOUT); */
     my_wait(-1);
     my_exit();
 }

@@ -4,14 +4,15 @@ struct pipe_struct{
     char * buffer;
     uint16_t read_index;
     uint16_t write_index;
-    // yo me encargo de última de la parte de block
-    // semaphore -> value == filled_slots  -> read: if filled_Slots == 0 block
-    // semaphore -> value == empty_slots -> write : if empty_slots == 0 block
-    char * filled_slots_sem;
+    char * full_slots_sem;
     char * empty_slots_sem;
+    uint8_t read_fds_open;
+    uint8_t write_fds_open;
+    // por ahora
+    uint32_t dim;
 };
 
-pipe pipe_array[MAX_PIPES];
+pipe_ptr pipe_array[MAX_PIPES];
 
 
 static int16_t next_available_pipe_number(){
@@ -24,19 +25,63 @@ static int16_t next_available_pipe_number(){
 }
 
 
+
+static void create_sem_name(char * sem_name, const char * name, int16_t pipe_number){
+    char pipe_number_buf[4];
+    concat_str(sem_name, name);
+    int_to_string(pipe_number, pipe_number_buf, 4);
+    concat_str(sem_name, pipe_number_buf);
+}
+
+
+
+static char read_char(pipe_ptr pipe){
+    char to_ret = pipe->buffer[pipe->read_index++];
+    if(pipe->read_index >= PIPE_SIZE){
+        pipe->read_index = 0;
+    }
+    return to_ret;
+}
+
+static void write_char(pipe_ptr pipe, char character){
+    pipe->buffer[pipe->write_index++] = character;
+    if(pipe->write_index >= PIPE_SIZE){
+        pipe->write_index = 0;
+    }
+}
+
+
+
 // Receives an array of integers representing file desciptors, fd[0] is for reading and fd[1] is for writing
-// On success, returns the pipe id, on error returns -1
-int16_t open_pipe(uint8_t file_descriptors[2]){
+// On success, returns 0, on error returns -1
+int16_t open_pipe(int file_descriptors[2]){
+
+    // se chinga, el nombre deberia ser un string literal o sea char * name = "name" 
+
     int16_t pipe_number = next_available_pipe_number();
+    char empty_name[9] = {'e','m','p','t','y'};
+    char full_name[8] = {'f','u','l','l'};
 
-    if(pipe_number > 0){
-        pipe new_pipe = (pipe) mm_malloc(sizeof(struct pipe_struct));
-        new_pipe->buffer = (char *) mm_malloc(BUFFER_SIZE);
+    if(pipe_number >= 0){
+        pipe_ptr new_pipe = (pipe_ptr) mm_malloc(sizeof(struct pipe_struct));
+        new_pipe->buffer = (char *) mm_malloc(PIPE_SIZE);
         new_pipe->read_index = new_pipe->write_index = 0;
-        // semaphores ?
-        pipe_array[pipe_number] = new_pipe;
+        new_pipe->empty_slots_sem = (char *) mm_malloc(9);
+        create_sem_name(new_pipe->empty_slots_sem, empty_name, pipe_number);
+        my_sem_open(new_pipe->empty_slots_sem, PIPE_SIZE);
+        new_pipe->full_slots_sem = (char *) mm_malloc(9);
+        create_sem_name(new_pipe->full_slots_sem, full_name, pipe_number);
+        my_sem_open(new_pipe->full_slots_sem, 0);
+        new_pipe->dim = 0;
 
-        return pipe_number;
+        int16_t pid = my_getpid();
+        file_descriptors[0] = open_fd(PIPE, READ, pipe_number, pid);
+        file_descriptors[1] = open_fd(PIPE, WRITE, pipe_number, pid);
+        new_pipe->read_fds_open = 1;
+        new_pipe->write_fds_open = 1;
+
+        pipe_array[pipe_number] = new_pipe;
+        return FINISH_SUCCESFULLY;
     }
     return FINISH_ON_ERROR;
 }
@@ -44,14 +89,100 @@ int16_t open_pipe(uint8_t file_descriptors[2]){
 
 
 // Optional : if all fd referring to pipe are closed then close pipe -> counter ?
-int16_t close_pipe(int16_t pipe_id);
+int16_t close_pipe(int16_t pipe_id){
+    pipe_ptr pipe = pipe_array[pipe_id];
+
+    if(pipe == NULL){
+        return FINISH_ON_ERROR;
+    }
+
+    close_type_fds(pipe_id, PIPE);
+    mm_free((void *)pipe->buffer);
+    my_sem_close(pipe->empty_slots_sem);
+    my_sem_close(pipe->full_slots_sem);
+    mm_free((void *)pipe->empty_slots_sem);
+    mm_free((void *)pipe->full_slots_sem);
+    mm_free((void *)pipe);
+    pipe_array[pipe_id] = NULL;
+    return FINISH_SUCCESFULLY;
+}
 
 
 
-// Blocking write -> if full block, returns n of characters written ?
-int16_t write_pipe(int16_t pipe_id, char * buf, int to_write);
+// Blocking write, returns number of bytes written. On error returns -1
+int16_t write_pipe(int16_t pipe_id, char * buf, int to_write){
+    pipe_ptr pipe = pipe_array[pipe_id];
+
+    if(pipe == NULL || pipe->read_fds_open == 0){
+        return FINISH_ON_ERROR;
+    }
+
+    int i = 0;
+
+    while(i < to_write && pipe->dim <= PIPE_SIZE){
+        my_sem_wait(pipe->empty_slots_sem);
+        write_char(pipe, buf[i++]);
+        pipe->dim++;
+        my_sem_post(pipe->full_slots_sem);
+    }
+
+    return i;
+}
 
 
 
-// Blocking read -> if empty block, returns n of characters read ?
-int16_t read_pipe(int16_t pipe_id, char * buf, int to_read);
+// Blocking read , returns number of bytes read. On error returns -1 and upon reading eof returns 0
+int16_t read_pipe(int16_t pipe_id, char * buf, int to_read){
+    pipe_ptr pipe = pipe_array[pipe_id];
+
+    if(pipe == NULL){
+        return FINISH_ON_ERROR;
+    }
+    
+    if(pipe->dim == 0 && pipe->write_fds_open == 0){
+        return FINISH_SUCCESFULLY;
+    }
+
+    int i = 0;
+
+    do{
+        my_sem_wait(pipe->full_slots_sem);
+        buf[i++] = read_char(pipe);
+        pipe->dim--;
+        my_sem_post(pipe->empty_slots_sem);
+    }while(i < to_read && pipe->dim > 0);
+
+    return i;
+}
+
+
+
+static void modify_fds(int16_t pipe_id, Permission permission, int inc){
+    pipe_ptr pipe = pipe_array[pipe_id];
+
+    if(pipe == NULL || pipe->read_fds_open == 0 || pipe->write_fds_open == 0)
+        return FINISH_ON_ERROR;
+
+    switch (permission)
+    {
+    case READ:
+        pipe->read_fds_open += inc;
+        break;
+    
+    case WRITE:
+        pipe->write_fds_open += inc;
+        break;
+    }
+}
+
+
+
+void increase_fds(int16_t pipe_id, Permission permission){
+    modify_fds(pipe_id, permission, 1);
+}
+
+
+
+void decrease_fds(int16_t pipe_id, Permission permission){
+    modify_fds(pipe_id, permission, -1);
+}

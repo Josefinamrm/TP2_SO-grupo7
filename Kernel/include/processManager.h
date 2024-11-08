@@ -9,6 +9,7 @@
 #include <lib.h>
 #include "videoDriver.h"
 #include "time.h"
+//#include <pipes.h> //-> si lo pongo aca me da error 
 
 #define MAX_PROCESS 200
 #define MAX_FD 200
@@ -18,8 +19,8 @@
 #define FINISH_SUCCESFULLY 0
 #define FINISH_ON_ERROR -1
 
-enum Type {STDIN = 0, STDOUT, STDERR, PIPE};
-enum Permission {READ = 0, WRITE};
+typedef enum {STDIN = 0, STDOUT, STDERR, PIPE} Type;
+typedef enum {READ = 0, WRITE} Permission;
 
 // IDEA: CAMBIAR LA IMPL DE LISTA Y PROCESO A OTRO FILE NO POR AHORA
 
@@ -32,6 +33,8 @@ typedef struct queue_info * waiting_processes_queue;
 typedef struct p * process;
 
 typedef struct fd_struct * fd;
+
+#include <pipes.h> // aca no me da error
 
 /*--------------------------------------------------------- Process List Functions  ---------------------------------------------------------*/
 
@@ -100,11 +103,15 @@ uint8_t is_ready_queue_empty();
 /*--------------------------------------------------------- File Descriptor Functions Implementations ---------------------------------------------------------*/
 
 // mapping -> pipe ?
-int16_t open_fd(enum Type type, enum Permission permission, int16_t pipe_id, int16_t process_pid);
+int16_t open_fd(Type type, Permission permission, int16_t pipe_id, int16_t process_pid);
 
 void close_fd(uint8_t fd_number);
 
+void close_type_fds(int16_t id, Type type);
+
 int16_t get_type(int16_t fd_number);
+
+int16_t get_id(int16_t fd_number);
 
 /*--------------------------------------------------------- Syscalls ---------------------------------------------------------*/
 
@@ -112,7 +119,7 @@ int16_t get_type(int16_t fd_number);
 int16_t my_getpid();
 
 // Creates a new process
-int16_t my_create_process(uint64_t function, char ** argv, uint8_t foreground, int16_t read_fd, int16_t write_fd);
+int16_t my_create_process(uint64_t function, char ** argv, uint8_t foreground, int read_fd, int write_fd);
 
 // Exits the current process, killing it
 void my_exit();

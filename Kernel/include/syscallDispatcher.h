@@ -11,6 +11,7 @@
 #include "processManager.h"
 #include "memoryManager.h"
 #include <semaphores.h>
+#include <pipes.h>
 
 #define STDIN 0
 #define STDOUT 1
