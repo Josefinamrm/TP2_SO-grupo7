@@ -4,23 +4,17 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <standard_types.h>
 #include <memoryManager.h>
 #include <interrupts.h>
 #include <lib.h>
 #include "videoDriver.h"
 #include "time.h"
-//#include <pipes.h> //-> si lo pongo aca me da error 
 
 #define MAX_PROCESS 200
 #define MAX_FD 200
 #define PROCESS_STACK_SIZE 4096
 #define DEFAULT_PRIO 1
-
-#define FINISH_SUCCESFULLY 0
-#define FINISH_ON_ERROR -1
-
-typedef enum {STDIN = 0, STDOUT, STDERR, PIPE} Type;
-typedef enum {READ = 0, WRITE} Permission;
 
 // IDEA: CAMBIAR LA IMPL DE LISTA Y PROCESO A OTRO FILE NO POR AHORA
 
@@ -34,7 +28,7 @@ typedef struct p * process;
 
 typedef struct fd_struct * fd;
 
-#include <pipes.h> // aca no me da error
+#include <pipes.h>
 
 /*--------------------------------------------------------- Process List Functions  ---------------------------------------------------------*/
 
@@ -102,12 +96,17 @@ uint8_t is_ready_queue_empty();
 
 /*--------------------------------------------------------- File Descriptor Functions Implementations ---------------------------------------------------------*/
 
-// mapping -> pipe ?
+// Opens new file descriptor
 int16_t open_fd(Type type, Permission permission, int16_t pipe_id, int16_t process_pid);
 
+// Closes file descriptor
 void close_fd(uint8_t fd_number);
 
-void close_type_fds(int16_t id, Type type);
+// Writes to file descriptor
+int64_t write_to_fd(int16_t fd_number, char * buffer, int to_write);
+
+// Reads from file descriptor
+int64_t read_from_fd(int16_t fd_number, char * buffer, int to_write);
 
 int16_t get_type(int16_t fd_number);
 

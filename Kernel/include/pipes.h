@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <processManager.h>
+#include <standard_types.h>
 #include <semaphores.h>
 
 #define PIPE_SIZE 4096
@@ -24,10 +25,7 @@ int16_t write_pipe(int16_t pipe_id, char * buf, int to_write);
 // Blocking read -> if empty block, returns n of characters read ?
 int16_t read_pipe(int16_t pipe_id, char * buf, int to_read);
 
-// Increases file descriptor and returns its new value, on error returns -1
-void increase_fds(int16_t pipe_id, Permission permission);
-
-// Decreases file descriptor and returns its new value, on error returns -1
-void decrease_fds(int16_t pipe_id, Permission permission);
+// Closes pipe end, indicated in permission
+void close_fd_end(int16_t pipe_id, Permission permission);
 
 #endif

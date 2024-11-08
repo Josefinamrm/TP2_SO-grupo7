@@ -3,6 +3,7 @@
 
 #include <lib.h>
 #include <processManager.h>
+#include <standard_types.h>
 #include <stringsLib.h>
 #define MAX_SEM 400
 

@@ -376,6 +376,8 @@ static int16_t next_available_fd_number(fd file_descriptors[]){
 }
 
 
+
+// Opens new file descriptor
 int16_t open_fd(Type type, Permission permission, int16_t id, int16_t process_pid){
 
     process p = process_array[process_pid];
@@ -396,6 +398,8 @@ int16_t open_fd(Type type, Permission permission, int16_t id, int16_t process_pi
 }
 
 
+
+// Closes file descriptor
 void close_fd(uint8_t fd_number){
     int16_t pid = my_getpid();
     fd fd = process_array[pid]->file_descriptors[fd_number];
@@ -405,7 +409,7 @@ void close_fd(uint8_t fd_number){
     }
 
     if(fd->type == PIPE){
-        decrease_fds(fd->id, fd->permission);
+        close_fd_end(fd->id, fd->permission);
     }
 
     mm_free(fd);
@@ -414,18 +418,67 @@ void close_fd(uint8_t fd_number){
 
 
 
-void close_type_fds(int16_t id, Type type){
-    process p = process_array[my_getpid()];
+// Writes to file descriptor
+int64_t write_to_fd(int16_t fd_number, char * buffer, int to_write){
+    int16_t fd_type = get_type((int16_t)fd_number);
 
-    if(type == PIPE){
-        fd * fd_arr = p->file_descriptors;
-        for(int i = 0; i < MAX_FD; i++){
-            if(fd_arr[i] != NULL && fd_arr[i]->id == id){
-                mm_free(fd_arr[i]);
-                fd_arr[i] = NULL;
-            }
-        }
+    if(fd_type == -1){
+        return FINISH_ON_ERROR;
     }
+
+    switch (fd_type)
+    {
+    case STDERR:
+        printArrayOfDimWithColor(RED, BLACK, buffer, to_write);
+        break;
+    
+    case PIPE:
+        int16_t pipe_id = get_id(fd_number);
+        if(pipe_id != -1){
+            return write_pipe(pipe_id, buffer, to_write);
+        }
+        break;
+    
+    default:
+        printArrayOfDimWithColor(WHITE, BLACK, buffer, to_write);
+        break;
+    }
+    return to_write;
+}
+
+
+
+// Reads from file descriptor
+int64_t read_from_fd(int16_t fd_number, char * buffer, int to_write){
+    int i = 0;
+    char c;
+    int16_t fd_type = get_type((int16_t)fd_number);
+
+    if(fd_type == -1){
+        return FINISH_ON_ERROR;
+    }
+
+    switch (fd_type){
+    case STDIN:
+        while(i < to_write){
+            c = get_char_from_buffer();
+            buffer[i++] = c;
+        }
+        break;
+
+    // por ahora, después capaz cambiarlo al fd
+    case PIPE:
+        int16_t pipe_id = get_id(fd_number);
+        if(pipe_id != -1){
+            i = read_pipe(pipe_id, buffer, to_write);
+        }
+        break;
+    
+    default:
+        break;
+    }
+
+    return i;
 }
 
 

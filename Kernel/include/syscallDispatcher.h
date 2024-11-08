@@ -22,8 +22,8 @@
 extern char getScanCode();
 extern int getTime(int timeUnit);
 
-uint64_t ksys_read(uint64_t fd, uint64_t buffer, uint64_t count);
-uint64_t ksys_write(uint64_t fd, uint64_t buffer, uint64_t count);
+int64_t ksys_read(uint64_t fd, uint64_t buffer, uint64_t count);
+int64_t ksys_write(uint64_t fd, uint64_t buffer, uint64_t count);
 uint64_t ksys_change_draw_size(uint64_t size);
 uint64_t ksys_print_array_of_draw_size(uint64_t fontColor, uint64_t backgroundColor, uint64_t x, uint64_t y, uint64_t buf);
 uint64_t ksys_write_color(uint64_t fontColor, uint64_t buffer, uint64_t count);

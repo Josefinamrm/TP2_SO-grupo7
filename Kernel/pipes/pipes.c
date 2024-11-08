@@ -6,8 +6,8 @@ struct pipe_struct{
     uint16_t write_index;
     char * full_slots_sem;
     char * empty_slots_sem;
-    uint8_t read_fds_open;
-    uint8_t write_fds_open;
+    int16_t read_fd;
+    int16_t write_fd;
     // por ahora
     uint32_t dim;
 };
@@ -64,21 +64,28 @@ int16_t open_pipe(int file_descriptors[2]){
 
     if(pipe_number >= 0){
         pipe_ptr new_pipe = (pipe_ptr) mm_malloc(sizeof(struct pipe_struct));
+        if(new_pipe == NULL){
+            return FINISH_ON_ERROR;
+        }
+
         new_pipe->buffer = (char *) mm_malloc(PIPE_SIZE);
+
+        if(new_pipe->buffer == NULL){
+            return FINISH_ON_ERROR;
+        }
+
         new_pipe->read_index = new_pipe->write_index = 0;
         new_pipe->empty_slots_sem = (char *) mm_malloc(9);
+        new_pipe->full_slots_sem = (char *) mm_malloc(9);
         create_sem_name(new_pipe->empty_slots_sem, empty_name, pipe_number);
         my_sem_open(new_pipe->empty_slots_sem, PIPE_SIZE);
-        new_pipe->full_slots_sem = (char *) mm_malloc(9);
         create_sem_name(new_pipe->full_slots_sem, full_name, pipe_number);
         my_sem_open(new_pipe->full_slots_sem, 0);
         new_pipe->dim = 0;
 
         int16_t pid = my_getpid();
-        file_descriptors[0] = open_fd(PIPE, READ, pipe_number, pid);
-        file_descriptors[1] = open_fd(PIPE, WRITE, pipe_number, pid);
-        new_pipe->read_fds_open = 1;
-        new_pipe->write_fds_open = 1;
+        new_pipe->read_fd = file_descriptors[0] = open_fd(PIPE, READ, pipe_number, pid);
+        new_pipe->write_fd = file_descriptors[1] = open_fd(PIPE, WRITE, pipe_number, pid);
 
         pipe_array[pipe_number] = new_pipe;
         return FINISH_SUCCESFULLY;
@@ -96,7 +103,8 @@ int16_t close_pipe(int16_t pipe_id){
         return FINISH_ON_ERROR;
     }
 
-    close_type_fds(pipe_id, PIPE);
+    close_fd(pipe->read_fd);
+    close_fd(pipe->write_fd);
     mm_free((void *)pipe->buffer);
     my_sem_close(pipe->empty_slots_sem);
     my_sem_close(pipe->full_slots_sem);
@@ -113,7 +121,7 @@ int16_t close_pipe(int16_t pipe_id){
 int16_t write_pipe(int16_t pipe_id, char * buf, int to_write){
     pipe_ptr pipe = pipe_array[pipe_id];
 
-    if(pipe == NULL || pipe->read_fds_open == 0){
+    if(pipe == NULL || pipe->read_fd == -1){
         return FINISH_ON_ERROR;
     }
 
@@ -139,7 +147,7 @@ int16_t read_pipe(int16_t pipe_id, char * buf, int to_read){
         return FINISH_ON_ERROR;
     }
     
-    if(pipe->dim == 0 && pipe->write_fds_open == 0){
+    if(pipe->dim == 0 && pipe->write_fd == -1){
         return FINISH_SUCCESFULLY;
     }
 
@@ -157,32 +165,21 @@ int16_t read_pipe(int16_t pipe_id, char * buf, int to_read){
 
 
 
-static void modify_fds(int16_t pipe_id, Permission permission, int inc){
+void close_fd_end(int16_t pipe_id, Permission permission){
     pipe_ptr pipe = pipe_array[pipe_id];
 
-    if(pipe == NULL || pipe->read_fds_open == 0 || pipe->write_fds_open == 0)
+    if(pipe == NULL || pipe->read_fd == -1 || pipe->write_fd == 1){
         return FINISH_ON_ERROR;
+    }
 
     switch (permission)
     {
     case READ:
-        pipe->read_fds_open += inc;
+        pipe->read_fd = -1;
         break;
     
     case WRITE:
-        pipe->write_fds_open += inc;
+        pipe->write_fd = -1;
         break;
     }
-}
-
-
-
-void increase_fds(int16_t pipe_id, Permission permission){
-    modify_fds(pipe_id, permission, 1);
-}
-
-
-
-void decrease_fds(int16_t pipe_id, Permission permission){
-    modify_fds(pipe_id, permission, -1);
 }

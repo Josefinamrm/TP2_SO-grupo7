@@ -86,87 +86,21 @@ int64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx
     return FINISH_SUCCESFULLY;
 }
 
-uint64_t ksys_read(uint64_t fd, uint64_t buffer, uint64_t count)
+int64_t ksys_read(uint64_t fd, uint64_t buffer, uint64_t count)
 {
-    int i = 0;
-    char c;
-    char *buff = (char *)buffer;
-    int16_t fd_type = get_type((int16_t)fd);
-
-    if(fd == -1){
-        FINISH_ON_ERROR;
-    }
-
-    switch (fd_type){
-    case STDIN:
-        while(i<count){
-            c = get_char_from_buffer();
-            buff[i++] = c;
-        }
-        break;
-
-    // por ahora, después capaz cambiarlo al fd
-    case PIPE:
-        int16_t pipe_id = get_id(fd);
-        if(pipe_id != -1){
-            i = read_pipe(pipe_id, (char *)buff, count);
-        }
-        break;
-    
-    default:
-        break;
-    }
-
-    return i;
-
-    /* if (fd == STDIN){
-        while (i < count && (c = get_char_from_buffer()) != 0){
-            buff[i++] = c;
-        }
-        return i;
-    }
-    else if (fd == LASTIN){
-        while (i < count && (c = get_last_char_from_buffer()) != 0){
-            buff[i++] = c;
-        }
-        return i;
-    }
-    return 0; */
+    return read_from_fd((int16_t)fd, (char *)buffer, (int)count);
 }
 
 // check error 
-uint64_t ksys_write(uint64_t fd, uint64_t buffer, uint64_t count)
+int64_t ksys_write(uint64_t fd, uint64_t buffer, uint64_t count)
 {
-    int16_t fd_type = get_type((int16_t)fd);
-    if(fd == -1){
-        return FINISH_ON_ERROR;
-    }
-    switch (fd_type)
-    {
-    case STDERR:
-        printArrayOfDimWithColor(RED, BLACK, (char *)buffer, count);
-        break;
-    
-    case PIPE:
-        int16_t pipe_id = get_id(fd);
-        if(pipe_id != -1){
-            return write_pipe(pipe_id, (char *)buffer, count);
-        }
-        break;
-    
-    default:
-        printArrayOfDimWithColor(WHITE, BLACK, (char *)buffer, count);
-        break;
-    }
-    return count;
+    return write_to_fd((int16_t)fd, (char *) buffer, (int)count);
 }
 
 uint64_t ksys_getTime()
 {
-    // char * reserve = "";
-    char reserve[TIME_STR]; // en reserve queda guardado el time en formato hh:mm:ss
+    char reserve[TIME_STR];
     timeToStr(reserve);
-    // print(reserve);   ver cual funcion uso para imprimir el string
     printArray(reserve);
     return FINISH_SUCCESFULLY;
 }
