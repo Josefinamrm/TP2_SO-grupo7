@@ -43,6 +43,14 @@ GLOBAL _sem_close
 GLOBAL _sem_post
 GLOBAL _sem_wait
 
+; ipc
+
+GLOBAL _open_pipe
+GLOBAL _close_pipe
+GLOBAL _write_pipe
+GLOBAL _read_pipe
+
+
 section .text
 
 _read: 
@@ -437,6 +445,50 @@ _sem_wait:
     mov rbp, rsp 
 
     mov rax, 35
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_open_pipe:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 36
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_close_pipe:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 37
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_write_pipe:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 38
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_read_pipe: 
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 39
     int 80h 
 
     mov rsp, rbp 

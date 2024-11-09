@@ -145,3 +145,19 @@ void usys_sem_post(char * name){
 void usys_sem_wait(char * name){
     _sem_wait((uint64_t)name);
 }
+
+int16_t usys_open_pipe(uint8_t file_descriptors[2]){
+    return _open_pipe(file_descriptors);
+}
+
+int16_t usys_close_pipe(int16_t pipe_id){
+    return _close_pipe((uint64_t)pipe_id);
+}
+
+int16_t usys_write_pipe(int16_t pipe_id, char * buf, int to_write){
+    return _write_pipe((uint64_t)pipe_id, (uint64_t)buf, (uint64_t)to_write);
+}
+
+int16_t usys_read_pipe(int16_t pipe_id, char * buf, int to_read){
+    return _read_pipe((uint64_t)pipe_id, (uint64_t)buf, (uint64_t)to_read);
+}

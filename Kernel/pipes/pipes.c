@@ -12,7 +12,9 @@ struct pipe_struct{
     uint32_t dim;
 };
 
+
 pipe_ptr pipe_array[MAX_PIPES];
+
 
 
 static int16_t next_available_pipe_number(){
@@ -74,6 +76,10 @@ int16_t open_pipe(int file_descriptors[2]){
             return FINISH_ON_ERROR;
         }
 
+    if(pipe_number > 0){
+        pipe new_pipe = (pipes) mm_malloc(sizeof(struct pipe_struct));
+        new_pipe->buffer = (char *) mm_malloc(BUFFER_SIZE);
+
         new_pipe->read_index = new_pipe->write_index = 0;
         new_pipe->empty_slots_sem = (char *) mm_malloc(9);
         new_pipe->full_slots_sem = (char *) mm_malloc(9);
@@ -97,6 +103,7 @@ int16_t open_pipe(int file_descriptors[2]){
 
 // Optional : if all fd referring to pipe are closed then close pipe -> counter ?
 int16_t close_pipe(int16_t pipe_id){
+
     pipe_ptr pipe = pipe_array[pipe_id];
 
     if(pipe == NULL){
@@ -114,7 +121,6 @@ int16_t close_pipe(int16_t pipe_id){
     pipe_array[pipe_id] = NULL;
     return FINISH_SUCCESFULLY;
 }
-
 
 
 // Blocking write, returns number of bytes written. On error returns -1
@@ -182,4 +188,5 @@ void close_fd_end(int16_t pipe_id, Permission permission){
         pipe->write_fd = -1;
         break;
     }
+
 }

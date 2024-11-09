@@ -5,7 +5,7 @@
 #include <test_util.h>
 #include <stdint.h>
 
-uint64_t test_processes(uint64_t argc, char *argv[]);
+uint64_t test_processes(int argc, char *argv[]);
 
 
 #endif

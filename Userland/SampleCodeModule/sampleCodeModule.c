@@ -5,7 +5,7 @@
 #include <shell.h>
 
 #define INPUT_SIZE 100 
-#define COMMAND_COUNT 19
+#define COMMAND_COUNT 23
 #define CANT_REGS 18
 #define TRUE 1
 #define FALSE 0
@@ -30,6 +30,10 @@ void loop();
 void cat();
 void wc();
 void filter();
+void phylo();
+void kill();
+void nice();
+void block();
 
 static char buffer[INPUT_SIZE] = {0};
 static int bufferIndex = 0;
@@ -58,7 +62,11 @@ static Command commands[] = {
     {"loop", loop, "Imprime saludo y ID cada 2 segundos.","No recibe argumentos."},
     {"cat", cat, "Imprime el stdin tal como lo recibe.","No recibe argumentos."},
     {"wc", wc, "Cuenta la cantidad de palabras en el stdin.","No recibe argumentos."},
-    {"filter", filter, "Filtra el stdin y muestra solo las letras.","No recibe argumentos."}
+    {"filter", filter, "Filtra el stdin y muestra solo las letras.","No recibe argumentos."},
+    {"phylo", phylo, "Muestra el problema de los filosofos.","No recibe argumentos."},
+    {"kill", kill, "Mata un proceso.","Recibe 1 argumento: PID del proceso a matar."},
+    {"nice", nice, "Cambia la prioridad de un proceso.","Recibe 2 argumentos: PID del proceso y nueva prioridad."},
+    {"block", block, "Bloquea un proceso.","Recibe 1 argumento: PID del proceso a bloquear."}
 };
 
 void parse_command(char *str) {
@@ -76,6 +84,13 @@ void parse_command(char *str) {
         if(strcmp(arguments[1], "b") == 0){
             foreground = FALSE;
             str = cmd;
+        }
+        else if (strcmp(arguments[1], "|") == 0){
+            print(arguments[0]);
+            print(" se conecta con ");
+            print(arguments[2]);
+            print("\n");
+            return;
         }
     }
 
@@ -98,31 +113,8 @@ int main()
 {
     print("Bienvenido a ");
     print_color(BLUE,"DORY_OS\n");
+
     print_color(GRAY,"Ingrese ");
-    print_color(WHITE,"\"help\" ");
-    print_color(GRAY,"para ver los comandos disponibles.\n");
-
-    print_color(GRAY, "Presione ");
-    print_color(WHITE, "\"b\" ");
-    print_color(GRAY, "luego del comando para ejecutar en background.\n");
-
-    char c;
-    int running = 1; 
-    currentFontSize = usys_get_font_size();
-    print_prompt_icon();
-    while (running){
-        c = get_char();
-        put_char(c);
-    }
-    // print("Ingrese uno de los siguientes comandos:\n");
-    // for(int i = 1; i < COMMAND_COUNT-1 ; i++){
-    //         print_color(LIGHT_BLUE, commands[i].name_id);
-    //         print(" | ");
-    // } 
-    // print_color(LIGHT_BLUE, commands[COMMAND_COUNT-1].name_id);
-
-
-    /* print_color(GRAY,"Ingrese ");
     print_color(WHITE,"\"help\" ");
     print_color(GRAY,"para ver los comandos disponibles.\n");
 
@@ -156,7 +148,7 @@ int main()
         }
     } 
     usys_exit();
-    return 0; */
+    return 0; 
 }
 
 
@@ -323,32 +315,32 @@ void play_eliminator() {
 void testprocess() {
     if(cant_arguments_func("testprocess", argC, 2) == -1) return;
     char * arg_command = (foreground)? arguments[1] : arguments[2];
-    char * argv[] = {"test processes", foreground, arg_command ,NULL};
-    int pid = usys_create_process((uint64_t)testprocess_ps,  usys_get_pid() , 1 , 3, argv);
+    char * argv[] = {"test processes", arg_command ,NULL};
+    int pid = usys_create_process((uint64_t)testprocess_ps, argv, foreground, STDIN, STDOUT);
     if(foreground) 
         usys_wait_processes(pid);
 }
 
 void testprio() {
     if(no_arguments_func("testprio") ==-1) return;
-    char * argv[] = {"test prio", foreground, NULL};
-    int pid = usys_create_process((uint64_t)testprio_ps, usys_get_pid(), 1, 2, argv);
+    char * argv[] = {"test prio", NULL};
+    int pid = usys_create_process((uint64_t)testprio_ps, argv, foreground, STDIN, STDOUT);
     if(foreground) 
         usys_wait_processes(pid);
 }
 
 void ps() {
     if(no_arguments_func("ps") ==-1) return;
-    char * argv[] = {"ps", foreground, NULL};
-    int pid = usys_create_process((uint64_t)ps_ps, usys_get_pid(), 1, 2, argv); 
+    char * argv[] = {"ps", NULL};
+    int pid = usys_create_process((uint64_t)ps_ps, argv, foreground, STDIN, STDOUT); 
     if(foreground) 
         usys_wait_processes(pid);
 }
 
 void mem() {
     if(no_arguments_func("mem") ==-1) return;
-    char * argv[] = {"memoryinfo", foreground, NULL};
-    int pid = usys_create_process((uint64_t)memoryinfo_ps, usys_get_pid(), 1, 2, argv); 
+    char * argv[] = {"memoryinfo", NULL};
+    int pid = usys_create_process((uint64_t)memoryinfo_ps, argv, foreground, STDOUT, STDIN); 
     if(foreground) 
         usys_wait_processes(pid);
 }
@@ -357,48 +349,84 @@ void testsynchro() {
     if(cant_arguments_func("testsynchro", argC, 3) == -1) return;
     char * arg_1 = foreground? arguments[1] : arguments[2];
     char * arg_2 = foreground? arguments[2] : arguments[3];
-    //char * argv[] = {"test synchro", foreground, "5", "1", NULL};
-    char * argv[] = {"test synchro", foreground, arg_1, arg_2, NULL};
-    int pid = usys_create_process((uint64_t)testsynchro_ps, usys_get_pid(), 1, 4, argv); 
+    char * argv[] = {"test synchro", arg_1, arg_2, NULL};
+    int pid = usys_create_process((uint64_t)testsynchro_ps, argv, foreground, STDIN, STDOUT); 
     if(foreground) 
         usys_wait_processes(pid);
 }
 
-// void testnosynchro() {
-//     if(cant_arguments_func("testnosynchro", argC, 2) == -1) return;
-//     char * arg_1 = foreground? arguments[1] : arguments[2];
-//     char * arg_2 = foreground? arguments[2] : arguments[3];
-//     char * argv[] = {"test synchro", foreground, arg_1, arg_2, NULL};
-//     int pid = usys_create_process((uint64_t)testsynchro_ps, usys_get_pid(), 1, 4, argv); 
-//     if(foreground) 
-//         usys_wait_processes(pid);
-// }
-
 void loop(){
-    no_arguments_func("loop");
-    char * argv[] = {"loop", foreground, NULL};
-    int pid = usys_create_process((uint64_t) loop_ps, usys_get_pid(), 1, 2, argv);
+    if(no_arguments_func("loop") ==-1) return;
+    char * argv[] = {"loop", NULL};
+    int pid = usys_create_process((uint64_t) loop_ps, argv, foreground, STDIN, STDOUT);
     if(foreground)
         usys_wait_processes(pid);
 }
 
 void cat(){
-    char * argv[] = {"cat", foreground, NULL};
-    int pid = usys_create_process((uint64_t) cat_ps, usys_get_pid(), 1, 2, argv);
+    if(no_arguments_func("cat") ==-1) return;
+    char * argv[] = {"cat", NULL};
+    int pid = usys_create_process((uint64_t) cat_ps, argv, foreground, STDIN, STDOUT);
     if(foreground)
         usys_wait_processes(pid);
 }
 
 void wc(){
-    char * argv[] = {"wc", foreground, NULL};
-    int pid = usys_create_process((uint64_t) wc_ps, usys_get_pid(), 1, 2, argv);
+    if(no_arguments_func("wc")==-1) return;
+    char * argv[] = {"wc", NULL};
+    int pid = usys_create_process((uint64_t) wc_ps, argv, foreground, STDIN, STDOUT);
     if(foreground)
         usys_wait_processes(pid);
 }
 
 void filter(){
-    char * argv[] = {"filter", foreground, NULL};
-    int pid = usys_create_process((uint64_t) filter_ps, usys_get_pid(), 1, 2, argv);
+    if(no_arguments_func("filter")==-1) return;
+    char * argv[] = {"filter", NULL};
+    int pid = usys_create_process((uint64_t) filter_ps, argv, foreground, STDIN, STDOUT);
+    if(foreground)
+        usys_wait_processes(pid);
+}
+
+void phylo(){
+    if(no_arguments_func("phylos")==-1) return;
+    char * argv[] = {"phylos", NULL};
+    int pid = usys_create_process((uint64_t) phylos_ps, argv, foreground, STDIN, STDOUT);
+    if(foreground)
+        usys_wait_processes(pid);
+}
+
+void kill(){
+    if(cant_arguments_func("kill", argC, 2) == -1) return;
+    if(strcmp(arguments[1], "1") == 0 || strcmp(arguments[1], "1") == 0 || strcmp(arguments[1], "2") == 0){
+        print_error("Error: no se puede matar al proceso.");
+        print(arguments[1]);
+        print("\n");
+        return;
+    }
+    char * argv[] = {"kill", arguments[1], NULL};
+    int pid = usys_create_process((uint64_t) kill_ps, argv, foreground, STDIN, STDOUT);
+    if(foreground)
+        usys_wait_processes(pid);
+}
+
+void nice(){
+    if(cant_arguments_func("nice", argC, 3) == -1) return;
+    char * argv[] = {"nice", arguments[1], arguments[2], NULL};
+    int pid = usys_create_process((uint64_t) nice_ps, argv, foreground, STDIN, STDOUT);
+    if(foreground)
+        usys_wait_processes(pid);
+}
+
+void block(){
+    if(cant_arguments_func("block", argC, 2) == -1) return;
+    if(strcmp(arguments[1], "1") == 0 || strcmp(arguments[1], "1") == 0 || strcmp(arguments[1], "2") == 0){
+        print_error("Error: no se puede bloquear al proceso.");
+        print(arguments[1]);
+        print("\n");
+        return;
+    }
+    char * argv[] = {"block", arguments[1], NULL};  
+    int pid = usys_create_process((uint64_t) block_ps, argv, foreground, STDIN, STDOUT);
     if(foreground)
         usys_wait_processes(pid);
 }

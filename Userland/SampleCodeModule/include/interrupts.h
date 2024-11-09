@@ -79,6 +79,16 @@ void _sem_post(uint64_t name);
 
 void _sem_wait(uint64_t name);
 
+// ipc 
+
+int16_t _open_pipe(uint64_t file_descriptors[2]);
+
+int16_t _close_pipe(int16_t pipe_id);
+
+int16_t _write_pipe(int16_t pipe_id, char * buf, int to_write);
+
+int16_t _read_pipe(int16_t pipe_id, char * buf, int to_read);
+
 #endif
 
 
