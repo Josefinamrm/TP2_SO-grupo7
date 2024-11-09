@@ -114,6 +114,7 @@ int main()
         c = get_char();
         put_char(c);
     }
+    usys_exit();
     // print("Ingrese uno de los siguientes comandos:\n");
     // for(int i = 1; i < COMMAND_COUNT-1 ; i++){
     //         print_color(LIGHT_BLUE, commands[i].name_id);

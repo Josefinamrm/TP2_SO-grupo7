@@ -641,8 +641,8 @@ int16_t my_kill(int16_t pid){
     // set children freeeeee (but not free the process resources, just free them from the list)
     free_children_queue(p->child_list, 0);
     p->child_list = NULL;
-    my_sem_post(process_array[p->ppid]->child_processes_sem);
     process_array[p->ppid]->active_child_processes--;
+    my_sem_post(process_array[p->ppid]->child_processes_sem);
 
     return EXIT_SUCCESS;
 }
@@ -687,11 +687,46 @@ static void my_wait_process(int16_t pid){
     }
 
     delete_child(p->child_list, pid, 1);
+
+    /* process p = process_array[my_getpid()];
+
+    if(p->child_list == NULL) return;
+
+    while(1){
+        if(process_array[pid]->state == KILLED){
+            delete_child(p->child_list, pid, 1);
+            return;
+        }
+        else{
+            my_yield();
+        }
+    } */
     
 }
 
 // Waits for all children to die -> free del stack pointer
 void my_wait(int16_t pid){
+
+    /* if(pid != -1){
+        my_wait_process(pid);
+        return;
+    }
+    else{
+        process p = process_array[my_getpid()];
+        if(p->child_list == NULL) return;
+
+        t_node * aux = p->child_list->front;
+        while(aux != NULL){
+            if(aux->p->state == KILLED){
+                t_node * save = aux;
+                delete_child(p->child_list, aux->p->pid, 1);
+                aux = save->next;
+            }
+            else{
+                my_yield();
+            }
+        }
+    } */
 
     if(pid != -1){
         my_wait_process(pid);
@@ -772,11 +807,13 @@ void initialize_std_fd(int16_t pid){
 // Creates idle process
 static void create_idle_process(){
     process idle_process = (process) mm_malloc(sizeof(struct p));
+
     idle_process->name = "Idle";
     idle_process->pid = 0;
     idle_process->ppid = 0;
     idle_process->priority = DEFAULT_PRIO;
     idle_process->state = READY;
+    
     uint64_t * initial_rsp = (uint64_t *) mm_malloc(PROCESS_STACK_SIZE);
     initial_rsp += PROCESS_STACK_SIZE / sizeof(uint64_t);
     idle_process->base_pointer = (uint64_t)initial_rsp;
@@ -822,7 +859,7 @@ void write_to_pipe(){
 }
 
 void init_process(){
-    char* argv1[] = {"read_from_pipe", NULL};
+    /* char* argv1[] = {"read_from_pipe", NULL};
     char* argv2[] = {"write_to_pipe", NULL};
 
     int fds[2];
@@ -830,9 +867,9 @@ void init_process(){
         printArray("error creando pipes");
     }
     my_create_process((uint64_t)read_from_pipe, argv1, 1, fds[0], STDOUT);
-    my_create_process((uint64_t) write_to_pipe, argv2, 1, STDIN, fds[1]);
-    /* char * argv[] = {"userland", NULL};
-    my_create_process((uint64_t)USERLAND_DIREC, argv, 1, STDIN, STDOUT); */
+    my_create_process((uint64_t) write_to_pipe, argv2, 1, STDIN, fds[1]); */
+    char * argv[] = {"userland", NULL};
+    my_create_process((uint64_t)USERLAND_DIREC, argv, 1, STDIN, STDOUT);
     my_wait(-1);
     my_exit();
 }
