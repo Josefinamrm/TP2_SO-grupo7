@@ -73,8 +73,8 @@ int64_t usys_create_process(uint64_t function, char ** argv, uint8_t foreground,
     return _create_process(function, (uint64_t) argv, (uint64_t)foreground, (uint64_t)read_fd, (uint64_t)write_fd);
 }
 
-void usys_nice(int16_t pid, uint8_t newPrio){
-    _nice((uint64_t)pid, (uint64_t)newPrio);
+int64_t usys_nice(int16_t pid, uint8_t newPrio){
+    return _nice((uint64_t)pid, (uint64_t)newPrio);
 }
 
 int64_t usys_kill(int16_t pid){

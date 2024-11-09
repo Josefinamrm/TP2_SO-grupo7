@@ -196,9 +196,8 @@ int64_t ksys_create_process(uint64_t function, uint64_t argv, uint64_t foregroun
     return my_create_process(function, (char **)argv, (uint8_t)foreground, (int)read_fd, (int)write_fd);
 }
 
-uint64_t ksys_nice(uint64_t pid, uint64_t newPrio){
-    my_nice((int16_t)pid, (uint8_t)newPrio);
-    return FINISH_SUCCESFULLY;
+int64_t ksys_nice(uint64_t pid, uint64_t newPrio){
+    return my_nice((int16_t)pid, (uint8_t)newPrio);
 }
 
 int64_t ksys_kill(uint64_t pid){
@@ -261,7 +260,7 @@ uint64_t ksys_total_space(){
     return (uint64_t) mm_total_space();
 }
 
-uint64_t ksys_sem_open(uint64_t name, uint64_t value){
+int64_t ksys_sem_open(uint64_t name, uint64_t value){
     return my_sem_open((char *)name, (int)value);
 }
 

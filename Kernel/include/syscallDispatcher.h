@@ -39,7 +39,7 @@ uint64_t ksys_draw_rect(uint64_t color, uint64_t x, uint64_t y, uint64_t size_x,
 uint64_t ksys_draw_array(uint64_t fontColor, uint64_t backgroundColor, uint64_t x, uint64_t y, uint64_t arr);
 uint64_t ksys_getpid();
 int64_t ksys_create_process(uint64_t function, uint64_t argv, uint64_t foreground, uint64_t read_fd, uint64_t write_fd);
-uint64_t ksys_nice(uint64_t pid, uint64_t newPrio);
+int64_t ksys_nice(uint64_t pid, uint64_t newPrio);
 int64_t ksys_kill(uint64_t pid);
 int64_t ksys_block(uint64_t pid);
 int64_t ksys_unblock(uint64_t pid);
@@ -53,7 +53,7 @@ uint64_t ksys_free(uint64_t ptr);
 uint64_t ksys_unused_space();
 uint64_t ksys_occupied_space();
 uint64_t ksys_total_space();
-uint64_t ksys_sem_open(uint64_t name, uint64_t value);
+int64_t ksys_sem_open(uint64_t name, uint64_t value);
 uint64_t ksys_sem_close(uint64_t name);
 uint64_t ksys_sem_post(uint64_t name);
 uint64_t ksys_sem_wait(uint64_t name);
