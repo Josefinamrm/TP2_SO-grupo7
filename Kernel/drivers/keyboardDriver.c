@@ -43,15 +43,12 @@ char buffer[BUFFER_SIZE] = {0};
 
 // Semáforos
 char * empty_slots = "keyboard_empty_slots";
-char * filled_slots = "keyboard_filled_slots";
-// Opcional creo
-char * mutex = "keyboard_mutex";         
+char * filled_slots = "keyboard_filled_slots";     
 
 
 void initialize_keyboard_driver(){
     my_sem_open(empty_slots, BUFFER_SIZE);
     my_sem_open(filled_slots, 0);
-    my_sem_open(mutex, 1);
 }
 
 
@@ -64,9 +61,7 @@ static void addToBuffer(char c)
     }
 
     my_sem_wait(empty_slots);
-    my_sem_wait(mutex);
     buffer[writeIndex++] = c;
-    my_sem_post(mutex);
     my_sem_post(filled_slots);
 
 }
@@ -80,9 +75,7 @@ char get_char_from_buffer()
 
     char to_ret;
     my_sem_wait(filled_slots);
-    my_sem_wait(mutex);
     to_ret = buffer[readIndex++];
-    my_sem_post(mutex);
     my_sem_post(empty_slots);
     return to_ret;
     /* if (readIndex == writeIndex)

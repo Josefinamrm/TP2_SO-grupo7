@@ -152,7 +152,6 @@ int main()
     print_color(WHITE, "\"b\" ");
     print_color(GRAY, "luego del comando para ejecutar en background.\n");
 
-
     char c;
     int running = 1; 
     currentFontSize = usys_get_font_size();
@@ -180,7 +179,7 @@ int main()
         }
     } 
     usys_exit();
-    return 0; 
+    return 0;
 }
 
 
