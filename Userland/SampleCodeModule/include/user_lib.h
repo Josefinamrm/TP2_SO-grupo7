@@ -10,9 +10,9 @@
 
 void print(char *arr);
 
-int strlen(char *arr);
+int stringlen(const char *arr);
 
-void strcpy(char *destination, const char *source);
+void stringcpy(char *destination, const char *source);
 
 uint32_t uint_to_base(uint64_t value, char *buffer, uint32_t base);
 
