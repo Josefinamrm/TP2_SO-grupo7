@@ -89,6 +89,16 @@ int64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx
             return ksys_write_pipe(rdi, rsi, rdx);
         case 39:
             return ksys_read_pipe(rdi, rsi, rdx);
+        case 40:
+            return ksys_open_fd(rdi, rsi, rdx, rcx);
+        case 41:
+            return ksys_close_fd(rdi);
+        case 42:
+            return ksys_close_all_fds(rdi);
+        case 43:
+            return ksys_write_to_fd(rdi, rsi, rdx);
+        case 44:
+            return ksys_read_from_fd(rdi, rsi, rdx);
     }
 
 
@@ -197,7 +207,8 @@ int64_t ksys_create_process(uint64_t function, uint64_t argv, uint64_t foregroun
 }
 
 int64_t ksys_nice(uint64_t pid, uint64_t newPrio){
-    return my_nice((int16_t)pid, (uint8_t)newPrio);
+    my_nice((int16_t)pid, (uint8_t)newPrio);
+    return FINISH_SUCCESFULLY;
 }
 
 int64_t ksys_kill(uint64_t pid){
@@ -293,4 +304,25 @@ uint64_t ksys_write_pipe(uint64_t pipe_id, uint64_t buf, uint64_t to_write){
 
 uint64_t ksys_read_pipe(uint64_t pipe_id, uint64_t buf, uint64_t to_read){
     return read_pipe((int16_t)pipe_id, (char *)buf, (int)to_read);
+}
+
+uint64_t ksys_open_fd(uint64_t type, uint64_t permission, uint64_t pipe_id, uint64_t process_pid){
+    return open_fd((uint8_t)type, (uint8_t)permission, (int16_t)pipe_id, (int16_t)process_pid);
+}
+
+uint64_t ksys_close_fd(uint64_t fd_number){
+    close_fd((int16_t)fd_number);
+    return FINISH_SUCCESFULLY;
+}
+
+uint64_t ksys_close_all_fds(uint64_t pid){
+    return close_all_fds((int16_t)pid);
+}
+
+uint64_t ksys_write_to_fd(uint64_t fd_number, uint64_t buffer, uint64_t to_write){
+    return write_to_fd((int16_t)fd_number, (char *)buffer, (int)to_write);
+}
+
+uint64_t ksys_read_from_fd(uint64_t fd_number, uint64_t buffer, uint64_t to_read){
+    return read_from_fd((int16_t)fd_number, (char *)buffer, (int)to_read);
 }

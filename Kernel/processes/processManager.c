@@ -304,6 +304,7 @@ static uint64_t setup_next_running_process(){
     if(ready_queue->front->p->state == BLOCKED || ready_queue->front->p->state == KILLED){
         remove_from_ready_queue(ready_queue->front->p->pid);
         if(ready_queue->size == 0){
+            idle_running = 1;
             return process_array[0]->stack_pointer;
         }else{
             return ready_queue->front->p->stack_pointer;
@@ -322,6 +323,7 @@ static uint64_t setup_next_running_process(){
     if(ready_queue->front->p->state == BLOCKED || ready_queue->front->p->state == KILLED){
         remove_from_ready_queue(ready_queue->front->p->pid);
         if(ready_queue->size == 0){
+            idle_running = 1;
             return process_array[0]->stack_pointer;
         }
     }
@@ -485,7 +487,9 @@ int64_t read_from_fd(int16_t fd_number, char * buffer, int to_read){
     case STDIN:
         while(i < to_read){
             c = get_char_from_buffer();
+            if(c==EOF) return 0;
             buffer[i++] = c;
+     
         }
         break;
 
@@ -685,6 +689,15 @@ static void my_wait_process(int16_t pid){
     while(process_array[pid]->state != KILLED){
         my_sem_wait(p->child_processes_sem);
     }
+    // while(1){
+    //     if(process_array[pid]->state == KILLED){
+    //         delete_child(p->child_list, pid, 1);
+    //         return;
+    //     }
+    //     else{
+    //         my_yield();
+    //     }
+    // }
 
     delete_child(p->child_list, pid, 1);
     
@@ -710,8 +723,13 @@ void my_wait(int16_t pid){
         while(aux != NULL){
             if(aux->p->state == KILLED){
                 t_node * save = aux->next;
+                // t_node * save = aux;
                 delete_child(p->child_list, aux->p->pid, 1);
                 aux = save;
+                // aux = save->next;
+                // }
+                // else{
+                // my_yield();
             }
         }
     }
@@ -829,10 +847,10 @@ void init_process(){
     if(open_pipe(fds) == -1){
         printArray("error creando pipes");
     }
-    my_create_process((uint64_t)read_from_pipe, argv1, 1, fds[0], STDOUT);
-    my_create_process((uint64_t) write_to_pipe, argv2, 1, STDIN, fds[1]);
-    /* char * argv[] = {"userland", NULL};
-    my_create_process((uint64_t)USERLAND_DIREC, argv, 1, STDIN, STDOUT); */
+    //my_create_process((uint64_t) write_to_pipe, argv2, 1, STDIN, fds[1]);
+    // my_create_process((uint64_t)read_from_pipe, argv1, 1, fds[0], STDOUT);
+    char * argv[] = {"userland", NULL};
+    my_create_process((uint64_t)USERLAND_DIREC, argv, 1, STDIN, STDOUT);
     my_wait(-1);
     my_exit();
 }

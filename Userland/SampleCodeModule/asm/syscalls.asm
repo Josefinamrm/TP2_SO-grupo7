@@ -49,7 +49,11 @@ GLOBAL _open_pipe
 GLOBAL _close_pipe
 GLOBAL _write_pipe
 GLOBAL _read_pipe
-
+GLOBAL _open_fd
+GLOBAL _close_fd
+GLOBAL _close_all_fds
+GLOBAL _write_to_fd
+GLOBAL _read_from_fd
 
 section .text
 
@@ -489,6 +493,61 @@ _read_pipe:
     mov rbp, rsp 
 
     mov rax, 39
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_open_fd:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 40
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_close_fd:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 41
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_close_all_fds:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 42
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_write_to_fd:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 43
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_read_from_fd:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 44
     int 80h 
 
     mov rsp, rbp 

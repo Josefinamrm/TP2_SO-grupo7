@@ -21,23 +21,26 @@ void testprio_ps(){
 
 void memoryinfo_ps() {
 
-    print("-------------------------------------------------------\n");
-    print("Total space: ");
-    usys_wait(5);
-    print_dec(usys_total_space());
-    usys_wait(5);
-    print("\n");
+    usys_write(STDOUT, "-------------------------------------------------------\n", 56);
+    usys_write(STDOUT, "Total space: ", 13);
+    char total_space[100];
+    int_to_string(usys_total_space(), total_space, 100);
+    usys_write(STDOUT, total_space, stringlen(total_space));
+    usys_write(STDOUT, "\n", 1);
 
-    print("Occupied space: ");
-    usys_wait(5);
-    print_dec(usys_occupied_space());
-    usys_wait(5);
-    print("\n");
+    usys_write(STDOUT, "Occupied space: ", 16);
+    char occupied_space[100];
+    int_to_string(usys_occupied_space(), occupied_space, 100);
+    usys_write(STDOUT, occupied_space, stringlen(occupied_space));
+    usys_write(STDOUT, "\n", 1);
 
-    print("Unused space: ");
-    print_dec(usys_unused_space());
-    print("\n");
-    print("-------------------------------------------------------\n");
+    usys_write(STDOUT, "Unused space: ", 14);
+    char unused_space[100];
+    int_to_string(usys_unused_space(), unused_space, 100);
+    usys_write(STDOUT, unused_space, stringlen(unused_space));
+    usys_write(STDOUT, "\n", 1);
+    usys_write(STDOUT, "-------------------------------------------------------\n", 56);
+     
     usys_exit();
 }
 
@@ -52,88 +55,72 @@ void my_process_inc_ps(int argc, char *argv[]){
 }
 
 void loop_ps(){
+
     while(1){
-        print("Hola! Soy el proceso nro ");
-        print_dec(usys_get_pid());
-        print("\n");
-        usys_wait(4000);
+        usys_write(STDOUT, "Hola! Soy el proceso: ", 22);
+        char pid_str[10];
+        int_to_string(usys_get_pid(), pid_str, 10);
+        usys_write(STDOUT, pid_str, stringlen(pid_str));
+        usys_write(STDOUT, "a\n", 2);
+        usys_exit();
     }
-    usys_exit();
 }
 
 void cat_ps(){
-    char buffer[1];
+    char buffer[1024];
     int bufferIndex = 0;
     char c;
-    char reading = 1;
-    while((c = usys_read(STDIN, buffer, 1)) > 0){ // print the stdin?
+    while((c = usys_read(STDIN, buffer, 1024)) > 0){ // print the stdin?
         usys_write(STDOUT, buffer, c);
     }
-    // buffer[bufferIndex] = 0;
-    usys_write(STDOUT, buffer, bufferIndex-1);
+
+    usys_write(STDOUT, buffer, stringlen(buffer));
     print("\n");
     usys_exit();
 }
 
 
 void wc_ps(){
-    char buffer[1024];
+   char buffer[1024];
     int bufferIndex = 0;
-    int count = 0;
     char c;
-    char reading = 1;
-    while(reading){
-        while((c = usys_read(STDIN, buffer, 1024)) > 0){ // print the stdin?
-            bufferIndex++;
-        } 
-        reading = 0;
-    }
-    // buffer[bufferIndex] = 0;
-    
-    for(int i=0; i<3; i++){
-        put_char(buffer[i]);
+    while((c = usys_read(STDIN, buffer, 1024)) > 0){ // print the stdin?
+        usys_write(STDOUT, buffer, c);
     }
 
-    for(int i = 0; i < bufferIndex; i++){
-        usys_write(STDOUT, (buffer[i]), 1); 
-        put_char(buffer[i]); 
+    int count = 1;
+    int j=0;
+    for(int i = 0; i < stringlen(buffer); i++){
+        if(buffer[i] == '\n' && buffer[i+1] != 0){
+            count++;
+        }
     }
-
-    char count_str[11];
-    int_to_string(count, count_str, 11);
-    usys_write(STDOUT, count_str, 11);
-    print("\n");
-    usys_exit();   
+    char count_str[10];
+    int_to_string(count, count_str, 10);
+    usys_write(STDOUT, count_str, 10);
+    usys_write(STDOUT, "\n", 1);
+    usys_exit(); 
 }
 
 void filter_ps(){
-    char buffer[100];
+    char buffer[1024];
     int bufferIndex = 0;
     char c;
-    char reading = 1;
-    while (reading) {  // if ESC 
-        c = get_char();  // non-blocking read
-        if (c != 0) {
-            if (c == '\b' && bufferIndex > 0) {
-                bufferIndex--;
-                put_char(c);
-            } else if (c == '\n') {
-                print("\n");
-                buffer[bufferIndex] = '\0';  // Null-terminate the command
-                reading = 0;
-            } 
-            else if(c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u'){
-                put_char(c);
-            }
-            else if (c != '\b') {
-                put_char(c);
-                buffer[bufferIndex++] = c;
-           }
+    while((c = usys_read(STDIN, buffer, 1024)) > 0){ // print the stdin?
+        usys_write(STDOUT, buffer, c);
+    }
+
+    char to_print[stringlen(buffer)];
+    int j=0;
+    for(int i = 0; i < stringlen(buffer); i++){
+        if(buffer[i] != 'a' && buffer[i] != 'e' && buffer[i] != 'i' && buffer[i] != 'o' && buffer[i] != 'u'){
+            to_print[j++] = buffer[i];
         }
-    } 
-    usys_write(STDOUT, buffer, bufferIndex);
-    print("\n");
-    usys_exit();
+    }
+    j--;
+    usys_write(STDOUT, to_print, j);
+    usys_write(STDOUT, "\n", 1);
+    usys_exit(); 
 }
 
 void phylos_ps(){

@@ -89,6 +89,15 @@ int16_t _write_pipe(int16_t pipe_id, char * buf, int to_write);
 
 int16_t _read_pipe(int16_t pipe_id, char * buf, int to_read);
 
+int16_t _open_fd(int8_t type, int8_t permission, int16_t pipe_id, int16_t process_pid);
+
+void _close_fd(int16_t fd_number);
+
+int16_t _close_all_fds(int16_t pid);
+
+int64_t _write_to_fd(int16_t fd_number, char * buffer, int to_write);
+
+int64_t _read_from_fd(int16_t fd_number, char * buffer, int to_read);
 #endif
 
 
