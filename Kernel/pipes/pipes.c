@@ -12,7 +12,9 @@ struct pipe_struct{
     uint32_t dim;
 };
 
+
 pipe_ptr pipe_array[MAX_PIPES];
+
 
 
 static int16_t next_available_pipe_number(){
@@ -79,6 +81,7 @@ int16_t open_pipe(int file_descriptors[2]){
 
 // Closes pipe and associates file descriptors
 int16_t close_pipe(int16_t pipe_id){
+
     pipe_ptr pipe = pipe_array[pipe_id];
 
     if(pipe == NULL){
@@ -96,7 +99,6 @@ int16_t close_pipe(int16_t pipe_id){
     pipe_array[pipe_id] = NULL;
     return FINISH_SUCCESFULLY;
 }
-
 
 
 // Blocking write, returns number of bytes written. On error returns -1
@@ -165,4 +167,5 @@ void close_fd_end(int16_t pipe_id, Permission permission){
         pipe->write_fd = -1;
         break;
     }
+
 }

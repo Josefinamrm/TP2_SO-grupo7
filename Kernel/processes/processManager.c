@@ -485,7 +485,9 @@ int64_t read_from_fd(int16_t fd_number, char * buffer, int to_read){
     case STDIN:
         while(i < to_read){
             c = get_char_from_buffer();
+            if(c==EOF) return 0;
             buffer[i++] = c;
+     
         }
         break;
 
@@ -685,6 +687,15 @@ static void my_wait_process(int16_t pid){
     while(process_array[pid]->state != KILLED){
         my_sem_wait(p->child_processes_sem);
     }
+    // while(1){
+    //     if(process_array[pid]->state == KILLED){
+    //         delete_child(p->child_list, pid, 1);
+    //         return;
+    //     }
+    //     else{
+    //         my_yield();
+    //     }
+    // }
 
     delete_child(p->child_list, pid, 1);
 
@@ -745,8 +756,13 @@ void my_wait(int16_t pid){
         while(aux != NULL){
             if(aux->p->state == KILLED){
                 t_node * save = aux->next;
+                // t_node * save = aux;
                 delete_child(p->child_list, aux->p->pid, 1);
                 aux = save;
+                // aux = save->next;
+                // }
+                // else{
+                // my_yield();
             }
         }
     }
@@ -764,7 +780,7 @@ void my_ps(){
 
     uint32_t i = 0;
     uint32_t counter = 0;
-    while(counter < process_counter){
+    while(counter <= process_counter){
         if(process_array[i] != NULL){
             printArray("    ");
             printArray(process_array[i]->name);
