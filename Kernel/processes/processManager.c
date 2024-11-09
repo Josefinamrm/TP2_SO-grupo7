@@ -729,7 +729,7 @@ void my_ps(){
 
     uint32_t i = 0;
     uint32_t counter = 0;
-    while(counter < process_counter){
+    while(counter <= process_counter){
         if(process_array[i] != NULL){
             printArray("    ");
             printArray(process_array[i]->name);

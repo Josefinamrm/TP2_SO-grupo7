@@ -1,6 +1,8 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-#include "syscallDispatcher.h"
+
+#include <syscallDispatcher.h>
+#include <semaphores.h>
 
 int64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, uint64_t r8, uint64_t rax)
 {
@@ -79,6 +81,14 @@ int64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx
             return ksys_sem_post(rdi);
         case 35:    
             return ksys_sem_wait(rdi);
+        case 36:
+            return ksys_open_pipe(rdi);
+        case 37:
+            return ksys_close_pipe(rdi);
+        case 38:
+            return ksys_write_pipe(rdi, rsi, rdx);
+        case 39:
+            return ksys_read_pipe(rdi, rsi, rdx);
     }
 
 
@@ -269,3 +279,18 @@ uint64_t ksys_sem_wait(uint64_t name){
     return FINISH_SUCCESFULLY;
 }
 
+uint64_t ksys_open_pipe(uint64_t file_descriptors[2]){
+    return open_pipe((uint8_t *)file_descriptors);
+}
+
+uint64_t ksys_close_pipe(uint64_t pipe_id){
+    return close_pipe((int16_t)pipe_id);
+}
+
+uint64_t ksys_write_pipe(uint64_t pipe_id, uint64_t buf, uint64_t to_write){
+    return write_pipe((int16_t)pipe_id, (char *)buf, (int)to_write);
+}
+
+uint64_t ksys_read_pipe(uint64_t pipe_id, uint64_t buf, uint64_t to_read){
+    return read_pipe((int16_t)pipe_id, (char *)buf, (int)to_read);
+}
