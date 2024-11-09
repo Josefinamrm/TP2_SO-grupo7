@@ -129,3 +129,11 @@ void my_sem_wait(char * name){
     }
 }
 
+
+// Creates semaphore name as "name" + number to serve as a unique id
+void create_sem_name(char * sem_name, const char * name, int16_t pipe_number){
+    char pipe_number_buf[4];
+    concat_str(sem_name, name);
+    int_to_string(pipe_number, pipe_number_buf, 4);
+    concat_str(sem_name, pipe_number_buf);
+}

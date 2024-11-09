@@ -42,7 +42,7 @@ void add_child(children_queue queue, process child);
 void delete_child(children_queue queue, int16_t pid, uint8_t free_process);
 
 // Checks whether the queue is empty
-uint64_t childless(children_queue queue);
+uint64_t is_children_queue_empty(children_queue queue);
 
 // Frees children queue
 void free_children_queue(children_queue queue, uint8_t free_process);
@@ -100,13 +100,16 @@ uint8_t is_ready_queue_empty();
 int16_t open_fd(Type type, Permission permission, int16_t pipe_id, int16_t process_pid);
 
 // Closes file descriptor
-void close_fd(uint8_t fd_number);
+void close_fd(int16_t fd_number);
+
+// Closes all file descriptors
+int16_t close_all_fds(int16_t pid);
 
 // Writes to file descriptor
 int64_t write_to_fd(int16_t fd_number, char * buffer, int to_write);
 
 // Reads from file descriptor
-int64_t read_from_fd(int16_t fd_number, char * buffer, int to_write);
+int64_t read_from_fd(int16_t fd_number, char * buffer, int to_read);
 
 int16_t get_type(int16_t fd_number);
 
@@ -126,7 +129,7 @@ void my_exit();
 void my_exit_foreground();
 
 // Changes process priority
-void my_nice(int16_t pid, uint8_t newPrio);
+int64_t my_nice(int16_t pid, uint8_t newPrio);
 
 // Kills process
 int16_t my_kill(int16_t pid);

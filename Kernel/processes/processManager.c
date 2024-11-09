@@ -29,6 +29,8 @@ struct p{
     uint64_t stack_pointer;
     uint64_t base_pointer;
     struct queue_info * child_list;
+    char * child_processes_sem;
+    uint16_t active_child_processes;
     fd file_descriptors[MAX_FD];
     uint8_t foreground; 
 
@@ -81,6 +83,7 @@ void add_child(children_queue queue, process child){
         queue->rear = newborn;
     }
     queue->size++;
+
 }
 
 // Deletes a process from the children queue, but doesn´t free the process
@@ -108,9 +111,11 @@ void delete_child(children_queue queue, int16_t pid, uint8_t free_process){
             prev->next = current->next;
         }
         if(free_process){
-            process_array[current->p->pid] = NULL;
+            close_all_fds(pid);
+            my_sem_close(current->p->child_processes_sem);
             mm_free((void *)current->p->base_pointer);
             mm_free((void *)current->p);
+            process_array[current->p->pid] = NULL;
             process_counter--;
         }
         mm_free(current);
@@ -119,7 +124,7 @@ void delete_child(children_queue queue, int16_t pid, uint8_t free_process){
 }
 
 // Checks whether the list is empty
-uint64_t childless(children_queue queue){
+uint64_t is_children_queue_empty(children_queue queue){
     return queue->size == 0;
 }
 
@@ -152,7 +157,7 @@ void enqueue(waiting_processes_queue queue, int16_t pid){
 // Deletes the first process from the queue 
 int16_t dequeue(waiting_processes_queue queue){
     if(queue->size == 0)
-        return -1;
+        return FINISH_ON_ERROR;
 
     t_node * aux = queue->front;
     if(queue->size > 1){
@@ -266,7 +271,7 @@ uint8_t is_empty(process_queue queue){
 /*--------------------------------------------------------- Ready Queue Functions ---------------------------------------------------------*/
 
 // Adds n process instances, where n = priority
-static uint32_t add_to_ready_queue(process p){ 
+static int32_t add_to_ready_queue(process p){ 
     
     add_all_process_instances(ready_queue, p);
 
@@ -274,7 +279,7 @@ static uint32_t add_to_ready_queue(process p){
 }
 
 // Removes an instance of the ready_queue
-static uint32_t remove_from_ready_queue(int16_t pid){
+static int32_t remove_from_ready_queue(int16_t pid){
     if(process_array[pid] == NULL){
         return EXIT_FAILURE;
     }
@@ -343,7 +348,7 @@ uint64_t next_running_process(uint64_t current_rsp){
 }
 
 
-// Returns idle process rsp, idle process will have pid 0 for now, must change later;
+// Returns idle process rsp
 uint64_t idle_process_rsp(){
     idle_running = 1;
     return process_array[0]->stack_pointer;
@@ -400,7 +405,7 @@ int16_t open_fd(Type type, Permission permission, int16_t id, int16_t process_pi
 
 
 // Closes file descriptor
-void close_fd(uint8_t fd_number){
+void close_fd(int16_t fd_number){
     int16_t pid = my_getpid();
     fd fd = process_array[pid]->file_descriptors[fd_number];
     
@@ -418,11 +423,29 @@ void close_fd(uint8_t fd_number){
 
 
 
+
+// Closes all file descriptors from a process
+int16_t close_all_fds(int16_t pid){
+    process p = process_array[pid];
+
+    if(p == NULL){
+        return FINISH_ON_ERROR;
+    }
+
+    for(int i = 0; i < MAX_FD; i++){
+        close_fd(p->file_descriptors[i]);
+    }
+
+    return FINISH_ON_ERROR;
+}
+
+
+
 // Writes to file descriptor
 int64_t write_to_fd(int16_t fd_number, char * buffer, int to_write){
     int16_t fd_type = get_type((int16_t)fd_number);
 
-    if(fd_type == -1){
+    if(fd_type == -1 || fd_type == READ){
         return FINISH_ON_ERROR;
     }
 
@@ -449,18 +472,18 @@ int64_t write_to_fd(int16_t fd_number, char * buffer, int to_write){
 
 
 // Reads from file descriptor
-int64_t read_from_fd(int16_t fd_number, char * buffer, int to_write){
+int64_t read_from_fd(int16_t fd_number, char * buffer, int to_read){
     int i = 0;
     char c;
     int16_t fd_type = get_type((int16_t)fd_number);
 
-    if(fd_type == -1){
+    if(fd_type == -1 || fd_type == WRITE){
         return FINISH_ON_ERROR;
     }
 
     switch (fd_type){
     case STDIN:
-        while(i < to_write){
+        while(i < to_read){
             c = get_char_from_buffer();
             buffer[i++] = c;
         }
@@ -470,7 +493,7 @@ int64_t read_from_fd(int16_t fd_number, char * buffer, int to_write){
     case PIPE:
         int16_t pipe_id = get_id(fd_number);
         if(pipe_id != -1){
-            i = read_pipe(pipe_id, buffer, to_write);
+            i = read_pipe(pipe_id, buffer, to_read);
         }
         break;
     
@@ -543,13 +566,19 @@ int16_t my_create_process(uint64_t function, char ** argv, uint8_t foreground, i
         new_process->base_pointer = (uint64_t)initial_rsp;
         new_process->stack_pointer = _setup_stack_structure_asm((uint64_t)initial_rsp, function, argc, (uint64_t)argv);
         new_process->child_list = initialize_children_queue();
-                                                              // rdi        rsi      rdx  rcx
+                                                                           // rdi        rsi      rdx       rcx
         new_process->foreground = foreground;
         process_array[new_pid] = new_process;
-        add_to_ready_queue(new_process);
         initialize_fd(new_pid, new_process->ppid, read_fd, write_fd);
         add_child(process_array[new_process->ppid]->child_list, new_process);
 
+        new_process->child_processes_sem = (char *) mm_malloc(sizeof(7));
+        create_sem_name(new_process->child_processes_sem, "pid", new_pid);
+        my_sem_open(new_process->child_processes_sem, 0);
+        new_process->active_child_processes = 0;
+        process_array[new_process->ppid]->active_child_processes++;
+
+        add_to_ready_queue(new_process);
         process_counter++;
         
     }
@@ -569,7 +598,12 @@ void my_exit_foreground(){
 }
 
 // Changes process priority
-void my_nice(int16_t pid, uint8_t new_prio){
+int64_t my_nice(int16_t pid, uint8_t new_prio){
+
+    if(new_prio == 0){
+        return FINISH_ON_ERROR;
+    }
+
     if(process_array[pid]->priority < new_prio){ // upgrade
         for(int i = process_array[pid]->priority; i > process_array[pid]->priority - new_prio; i--){
             add_to_ready_queue(process_array[pid]);
@@ -581,6 +615,8 @@ void my_nice(int16_t pid, uint8_t new_prio){
         }
     }
     process_array[pid]->priority = new_prio;
+
+    return FINISH_SUCCESFULLY;
 }
 
 
@@ -605,6 +641,8 @@ int16_t my_kill(int16_t pid){
     // set children freeeeee (but not free the process resources, just free them from the list)
     free_children_queue(p->child_list, 0);
     p->child_list = NULL;
+    my_sem_post(process_array[p->ppid]->child_processes_sem);
+    process_array[p->ppid]->active_child_processes--;
 
     return EXIT_SUCCESS;
 }
@@ -644,15 +682,11 @@ static void my_wait_process(int16_t pid){
 
     if(p->child_list == NULL) return;
 
-    while(1){
-        if(process_array[pid]->state == KILLED){
-            delete_child(p->child_list, pid, 1);
-            return;
-        }
-        else{
-            my_yield();
-        }
+    while(process_array[pid]->state != KILLED){
+        my_sem_wait(p->child_processes_sem);
     }
+
+    delete_child(p->child_list, pid, 1);
     
 }
 
@@ -667,15 +701,17 @@ void my_wait(int16_t pid){
         process p = process_array[my_getpid()];
         if(p->child_list == NULL) return;
 
+
+        while(p->active_child_processes){
+            my_sem_wait(p->child_processes_sem);
+        }
+
         t_node * aux = p->child_list->front;
         while(aux != NULL){
             if(aux->p->state == KILLED){
-                t_node * save = aux;
+                t_node * save = aux->next;
                 delete_child(p->child_list, aux->p->pid, 1);
-                aux = save->next;
-            }
-            else{
-                my_yield();
+                aux = save;
             }
         }
     }
@@ -748,7 +784,13 @@ static void create_idle_process(){
     idle_process->stack_pointer = _setup_stack_structure_asm((uint64_t)initial_rsp, (uint64_t)idle, 1, (uint64_t)argv);
     idle_process->child_list = initialize_children_queue();
     process_array[0] = idle_process;
+
     initialize_std_fd(0);
+
+    idle_process->child_processes_sem = (char *) mm_malloc(sizeof(7));
+    create_sem_name(idle_process->child_processes_sem, "pid", 0);
+    my_sem_open(idle_process->child_processes_sem, 0);
+
     process_counter++;
 }
 

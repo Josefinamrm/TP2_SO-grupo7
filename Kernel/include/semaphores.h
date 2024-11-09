@@ -32,6 +32,7 @@ void my_sem_post(char * name);
 // Decrements the value of the semaphore, blocks if it goes "below" 0
 void my_sem_wait(char * name);
 
-
+// Creates semaphore name as "name" + number to serve as a unique id. Copies it to sem_name
+void create_sem_name(char * sem_name, const char * name, int16_t number);
 
 #endif

@@ -26,15 +26,6 @@ static int16_t next_available_pipe_number(){
 
 
 
-static void create_sem_name(char * sem_name, const char * name, int16_t pipe_number){
-    char pipe_number_buf[4];
-    concat_str(sem_name, name);
-    int_to_string(pipe_number, pipe_number_buf, 4);
-    concat_str(sem_name, pipe_number_buf);
-}
-
-
-
 static char read_char(pipe_ptr pipe){
     char to_ret = pipe->buffer[pipe->read_index++];
     if(pipe->read_index >= PIPE_SIZE){
@@ -59,28 +50,19 @@ int16_t open_pipe(int file_descriptors[2]){
     // se chinga, el nombre deberia ser un string literal o sea char * name = "name" 
 
     int16_t pipe_number = next_available_pipe_number();
-    char empty_name[9] = {'e','m','p','t','y'};
-    char full_name[8] = {'f','u','l','l'};
-
+    
     if(pipe_number >= 0){
         pipe_ptr new_pipe = (pipe_ptr) mm_malloc(sizeof(struct pipe_struct));
-        if(new_pipe == NULL){
-            return FINISH_ON_ERROR;
-        }
-
         new_pipe->buffer = (char *) mm_malloc(PIPE_SIZE);
-
-        if(new_pipe->buffer == NULL){
-            return FINISH_ON_ERROR;
-        }
-
         new_pipe->read_index = new_pipe->write_index = 0;
+
         new_pipe->empty_slots_sem = (char *) mm_malloc(9);
         new_pipe->full_slots_sem = (char *) mm_malloc(9);
-        create_sem_name(new_pipe->empty_slots_sem, empty_name, pipe_number);
+        create_sem_name(new_pipe->empty_slots_sem, "empty", pipe_number);
         my_sem_open(new_pipe->empty_slots_sem, PIPE_SIZE);
-        create_sem_name(new_pipe->full_slots_sem, full_name, pipe_number);
+        create_sem_name(new_pipe->full_slots_sem, "full", pipe_number);
         my_sem_open(new_pipe->full_slots_sem, 0);
+
         new_pipe->dim = 0;
 
         int16_t pid = my_getpid();
@@ -95,7 +77,7 @@ int16_t open_pipe(int file_descriptors[2]){
 
 
 
-// Optional : if all fd referring to pipe are closed then close pipe -> counter ?
+// Closes pipe and associates file descriptors
 int16_t close_pipe(int16_t pipe_id){
     pipe_ptr pipe = pipe_array[pipe_id];
 
@@ -165,6 +147,7 @@ int16_t read_pipe(int16_t pipe_id, char * buf, int to_read){
 
 
 
+// Closes pipe end, indicated in permission
 void close_fd_end(int16_t pipe_id, Permission permission){
     pipe_ptr pipe = pipe_array[pipe_id];
 

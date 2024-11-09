@@ -45,7 +45,7 @@ uint64_t usys_get_pid();
 
 int64_t usys_create_process(uint64_t function, char ** argv, uint8_t foreground, int16_t read_fd, int16_t write_fd);
 
-void usys_nice(int16_t pid, uint8_t new_prio);
+int64_t usys_nice(int16_t pid, uint8_t new_prio);
 
 int64_t usys_kill(int16_t pid);
 
