@@ -304,7 +304,7 @@ static uint64_t setup_next_running_process(){
     if(ready_queue->front->p->state == BLOCKED || ready_queue->front->p->state == KILLED){
         remove_from_ready_queue(ready_queue->front->p->pid);
         if(ready_queue->size == 0){
-            return process_array[0]->stack_pointer;
+            return idle_process_rsp();
         }else{
             return ready_queue->front->p->stack_pointer;
         }
@@ -322,7 +322,7 @@ static uint64_t setup_next_running_process(){
     if(ready_queue->front->p->state == BLOCKED || ready_queue->front->p->state == KILLED){
         remove_from_ready_queue(ready_queue->front->p->pid);
         if(ready_queue->size == 0){
-            return process_array[0]->stack_pointer;
+            return idle_process_rsp();
         }
     }
 
