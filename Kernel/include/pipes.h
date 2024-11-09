@@ -8,7 +8,8 @@
 #define BUFFER_SIZE 4096
 #define MAX_PIPES 200
 
-typedef struct pipe_struct * pipe;
+#include <memoryManager.h>
+typedef struct pipe_struct * pipes;
 
 
 // Receives an array of integers representing file desciptors, fd[0] is for reading and fd[1] is for writing

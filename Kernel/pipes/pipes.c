@@ -11,7 +11,7 @@ struct pipe_struct{
     char * empty_slots_sem;
 };
 
-pipe pipe_array[MAX_PIPES];
+pipes pipe_array[MAX_PIPES];
 
 
 static int16_t next_available_pipe_number(){
@@ -30,7 +30,7 @@ int16_t open_pipe(uint8_t file_descriptors[2]){
     int16_t pipe_number = next_available_pipe_number();
 
     if(pipe_number > 0){
-        pipe new_pipe = (pipe) mm_malloc(sizeof(struct pipe_struct));
+        pipes new_pipe = (pipes) mm_malloc(sizeof(struct pipe_struct));
         new_pipe->buffer = (char *) mm_malloc(BUFFER_SIZE);
         new_pipe->read_index = new_pipe->write_index = 0;
         // semaphores ?
@@ -44,14 +44,20 @@ int16_t open_pipe(uint8_t file_descriptors[2]){
 
 
 // Optional : if all fd referring to pipe are closed then close pipe -> counter ?
-int16_t close_pipe(int16_t pipe_id);
+int16_t close_pipe(int16_t pipe_id){
+    printArray("close pipe\n");
+}
 
 
 
 // Blocking write -> if full block, returns n of characters written ?
-int16_t write_pipe(int16_t pipe_id, char * buf, int to_write);
+int16_t write_pipe(int16_t pipe_id, char * buf, int to_write){
+    printArray("write on pipe\n");
+}
 
 
 
 // Blocking read -> if empty block, returns n of characters read ?
-int16_t read_pipe(int16_t pipe_id, char * buf, int to_read);
+int16_t read_pipe(int16_t pipe_id, char * buf, int to_read){
+    printArray("read on pipe\n");
+}

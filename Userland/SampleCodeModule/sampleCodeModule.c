@@ -85,6 +85,13 @@ void parse_command(char *str) {
             foreground = FALSE;
             str = cmd;
         }
+        else if (strcmp(arguments[1], "|") == 0){
+            print(arguments[0]);
+            print(" se conecta con ");
+            print(arguments[2]);
+            print("\n");
+            return;
+        }
     }
 
     for (int i = 0; i < COMMAND_COUNT; i++) {

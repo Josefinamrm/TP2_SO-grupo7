@@ -141,6 +141,12 @@ void phylos_ps(){
     usys_exit();
 }
 
+void philosopher_ps(int argc, char *argv[]){
+    int i = satoi(argv[1]);
+    phylosopher(i);
+    usys_exit();
+}
+
 void kill_ps(int argc, char *argv[]){
     int pid = satoi(argv[1]);
     if(usys_kill(pid) == 0){
