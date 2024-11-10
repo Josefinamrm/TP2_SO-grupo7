@@ -14,21 +14,14 @@
 #define HUNGRY 1
 #define EATING 2
 
-// #define LEFT(x, y) (x + y - 1) % y
-// #define RIGHT(x, y) (x + 1) % y
-
 #define LEFT(x) x
 #define RIGHT(x, y) (x + 1) % y
 
-static int counter = 0;
 static char * fork[MAX];
 
 static char * phylo_mutex = "phylo_mutex";
-static char * returnex = "returnex";
-static char * printex1 = "printex1";
-static char * printex2 = "printex2";
-static char * addex = "addex";
-static int adding = 0;
+static char * printing = "printing";
+static char * adding_mutex = "adding";
 
 static uint64_t initial_pid;
 
