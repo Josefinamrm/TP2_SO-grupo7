@@ -5,7 +5,7 @@
 #include <shell.h>
 
 #define INPUT_SIZE 100 
-#define COMMAND_COUNT 23
+#define COMMAND_COUNT 22
 #define CANT_REGS 18
 #define TRUE 1
 #define FALSE 0
@@ -15,7 +15,6 @@ void help();
 void divzero();
 void invopcode();
 void time();
-void play_eliminator();
 void zoomin();
 void zoomout();
 void inforeg();
@@ -38,7 +37,6 @@ void block();
 static char buffer[INPUT_SIZE] = {0};
 static int bufferIndex = 0;
 static int currentFontSize;
-static int gameActive = 0;
 static char foreground = TRUE;
 static char pipe = FALSE;
 static int argC=0;
@@ -50,7 +48,6 @@ static Command commands[] = {
     {"invopcode", invopcode, "Simula la excepcion de opcode invalida.","No recibe argumentos."},
     {"time", time, "Muestra la hora actual.","No recibe argumentos."},
     {"inforeg", inforeg, "Imprime los registros capturados por CTRL.","No recibe argumentos."},
-    {"eliminator", play_eliminator, "Inicia el juego de eliminator.","No recibe argumentos."},
     {"zoomin", zoomin, "Aumenta el tamanio de la letra.", "No recibe argumentos."},
     {"zoomout", zoomout, "Disminuye el tamanio de la letra.", "No recibe argumentos."},
     {"clear", clear_shell, "Limpia la shell.", "No recibe argumentos."},
@@ -332,15 +329,6 @@ void beep() {
     if(no_arguments_func("beep") ==-1) return;
     print_color(GREEN, "BEEP!!\n");
     usys_beep(1000, 10);
-}
-
-void play_eliminator() {
-    if(no_arguments_func("eliminator") ==-1) return;
-    gameActive = 1;
-    clear_shell();
-    eliminator();
-    clear_shell(); 
-    gameActive = 0;
 }
 
 void testprocess() {

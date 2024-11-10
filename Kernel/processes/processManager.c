@@ -8,7 +8,7 @@
 
 #define INIT_PID 1
 uint8_t idle_running;
-typedef enum  {READY = 0, RUNNING, BLOCKED, KILLED, ZOMBIE} State;
+typedef enum  {READY = 0, RUNNING, BLOCKED, KILLED} State;
 
 /*--------------------------------------------------------- Process Control Structure ---------------------------------------------------------*/
 
@@ -53,7 +53,7 @@ struct queue_info{
 
 process_queue ready_queue;
 
-process process_array[MAX_PROCESS];
+process process_array[MAX_PROCESSES];
 
 uint8_t process_counter = 0;
 
@@ -361,7 +361,7 @@ uint8_t is_ready_queue_empty(){
 
 // Returns the next available pid
 static int16_t next_available_pid(){
-    for(int i=0; i < MAX_PROCESS; i++){
+    for(int i=0; i < MAX_PROCESSES; i++){
         if(process_array[i] == NULL){
             return i;
         }
@@ -620,20 +620,23 @@ void my_exit_foreground(){
 // Changes process priority
 int64_t my_nice(int16_t pid, uint8_t new_prio){
 
-    if(new_prio == 0){
+    if(new_prio == 0 || new_prio > 4){
         return FINISH_ON_ERROR;
     }
 
-    if(process_array[pid]->priority < new_prio){ // upgrade
-        for(int i = process_array[pid]->priority; i > process_array[pid]->priority - new_prio; i--){
-            add_to_ready_queue(process_array[pid]);
+    if(process_array[pid]->state == READY || process_array[pid]->state == RUNNING){
+        if(process_array[pid]->priority < new_prio){ // upgrade
+            for(int i = process_array[pid]->priority; i > process_array[pid]->priority - new_prio; i--){
+                add_to_ready_queue(process_array[pid]);
+            }
+        }   
+        else if(process_array[pid]->priority > new_prio){ // downgrade
+            for(int i = process_array[pid]->priority; i > new_prio - process_array[pid]->priority; i--){
+                remove_from_ready_queue(process_array[pid]->pid);
+            }
         }
     }
-    else if(process_array[pid]->priority > new_prio){ // downgrade
-        for(int i = process_array[pid]->priority; i > new_prio - process_array[pid]->priority; i--){
-            remove_from_ready_queue(process_array[pid]->pid);
-        }
-    }
+    
     process_array[pid]->priority = new_prio;
 
     return FINISH_SUCCESFULLY;
@@ -707,46 +710,11 @@ static void my_wait_process(int16_t pid){
     }
 
     delete_child(p->child_list, pid, 1);
-
-    /* process p = process_array[my_getpid()];
-
-    if(p->child_list == NULL) return;
-
-    while(1){
-        if(process_array[pid]->state == KILLED){
-            delete_child(p->child_list, pid, 1);
-            return;
-        }
-        else{
-            my_yield();
-        }
-    } */
     
 }
 
 // Waits for all children to die -> free del stack pointer
 void my_wait(int16_t pid){
-
-    /* if(pid != -1){
-        my_wait_process(pid);
-        return;
-    }
-    else{
-        process p = process_array[my_getpid()];
-        if(p->child_list == NULL) return;
-
-        t_node * aux = p->child_list->front;
-        while(aux != NULL){
-            if(aux->p->state == KILLED){
-                t_node * save = aux;
-                delete_child(p->child_list, aux->p->pid, 1);
-                aux = save->next;
-            }
-            else{
-                my_yield();
-            }
-        }
-    } */
 
     if(pid != -1){
         my_wait_process(pid);
@@ -773,46 +741,40 @@ void my_wait(int16_t pid){
 }
 
 // Prints processes info -> name, pid and state
-void my_ps(){
-    char * spacing = "            ";
-    printArray("    ");
-    printArray("NAME");
-    printArray(spacing);
-    printArray("PID");
-    printArray(spacing);
-    printArray("STATE\n");
-
-    uint32_t i = 0;
-    uint32_t counter = 0;
-    while(counter <= process_counter){
-        if(process_array[i] != NULL){
-            printArray("    ");
-            printArray(process_array[i]->name);
-            printArray(spacing);
-            printDec(process_array[i]->pid);
-            printArray(spacing);
-            switch (process_array[i]->state){
-                case READY:
-                    printArray("READY");        
-                    break;
-                case RUNNING:
-                    printArray("RUNNING");
-                    break;
-                case BLOCKED:
-                    printArray("BLOCKED");
-                    break;
-                case KILLED:
-                    printArray("KILLED");
-                    break;
-                case ZOMBIE:
-                    printArray("ZOMBIE");
-                    break;
-            }   
-            putChar('\n');
-            counter++;
+// Fills the array with each process structure
+int64_t get_process_info(process_view processes[MAX_PROCESSES]){
+    int new_dim = 0;
+    while(process_array[new_dim] != NULL){
+        processes[new_dim].name = process_array[new_dim]->name;
+        processes[new_dim].pid = process_array[new_dim]->pid;
+        processes[new_dim].priority = process_array[new_dim]->priority;
+        processes[new_dim].stack_pointer = process_array[new_dim]->stack_pointer;
+        switch (process_array[new_dim]->state)
+        {
+        case RUNNING:
+            processes[new_dim].state = "RUNNING";
+            break;
+        case READY:
+            processes[new_dim].state = "READY";
+            break;
+        case BLOCKED:
+            processes[new_dim].state = "BLOCKED";
+            break;
+        case KILLED:
+            processes[new_dim].state = "KILLED";
+            break;
+        default:
+            break;
         }
-        i++;
+
+        if(process_array[new_dim]->foreground){
+            processes[new_dim].foreground = "fg";
+        }else{
+            processes[new_dim].foreground = "bg";
+        }
+        new_dim++;
     }
+    return new_dim;
 }
 
 /*--------------------------------------------------------- Base Processes and Functions ---------------------------------------------------------*/
@@ -864,30 +826,7 @@ void idle(){
     _idle();
 }
 
-
-void read_from_pipe(){
-    char buf[10];
-    int bytes_read = ksys_read(STDIN, buf, 5);
-    printArrayOfDim(buf, bytes_read);
-    my_exit();
-}
-
-void write_to_pipe(){
-    char hola[] = "hola";
-    ksys_write(STDOUT, hola, 5); 
-    my_exit();
-}
-
 void init_process(){
-    /* char* argv1[] = {"read_from_pipe", NULL};
-    char* argv2[] = {"write_to_pipe", NULL};
-
-    int fds[2];
-    if(open_pipe(fds) == -1){
-        printArray("error creando pipes");
-    }
-    my_create_process((uint64_t)read_from_pipe, argv1, 1, fds[0], STDOUT);
-    my_create_process((uint64_t) write_to_pipe, argv2, 1, STDIN, fds[1]); */
     char * argv[] = {"userland", NULL};
     my_create_process((uint64_t)USERLAND_DIREC, argv, 1, STDIN, STDOUT);
     my_wait(-1);

@@ -44,7 +44,7 @@ int64_t ksys_kill(uint64_t pid);
 int64_t ksys_block(uint64_t pid);
 int64_t ksys_unblock(uint64_t pid);
 uint64_t ksys_yield();
-uint64_t ksys_ps();
+uint64_t ksys_get_process_info(uint64_t processes);
 uint64_t ksys_wait_processes(uint64_t pid);
 uint64_t ksys_exit();
 uint64_t ksys_malloc(uint64_t nbytes);
@@ -63,9 +63,6 @@ uint64_t ksys_write_pipe(uint64_t pipe_id, uint64_t buf, uint64_t to_write);
 uint64_t ksys_read_pipe(uint64_t pipe_id, uint64_t buf, uint64_t to_read);
 uint64_t ksys_open_fd(uint64_t type, uint64_t permission, uint64_t pipe_id);
 uint64_t ksys_close_fd(uint64_t fd_number);
-uint64_t ksys_close_all_fds(uint64_t pid);
-uint64_t ksys_write_to_fd(uint64_t fd_number, uint64_t buffer, uint64_t to_write);  
-uint64_t ksys_read_from_fd(uint64_t fd_number, uint64_t buffer, uint64_t to_read);
 
 
 #endif

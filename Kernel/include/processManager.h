@@ -11,12 +11,20 @@
 #include "videoDriver.h"
 #include "time.h"
 
-#define MAX_PROCESS 200
+#define MAX_PROCESSES 200
 #define MAX_FD 200
 #define PROCESS_STACK_SIZE 4096
 #define DEFAULT_PRIO 1
 
 // IDEA: CAMBIAR LA IMPL DE LISTA Y PROCESO A OTRO FILE NO POR AHORA
+typedef struct{
+    char * name;
+    int16_t pid;
+    uint8_t priority;
+    char * state;
+    uint64_t stack_pointer;
+    char * foreground;
+}process_view;
 
 typedef struct queue_info * children_queue;
 
@@ -152,8 +160,8 @@ void my_yield();
 // Waits for all children to finish
 void my_wait(int16_t pid);
 
-// Prints processes info -> name, pid and state
-void my_ps();
+// Fills the array with each process structure
+int64_t get_process_info(process_view processes[MAX_PROCESSES]);
 
 /*--------------------------------------------------------- Base Processes and Functions ---------------------------------------------------------*/
 

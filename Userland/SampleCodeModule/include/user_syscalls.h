@@ -11,6 +11,16 @@
 #define READ 0
 #define WRITE 1
 
+#define MAX_PROCESSES 200
+typedef struct{
+    char * name;
+    int16_t pid;
+    uint8_t priority;
+    char * state;
+    uint64_t stack_pointer;
+    char * foreground;
+}process_view;
+
 
 int usys_read(int fd, char * buf, int size);
 
@@ -61,7 +71,7 @@ void usys_yield();
 
 void usys_wait_processes(int16_t pid);
 
-void usys_ps();
+uint64_t usys_get_process_info(process_view processes[MAX_PROCESSES]);
 
 void usys_exit();
 
@@ -102,11 +112,5 @@ int64_t usys_read_pipe(int16_t pipe_id, char * buf, int to_read);
 int64_t usys_open_fd(int8_t type, int8_t permission, int16_t pipe_id);
 
 void usys_close_fd(int16_t fd_number);
-
-int64_t usys_close_all_fds(int16_t pid);
-
-int64_t usys_write_to_fd(int16_t fd_number, char * buffer, int to_write);
-
-int64_t usys_read_from_fd(int16_t fd_number, char * buffer, int to_read);
 
 #endif
