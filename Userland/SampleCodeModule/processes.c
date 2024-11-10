@@ -86,10 +86,9 @@ void loop_ps(){
 
     while(1){
         usys_write(STDOUT, "Hola! Soy el proceso: ", 22);
-        char pid_str[10];
-        int_to_string(usys_get_pid(), pid_str, 10);
-        usys_write(STDOUT, pid_str, stringlen(pid_str));
-        usys_write(STDOUT, "a\n", 2);
+        print_dec(22);
+        print("a'\n");
+        usys_wait(2);
     }
         usys_exit();
 }
@@ -139,7 +138,7 @@ void filter_ps(){
     int j=0;
     put_char('\n');
     for(int i = 0; i < bufferIndex; i++){
-        if(buffer[i] != 'a' && buffer[i] != 'e' && buffer[i] != 'i' && buffer[i] != 'o' && buffer[i] != 'u'){
+        if(!is_vowel(buffer[i])){
             to_print[j++] = buffer[i];
         }
     }

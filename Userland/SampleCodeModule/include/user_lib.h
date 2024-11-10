@@ -8,6 +8,8 @@
 
 #define INPUT_SIZE 100
 
+#define TO_LOWER(c) ((c) >= 'A' && (c) <= 'Z' ? (c) + ('a'-'A') : (c))
+
 void print(char *arr);
 
 int stringlen(const char *arr);
@@ -44,5 +46,6 @@ void udraw_array(uint32_t fontColor, uint32_t backgroundColor, int x, int y, cha
 
 void udraw_frame(uint32_t color, uint64_t x, uint64_t y, uint64_t size_x, uint64_t size_y, uint64_t thickness);
 
+int is_vowel(char c);
 
 #endif

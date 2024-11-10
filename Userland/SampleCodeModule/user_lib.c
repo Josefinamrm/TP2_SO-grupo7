@@ -21,16 +21,16 @@ void put_char(char c) {
 }
 
 void print_color(int fontColor, char * string) {
-    usys_write_color(fontColor, string, stringlen(string)+1);
+    usys_write_color(fontColor, string, stringlen(string));
 }
 
 
 void print_error(char * string) {
-    usys_write(STDERR, string, stringlen(string)+1); 
+    usys_write(STDERR, string, stringlen(string)); 
 }
 
 void print(char * string) {
-    usys_write(STDOUT, string, stringlen(string)+1); 
+    usys_write(STDOUT, string, stringlen(string)); 
 }
 
 int stringlen(const char *arr){
@@ -197,4 +197,9 @@ void udraw_frame(uint32_t color, uint64_t x, uint64_t y, uint64_t size_x, uint64
 
 void udraw_array(uint32_t fontColor, uint32_t backgroundColor, int x, int y, char * arr) {
     _draw_array(fontColor, backgroundColor, (uint64_t) x,(uint64_t) y, (uint64_t) arr);
+}
+
+int is_vowel(char c) {
+    c = TO_LOWER(c);
+    return (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u');
 }

@@ -2,11 +2,7 @@
 #define USER_SYSCALLS_H
 #include <interrupts.h>
 
-#define STDIN 0
-#define STDOUT 1
-#define STDERR 2
-#define PIPE 3
-#define LASTIN 4
+typedef enum {STDIN = 0, STDOUT, STDERR, BACKGROUND, PIPE, LASTIN} Type;
 
 #define READ 0
 #define WRITE 1
