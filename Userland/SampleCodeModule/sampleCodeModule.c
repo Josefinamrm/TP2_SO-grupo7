@@ -421,7 +421,7 @@ void filter(int fd[2]){
 void phylo(int fd[2]){
     if(pipe == FALSE)  if(no_arguments_func("phylos")==-1) return;
     char * argv[] = {"phylos", NULL};
-    int pid = usys_create_process((uint64_t) phylos_ps, argv, foreground, STDIN, STDOUT);
+    int pid = usys_create_process((uint64_t) phylos_ps, argv, foreground, fd[0], fd[1]);
     if(foreground)
         usys_wait_processes(pid);
 }

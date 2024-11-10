@@ -8,22 +8,20 @@
 #define FREE_MEM_START 0x0000000000600000 // Data from Pure64 Manual
 #define TOTAL_HEADER_UNITS (8388608 + 1)
 
-// List node state
-// #define FREE 0
-// #define OCCUPIED 1
+#ifdef BUDDY_SYSTEM 
 
 #define MEM_SIZE 0x800000 // 8MB
-#define MEM_MIN 0x1000 // 4k
-#define MEM_BLOCKS MEM_SIZE/MEM_MIN // 8MB/4K = 2048
-#define CANT_NODES MEM_BLOCKS*2 - 1 // 4095
+#define MEM_MIN 0x800 // 2k
+#define MEM_BLOCKS MEM_SIZE/MEM_MIN
+#define CANT_NODES MEM_BLOCKS*2 - 1 
 
-// #define LEFT_CHILD(x) x/2
-// #define RIGHT_CHILD(x) x + x/2 +1
 #define LEFT_CHILD(x) (2 * (x) + 1)
 #define RIGHT_CHILD(x) (2 * (x) + 2)
 
 static void * mem;
 static mem_states[CANT_NODES];
+
+#endif
 
 typedef enum States {FREE=0, HALF_OCCUPIED, OCCUPIED} States;
 

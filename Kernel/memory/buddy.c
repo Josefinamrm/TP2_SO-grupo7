@@ -1,17 +1,24 @@
 // // This is a personal academic project. Dear PVS-Studio, please check it.
 // // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
-// #include <memoryManager.h>
-// // #include "buddy.h"
-// // #include <stdio.h>
+
+// #include "buddy.h"
+// #include <stdio.h>
 
 
-// // uint8_t mem_states[CANT_NODES];
+// uint8_t mem_states[CANT_NODES];
+
+
+#include <memoryManager.h>  
+
+
+// #ifdef BUDDY_SYSTEM
 
 // uint64_t used_space = 0;
 // uint64_t total_space = 0;
 
 // void mm_init(uint64_t memory_start, uint64_t size){
+//     printArray("BUDDY\n");
 //     for(int i = 0; i < CANT_NODES; i++){
 //         mem_states[i] = FREE;
 //     }
@@ -142,3 +149,5 @@
 // int mm_total_space(){
 //     return total_space;
 // }
+
+// #endif

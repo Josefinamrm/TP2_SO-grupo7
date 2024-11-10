@@ -125,12 +125,13 @@ void filter_ps(){
 
 void phylos_ps(){
     main_phylos();
+    usys_wait_processes(-1);
     usys_exit();
 }
 
 void philosopher_ps(int argc, char *argv[]){
     int i = satoi(argv[1]);
-    phylosopher(i);
+    philosopher(i);
     usys_exit();
 }
 
