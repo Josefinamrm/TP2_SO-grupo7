@@ -412,9 +412,14 @@ int16_t open_fd(Type type, Permission permission, int16_t id){
 
 // Closes file descriptor from a certain pid
 void close_fd_from_pid(int16_t fd_number, int16_t process_pid){
+
+    if(fd_number >= MAX_FD){
+        return;
+    }
+
     fd fd = process_array[process_pid]->file_descriptors[fd_number];
     
-    if(fd_number > MAX_FD || fd == NULL){
+    if(fd == NULL){
         return;
     }
 
@@ -444,7 +449,8 @@ int16_t close_all_fds(int16_t pid){
         return FINISH_ON_ERROR;
     }
 
-    for(int i = 0; i < MAX_FD; i++){
+    // por ahora, porque puede ser que tenga un fd abierto y en el meido hayan nulls ->probar a darle mas memoria del stack
+    for(int i = 0; p->file_descriptors[i] != NULL; i++){
         close_fd_from_pid(i, pid);
     }
 
