@@ -51,7 +51,7 @@ void _yield();
 
 void _wait_processes(uint64_t pid);
 
-void _ps();
+uint64_t _get_processes_info(uint64_t processes);
 
 void _exit();
 

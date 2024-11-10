@@ -7,7 +7,7 @@
 // #define INITIAL_FONT_SIZE 1
 #define CHAR_WIDTH 8
 #define CHAR_HEIGHT 16
-#define DEFAULT_FONT_SIZE 2
+#define DEFAULT_FONT_SIZE 1
 #define DEFAULT_DRAW_SIZE 3
 
 

@@ -97,8 +97,8 @@ void usys_wait_processes(int16_t pid){
     _wait_processes((uint64_t)pid);
 }
 
-void usys_ps(){
-    _ps();
+uint64_t usys_get_process_info(process_view processes[MAX_PROCESSES]){
+    return _get_processes_info((uint64_t)processes);
 }
 
 void usys_exit(){
@@ -168,16 +168,4 @@ int64_t usys_open_fd(int8_t type, int8_t permission, int16_t pipe_id){
 
 void usys_close_fd(int16_t fd_number){
     _close_fd((uint64_t)fd_number);
-}
-
-int64_t usys_close_all_fds(int16_t pid){
-    return _close_all_fds((uint64_t)pid);
-}
-
-int64_t usys_write_to_fd(int16_t fd_number, char * buffer, int to_write){
-    return _write_to_fd((uint64_t)fd_number, (uint64_t)buffer, (uint64_t)to_write);
-}
-
-int64_t usys_read_from_fd(int16_t fd_number, char * buffer, int to_read){
-    return _read_from_fd((uint64_t)fd_number, (uint64_t)buffer, (uint64_t)to_read);
 }

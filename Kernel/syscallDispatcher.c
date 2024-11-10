@@ -58,7 +58,7 @@ int64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx
         case 23:
             return ksys_wait_processes(rdi);
         case 24:
-            return ksys_ps();
+            return ksys_get_process_info(rdi);
         case 25:
             return ksys_exit();
         case 26:
@@ -93,12 +93,6 @@ int64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx
             return ksys_open_fd(rdi, rsi, rdx);
         case 41:
             return ksys_close_fd(rdi);
-        case 42:
-            return ksys_close_all_fds(rdi);
-        case 43:
-            return ksys_write_to_fd(rdi, rsi, rdx);
-        case 44:
-            return ksys_read_from_fd(rdi, rsi, rdx);
     }
 
 
@@ -235,9 +229,8 @@ uint64_t ksys_wait_processes(uint64_t pid){
     return FINISH_SUCCESFULLY;
 }
 
-uint64_t ksys_ps(){
-    my_ps();
-    return FINISH_SUCCESFULLY;
+uint64_t ksys_get_process_info(uint64_t processes){
+    return get_process_info((process_view *)processes);
 }
 
 
@@ -313,16 +306,4 @@ uint64_t ksys_open_fd(uint64_t type, uint64_t permission, uint64_t pipe_id){
 uint64_t ksys_close_fd(uint64_t fd_number){
     close_fd((int16_t)fd_number);
     return FINISH_SUCCESFULLY;
-}
-
-uint64_t ksys_close_all_fds(uint64_t pid){
-    return close_all_fds((int16_t)pid);
-}
-
-uint64_t ksys_write_to_fd(uint64_t fd_number, uint64_t buffer, uint64_t to_write){
-    return write_to_fd((int16_t)fd_number, (char *)buffer, (int)to_write);
-}
-
-uint64_t ksys_read_from_fd(uint64_t fd_number, uint64_t buffer, uint64_t to_read){
-    return read_from_fd((int16_t)fd_number, (char *)buffer, (int)to_read);
 }

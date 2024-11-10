@@ -24,7 +24,7 @@ GLOBAL _block
 GLOBAL _unblock
 GLOBAL _yield
 GLOBAL _wait_processes
-GLOBAL _ps
+GLOBAL _get_processes_info
 GLOBAL _exit
 
 ; memory:
@@ -323,7 +323,7 @@ _wait_processes:
     pop rbp 
     ret
 
-_ps:
+_get_processes_info:
     push rbp 
     mov rbp, rsp 
 

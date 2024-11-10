@@ -5,7 +5,35 @@
 #include <shell.h>
 
 void ps_ps(){
-    usys_ps();
+    process_view processes[MAX_PROCESSES];
+    int dim = usys_get_process_info(processes);
+    char * spacing = "        ";
+    print("Name");
+    print(spacing);
+    print("Pid");
+    print(spacing);
+    print("Priority");
+    print(spacing);
+    print("State");
+    print(spacing);
+    print("RSP");
+    print(spacing);
+    print("fg");
+    put_char('\n');
+    for(int i = 0; i < dim; i++){
+        print(processes[i].name);
+        print(spacing);
+        print_dec(processes[i].pid);
+        print(spacing);
+        print_dec(processes[i].priority);
+        print(spacing);
+        print(processes[i].state);
+        print(spacing);
+        print_dec(processes[i].stack_pointer);
+        print(spacing);
+        print(processes[i].foreground);
+        put_char('\n');
+    }
     usys_exit();
 }
 
@@ -62,43 +90,38 @@ void loop_ps(){
         int_to_string(usys_get_pid(), pid_str, 10);
         usys_write(STDOUT, pid_str, stringlen(pid_str));
         usys_write(STDOUT, "a\n", 2);
-        usys_exit();
     }
+        usys_exit();
 }
 
 void cat_ps(){
     char buffer[1024];
     int bufferIndex = 0;
     char c;
-    while((c = usys_read(STDIN, buffer, 1024)) > 0){ // print the stdin?
-        usys_write(STDOUT, buffer, c);
+    while(usys_read(STDIN, &c, 1) > 0){ // print the stdin?
+        put_char(c);
+        buffer[bufferIndex++] = c;
+        if(c == '\n'){
+            buffer[bufferIndex] = '\0';
+            print(buffer);
+            bufferIndex = 0;
+        }
     }
-
-    usys_write(STDOUT, buffer, stringlen(buffer));
-    print("\n");
     usys_exit();
 }
 
 
 void wc_ps(){
-   char buffer[1024];
-    int bufferIndex = 0;
+    int line_count = 0;
     char c;
-    while((c = usys_read(STDIN, buffer, 1024)) > 0){ // print the stdin?
-        usys_write(STDOUT, buffer, c);
-    }
-
-    int count = 1;
-    int j=0;
-    for(int i = 0; i < stringlen(buffer); i++){
-        if(buffer[i] == '\n' && buffer[i+1] != 0){
-            count++;
+    while(usys_read(STDIN, &c, 1) > 0){ // print the stdin?
+        put_char(c);
+        if(c == '\n'){
+            line_count++;
         }
     }
-    char count_str[10];
-    int_to_string(count, count_str, 10);
-    usys_write(STDOUT, count_str, 10);
-    usys_write(STDOUT, "\n", 1);
+    print_dec(line_count);
+    put_char('\n');
     usys_exit(); 
 }
 
@@ -106,20 +129,23 @@ void filter_ps(){
     char buffer[1024];
     int bufferIndex = 0;
     char c;
-    while((c = usys_read(STDIN, buffer, 1024)) > 0){ // print the stdin?
-        usys_write(STDOUT, buffer, c);
+    while(usys_read(STDIN, &c, 1) > 0){ // print the stdin?
+        put_char(c);
+        buffer[bufferIndex++] = c;
     }
+    buffer[bufferIndex] = '\0';
 
-    char to_print[stringlen(buffer)];
+    char to_print[bufferIndex];
     int j=0;
-    for(int i = 0; i < stringlen(buffer); i++){
+    put_char('\n');
+    for(int i = 0; i < bufferIndex; i++){
         if(buffer[i] != 'a' && buffer[i] != 'e' && buffer[i] != 'i' && buffer[i] != 'o' && buffer[i] != 'u'){
             to_print[j++] = buffer[i];
         }
     }
-    j--;
-    usys_write(STDOUT, to_print, j);
-    usys_write(STDOUT, "\n", 1);
+    to_print[j] = '\0';
+    print(to_print);
+    put_char('\n');
     usys_exit(); 
 }
 
