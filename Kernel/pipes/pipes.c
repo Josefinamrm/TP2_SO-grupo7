@@ -45,12 +45,8 @@ static void write_char(pipe_ptr pipe, char character){
 
 
 
-// Receives an array of integers representing file desciptors, fd[0] is for reading and fd[1] is for writing
-// On success, returns 0, on error returns -1
-int16_t open_pipe(int file_descriptors[2]){
-
-    // se chinga, el nombre deberia ser un string literal o sea char * name = "name" 
-
+// Opens pipe for a certain pid
+int16_t open_pipe_for_pid(int file_descriptors[2], int16_t pid){
     int16_t pipe_number = next_available_pipe_number();
     
     if(pipe_number >= 0){
@@ -67,9 +63,8 @@ int16_t open_pipe(int file_descriptors[2]){
 
         new_pipe->dim = 0;
 
-        int16_t pid = my_getpid();
-        new_pipe->read_fd = file_descriptors[0] = open_fd(PIPE, READ, pipe_number, pid);
-        new_pipe->write_fd = file_descriptors[1] = open_fd(PIPE, WRITE, pipe_number, pid);
+        new_pipe->read_fd = file_descriptors[0] = open_fd_for_pid(PIPE, READ, pipe_number, pid);
+        new_pipe->write_fd = file_descriptors[1] = open_fd_for_pid(PIPE, WRITE, pipe_number, pid);
 
         pipe_array[pipe_number] = new_pipe;
         return FINISH_SUCCESFULLY;
@@ -79,17 +74,24 @@ int16_t open_pipe(int file_descriptors[2]){
 
 
 
-// Closes pipe and associates file descriptors
-int16_t close_pipe(int16_t pipe_id){
+// Receives an array of integers representing file desciptors, fd[0] is for reading and fd[1] is for writing
+// On success, returns 0, on error returns -1
+int16_t open_pipe(int file_descriptors[2]){
+    return open_pipe_for_pid(file_descriptors, my_getpid());
+}
 
+
+
+// Closes all file descriptors from a certain pid
+int16_t close_pipe_from_pid(int16_t pipe_id, int16_t pid){
     pipe_ptr pipe = pipe_array[pipe_id];
 
     if(pipe == NULL){
         return FINISH_ON_ERROR;
     }
 
-    close_fd(pipe->read_fd);
-    close_fd(pipe->write_fd);
+    close_fd_from_pid(pipe->read_fd, pid);
+    close_fd_from_pid(pipe->write_fd, pid);
     mm_free((void *)pipe->buffer);
     my_sem_close(pipe->empty_slots_sem);
     my_sem_close(pipe->full_slots_sem);
@@ -98,6 +100,13 @@ int16_t close_pipe(int16_t pipe_id){
     mm_free((void *)pipe);
     pipe_array[pipe_id] = NULL;
     return FINISH_SUCCESFULLY;
+}
+
+
+
+// Closes pipe and associated file descriptors
+int16_t close_pipe(int16_t pipe_id){
+    return close_pipe_from_pid(pipe_id, my_getpid());
 }
 
 
@@ -150,22 +159,25 @@ int16_t read_pipe(int16_t pipe_id, char * buf, int to_read){
 
 
 // Closes pipe end, indicated in permission
-void close_fd_end(int16_t pipe_id, Permission permission){
+void close_pipe_fd_end(int16_t pipe_id, Permission permission){
     pipe_ptr pipe = pipe_array[pipe_id];
 
-    if(pipe == NULL || pipe->read_fd == -1 || pipe->write_fd == 1){
-        return FINISH_ON_ERROR;
+    if(pipe == NULL){
+        return;
     }
 
     switch (permission)
     {
     case READ:
+        if(pipe->read_fd == -1)
+            return;
         pipe->read_fd = -1;
         break;
     
     case WRITE:
+        if(pipe->write_fd == -1)
+            return;
         pipe->write_fd = -1;
         break;
     }
-
 }

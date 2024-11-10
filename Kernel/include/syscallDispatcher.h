@@ -61,7 +61,7 @@ uint64_t ksys_open_pipe(uint64_t file_descriptors[2]);
 uint64_t ksys_close_pipe(uint64_t pipe_id);
 uint64_t ksys_write_pipe(uint64_t pipe_id, uint64_t buf, uint64_t to_write);
 uint64_t ksys_read_pipe(uint64_t pipe_id, uint64_t buf, uint64_t to_read);
-uint64_t ksys_open_fd(uint64_t type, uint64_t permission, uint64_t pipe_id, uint64_t process_pid);
+uint64_t ksys_open_fd(uint64_t type, uint64_t permission, uint64_t pipe_id);
 uint64_t ksys_close_fd(uint64_t fd_number);
 uint64_t ksys_close_all_fds(uint64_t pid);
 uint64_t ksys_write_to_fd(uint64_t fd_number, uint64_t buffer, uint64_t to_write);  

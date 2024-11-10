@@ -130,7 +130,7 @@ int usys_total_space(){
     return _total_space();
 }
 
-int16_t usys_sem_open(char * name, int value){
+int64_t usys_sem_open(char * name, int value){
     return _sem_open((uint64_t)name, (uint64_t)value);
 }
 
@@ -146,31 +146,31 @@ void usys_sem_wait(char * name){
     _sem_wait((uint64_t)name);
 }
 
-int16_t usys_open_pipe(uint8_t file_descriptors[2]){
-    return _open_pipe(file_descriptors);
+int64_t usys_open_pipe(int file_descriptors[2]){
+    return _open_pipe((uint64_t)file_descriptors);
 }
 
-int16_t usys_close_pipe(int16_t pipe_id){
+int64_t usys_close_pipe(int16_t pipe_id){
     return _close_pipe((uint64_t)pipe_id);
 }
 
-int16_t usys_write_pipe(int16_t pipe_id, char * buf, int to_write){
+int64_t usys_write_pipe(int16_t pipe_id, char * buf, int to_write){
     return _write_pipe((uint64_t)pipe_id, (uint64_t)buf, (uint64_t)to_write);
 }
 
-int16_t usys_read_pipe(int16_t pipe_id, char * buf, int to_read){
+int64_t usys_read_pipe(int16_t pipe_id, char * buf, int to_read){
     return _read_pipe((uint64_t)pipe_id, (uint64_t)buf, (uint64_t)to_read);
 }
 
-int16_t usys_open_fd(int8_t type, int8_t permission, int16_t pipe_id, int16_t process_pid){
-    return _open_fd((uint64_t)type, (uint64_t)permission, (uint64_t)pipe_id, (uint64_t)process_pid);
+int64_t usys_open_fd(int8_t type, int8_t permission, int16_t pipe_id){
+    return _open_fd((uint64_t)type, (uint64_t)permission, (uint64_t)pipe_id);
 }
 
 void usys_close_fd(int16_t fd_number){
     _close_fd((uint64_t)fd_number);
 }
 
-int16_t usys_close_all_fds(int16_t pid){
+int64_t usys_close_all_fds(int16_t pid){
     return _close_all_fds((uint64_t)pid);
 }
 

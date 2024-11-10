@@ -96,8 +96,14 @@ uint8_t is_ready_queue_empty();
 
 /*--------------------------------------------------------- File Descriptor Functions Implementations ---------------------------------------------------------*/
 
+// Opens new file descriptor for a certain pid
+int16_t open_fd_for_pid(Type type, Permission permission, int16_t id, int16_t process_pid);
+
 // Opens new file descriptor
-int16_t open_fd(Type type, Permission permission, int16_t pipe_id, int16_t process_pid);
+int16_t open_fd(Type type, Permission permission, int16_t id);
+
+// Closes file descriptor from a certain pid
+void close_fd_from_pid(int16_t fd_number, int16_t process_pid);
 
 // Closes file descriptor
 void close_fd(int16_t fd_number);
