@@ -81,7 +81,7 @@ int usys_total_space();
 
 // semaphores syscalls
 
-int16_t usys_sem_open(char * name, int value);
+int64_t usys_sem_open(char * name, int value);
 
 void usys_sem_close(char * name);
 
@@ -91,19 +91,19 @@ void usys_sem_wait(char * name);
 
 // ipc
 
-int16_t usys_open_pipe(uint8_t file_descriptors[2]);
+int64_t usys_open_pipe(int file_descriptors[2]);
 
-int16_t usys_close_pipe(int16_t pipe_id);
+int64_t usys_close_pipe(int16_t pipe_id);
 
-int16_t usys_write_pipe(int16_t pipe_id, char * buf, int to_write);
+int64_t usys_write_pipe(int16_t pipe_id, char * buf, int to_write);
 
-int16_t usys_read_pipe(int16_t pipe_id, char * buf, int to_read);
+int64_t usys_read_pipe(int16_t pipe_id, char * buf, int to_read);
 
-int16_t usys_open_fd(int8_t type, int8_t permission, int16_t pipe_id, int16_t process_pid);
+int64_t usys_open_fd(int8_t type, int8_t permission, int16_t pipe_id);
 
 void usys_close_fd(int16_t fd_number);
 
-int16_t usys_close_all_fds(int16_t pid);
+int64_t usys_close_all_fds(int16_t pid);
 
 int64_t usys_write_to_fd(int16_t fd_number, char * buffer, int to_write);
 

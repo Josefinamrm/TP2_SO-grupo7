@@ -90,7 +90,7 @@ int64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx
         case 39:
             return ksys_read_pipe(rdi, rsi, rdx);
         case 40:
-            return ksys_open_fd(rdi, rsi, rdx, rcx);
+            return ksys_open_fd(rdi, rsi, rdx);
         case 41:
             return ksys_close_fd(rdi);
         case 42:
@@ -306,8 +306,8 @@ uint64_t ksys_read_pipe(uint64_t pipe_id, uint64_t buf, uint64_t to_read){
     return read_pipe((int16_t)pipe_id, (char *)buf, (int)to_read);
 }
 
-uint64_t ksys_open_fd(uint64_t type, uint64_t permission, uint64_t pipe_id, uint64_t process_pid){
-    return open_fd((uint8_t)type, (uint8_t)permission, (int16_t)pipe_id, (int16_t)process_pid);
+uint64_t ksys_open_fd(uint64_t type, uint64_t permission, uint64_t pipe_id){
+    return open_fd((uint8_t)type, (uint8_t)permission, (int16_t)pipe_id);
 }
 
 uint64_t ksys_close_fd(uint64_t fd_number){

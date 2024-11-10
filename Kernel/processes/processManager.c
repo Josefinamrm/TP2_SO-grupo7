@@ -382,9 +382,8 @@ static int16_t next_available_fd_number(fd file_descriptors[]){
 
 
 
-// Opens new file descriptor
-int16_t open_fd(Type type, Permission permission, int16_t id, int16_t process_pid){
-
+// Opens new file descriptor for a certain pid
+int16_t open_fd_for_pid(Type type, Permission permission, int16_t id, int16_t process_pid){
     process p = process_array[process_pid];
     int16_t fd_number = next_available_fd_number(p->file_descriptors);
 
@@ -404,21 +403,34 @@ int16_t open_fd(Type type, Permission permission, int16_t id, int16_t process_pi
 
 
 
-// Closes file descriptor
-void close_fd(int16_t fd_number){
-    int16_t pid = my_getpid();
-    fd fd = process_array[pid]->file_descriptors[fd_number];
+// Opens new file descriptor
+int16_t open_fd(Type type, Permission permission, int16_t id){
+    return open_fd_for_pid(type, permission, id, my_getpid());
+}
+
+
+
+// Closes file descriptor from a certain pid
+void close_fd_from_pid(int16_t fd_number, int16_t process_pid){
+    fd fd = process_array[process_pid]->file_descriptors[fd_number];
     
     if(fd_number > MAX_FD || fd == NULL){
         return;
     }
 
     if(fd->type == PIPE){
-        close_fd_end(fd->id, fd->permission);
+        close_pipe_fd_end(fd->id, fd->permission);
     }
 
     mm_free(fd);
-    process_array[pid]->file_descriptors[fd_number] = NULL;
+    process_array[process_pid]->file_descriptors[fd_number] = NULL;
+}
+
+
+
+// Closes file descriptor
+void close_fd(int16_t fd_number){
+    close_fd_from_pid(fd_number, my_getpid());
 }
 
 
@@ -433,7 +445,7 @@ int16_t close_all_fds(int16_t pid){
     }
 
     for(int i = 0; i < MAX_FD; i++){
-        close_fd(p->file_descriptors[i]);
+        close_fd_from_pid(i, pid);
     }
 
     return FINISH_ON_ERROR;
@@ -544,9 +556,9 @@ static void initialize_fd(int16_t pid, int16_t ppid, int16_t read_fd, int16_t wr
     fd parent_read_fd = process_array[ppid]->file_descriptors[read_fd];
     fd parent_write_fd = process_array[ppid]->file_descriptors[write_fd];
 
-    open_fd(parent_read_fd->type, parent_read_fd->permission, parent_read_fd->id, pid);         // stdin
-    open_fd(parent_write_fd->type, parent_write_fd->permission, parent_write_fd->id, pid);      // stdout
-    open_fd(STDERR, WRITE, -1, pid);
+    open_fd_for_pid(parent_read_fd->type, parent_read_fd->permission, parent_read_fd->id, pid);         // stdin
+    open_fd_for_pid(parent_write_fd->type, parent_write_fd->permission, parent_write_fd->id, pid);      // stdout
+    open_fd_for_pid(STDERR, WRITE, -1, pid);
 }
 
 // después veo que hago en el caso border  ###############################  ME QUEDE ACA
@@ -687,15 +699,6 @@ static void my_wait_process(int16_t pid){
     while(process_array[pid]->state != KILLED){
         my_sem_wait(p->child_processes_sem);
     }
-    // while(1){
-    //     if(process_array[pid]->state == KILLED){
-    //         delete_child(p->child_list, pid, 1);
-    //         return;
-    //     }
-    //     else{
-    //         my_yield();
-    //     }
-    // }
 
     delete_child(p->child_list, pid, 1);
 
@@ -756,13 +759,8 @@ void my_wait(int16_t pid){
         while(aux != NULL){
             if(aux->p->state == KILLED){
                 t_node * save = aux->next;
-                // t_node * save = aux;
                 delete_child(p->child_list, aux->p->pid, 1);
                 aux = save;
-                // aux = save->next;
-                // }
-                // else{
-                // my_yield();
             }
         }
     }
@@ -815,9 +813,9 @@ void my_ps(){
 
 // Initializes standard file descriptors
 void initialize_std_fd(int16_t pid){
-    open_fd(STDIN, READ, -1, pid);
-    open_fd(STDOUT, WRITE, -1, pid);
-    open_fd(STDERR, WRITE, -1, pid);
+    open_fd_for_pid(STDIN, READ, -1, pid);
+    open_fd_for_pid(STDOUT, WRITE, -1, pid);
+    open_fd_for_pid(STDERR, WRITE, -1, pid);
 }
 
 // Creates idle process

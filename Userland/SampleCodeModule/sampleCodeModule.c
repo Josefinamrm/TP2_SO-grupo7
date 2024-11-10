@@ -377,10 +377,10 @@ void mem(int fd[2]) {
 }
 
 void testsynchro(int fd[2]) {
-    if(pipe == FALSE) if(cant_arguments_func("testsynchro", argC, 3) == -1) return;
+    //if(pipe == FALSE) if(cant_arguments_func("testsynchro", argC, 3) == -1) return;
     char * arg_1 = foreground? arguments[1] : arguments[2];
     char * arg_2 = foreground? arguments[2] : arguments[3];
-    char * argv[] = {"test synchro", arg_1, arg_2, NULL};
+    char * argv[] = {"test synchro", "2", "1", NULL};
     int pid = usys_create_process((uint64_t)testsynchro_ps, argv, foreground, STDIN, STDOUT); 
     if(foreground) 
         usys_wait_processes(pid);
