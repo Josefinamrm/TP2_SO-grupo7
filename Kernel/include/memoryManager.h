@@ -13,7 +13,7 @@
 #define MEM_SIZE 0x800000 // 8MB
 #define MEM_MIN 0x800 // 2k
 #define MEM_BLOCKS MEM_SIZE/MEM_MIN
-#define CANT_NODES MEM_BLOCKS*2 - 1 
+#define CANT_NODES ((MEM_BLOCKS * 2) - 1) 
 
 #define LEFT_CHILD(x) (2 * (x) + 1)
 #define RIGHT_CHILD(x) (2 * (x) + 2)

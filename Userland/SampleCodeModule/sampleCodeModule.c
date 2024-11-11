@@ -2,6 +2,8 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /* sampleCodeModule.c */
 
 #include <shell.h>
@@ -144,10 +146,9 @@ int main()
     print_color(GRAY, "luego del comando para ejecutar en background.\n");
 
     char c;
-    int running = 1; 
     currentFontSize = usys_get_font_size();
     print_prompt_icon();
-    while (running) {  // if ESC 
+    while (1) {  // if ESC 
         c = get_char();  // non-blocking read
         if (c != 0) {
             if (c == '\b' && bufferIndex > 0) {
@@ -381,7 +382,7 @@ void phylo(int fd[]){
 
 void kill(){
     if(cant_arguments_func("kill", argC, 2) == -1) return;
-    if(strcmp(arguments[1], "1") == 0 || strcmp(arguments[1], "1") == 0 || strcmp(arguments[1], "2") == 0){
+    if(strcmp(arguments[1], "1") == 0 || strcmp(arguments[1], "2") == 0){
         print_error("Error: no se puede matar al proceso.");
         print(arguments[1]);
         print("\n");
@@ -403,7 +404,7 @@ void nice(){
 
 void block(){
     if(cant_arguments_func("block", argC, 2) == -1) return;
-    if(strcmp(arguments[1], "1") == 0 || strcmp(arguments[1], "1") == 0 || strcmp(arguments[1], "2") == 0){
+    if(strcmp(arguments[1], "1") == 0 || strcmp(arguments[1], "2") == 0){
         print_error("Error: no se puede bloquear al proceso.");
         print(arguments[1]);
         print("\n");

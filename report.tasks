@@ -1,35 +1,13 @@
 pvs-studio.com/en/docs/warnings/	1	err	Help: The documentation for all analyzer warnings is available here: https://pvs-studio.com/en/docs/warnings/.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Bootloader/BMFS/bmfs.c	554	err	V595 The 'disk' pointer was utilized before it was verified against nullptr. Check lines: 554, 577.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Bootloader/BMFS/bmfs.c	640	warn	V1032 The pointer 'dir_copy' is cast to a more strictly aligned pointer type.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Bootloader/BMFS/bmfs.c	696	warn	V1032 The pointer 'Directory' is cast to a more strictly aligned pointer type.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Bootloader/BMFS/bmfs.c	454	note	V575 The potential null pointer is passed into 'memset' function. Inspect the first argument.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Bootloader/BMFS/bmfs.c	484	note	V575 The potential null pointer is passed into 'rewind' function. Inspect the first argument.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Bootloader/BMFS/bmfs.c	240	note	V576 Incorrect format. Consider checking the third actual argument of the 'printf' function. The SIGNED integer type argument is expected.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Bootloader/BMFS/bmfs.c	256	note	V576 Incorrect format. Consider checking the fourth actual argument of the 'printf' function. The SIGNED integer type argument is expected.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Bootloader/BMFS/bmfs.c	256	note	V576 Incorrect format. Consider checking the third actual argument of the 'printf' function. The SIGNED integer type argument is expected.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Bootloader/BMFS/bmfs.c	410	note	V576 Incorrect format. Consider checking the second actual argument of the 'printf' function. Under certain conditions the pointer can be null.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Bootloader/BMFS/bmfs.c	691	note	V576 Incorrect format. Consider checking the second actual argument of the 'printf' function. The SIGNED integer type argument is expected.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Bootloader/BMFS/bmfs.c	371	note	V584 The 'diskSize' value is present on both sides of the '>' operator. The expression is incorrect or it can be simplified.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Bootloader/BMFS/bmfs.c	503	note	V1004 The 'mbr' pointer was used unsafely after it was verified against nullptr. Check lines: 394, 503.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Kernel/drivers/naiveConsole.c	9	warn	V1009 Check the array initialization. Only the first element is initialized explicitly. The rest elements are initialized with zeros.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Kernel/drivers/naiveConsole.c	10	note	V566 The integer constant is converted to pointer. Possibly an error or a bad coding style: (uint8_t *) 0xB8000
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Kernel/drivers/naiveConsole.c	11	note	V566 The integer constant is converted to pointer. Possibly an error or a bad coding style: (uint8_t *) 0xB8000
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Kernel/include/memoryManager.h	16	note	V1003 The macro 'CANT_NODES' is a dangerous expression. The expression must be surrounded by parentheses.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Kernel/kernel.c	31	note	V566 The integer constant is converted to pointer. Possibly an error or a bad coding style: (void *) 0x400000
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Kernel/kernel.c	32	note	V566 The integer constant is converted to pointer. Possibly an error or a bad coding style: (void *) 0x500000
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Kernel/memory/memoryManager.c	174	warn	V1031 The 'printArray' function is not declared. Passing data to or from this function can be affected.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Kernel/processes/processManager.c	432	err	V501 There are identical sub-expressions 'ready_queue->front->p->state == KILLED' to the left and to the right of the '||' operator.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Kernel/processes/processManager.c	305	err	V591 Non-void function should return a value.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Kernel/processes/processManager.c	617	err	V739 EOF should not be compared with a value of the 'char' type. The 'c' should be of the 'int' type.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Kernel/processes/processManager.c	432	warn	V560 A part of conditional expression is always false: ready_queue->front->p->state == KILLED.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Kernel/stringsLib.c	56	warn	V591 Non-void function should return a value.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Userland/SampleCodeModule/include/phylos.h	18	note	V1003 The macro 'RIGHT' is a dangerous expression. The parameters 'x', 'y' must be surrounded by parentheses.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Userland/SampleCodeModule/philosophers/phylos.c	431	err	V590 Consider inspecting this expression. The expression is excessive or contains a misprint.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Userland/SampleCodeModule/philosophers/phylos.c	247	warn	V1031 The 'create_sem' function is not declared. Passing data to or from this function can be affected.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Userland/SampleCodeModule/philosophers/phylos.c	251	warn	V1031 The 'create_philosopher' function is not declared. Passing data to or from this function can be affected.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Userland/SampleCodeModule/philosophers/phylos.c	383	warn	V1031 The 'random_in_range' function is not declared. Passing data to or from this function can be affected.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Userland/SampleCodeModule/philosophers/phylos.c	389	warn	V1031 The 'random_in_range' function is not declared. Passing data to or from this function can be affected.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Userland/SampleCodeModule/philosophers/phylos.c	284	note	V1107 Function declared as accepting unspecified number of parameters is called with '1' arguments. Consider explicitly specifying the function parameters list.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Userland/SampleCodeModule/sampleCodeModule.c	384	err	V501 There are identical sub-expressions 'strcmp(arguments[1], "1") == 0' to the left and to the right of the '||' operator.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Userland/SampleCodeModule/sampleCodeModule.c	406	err	V501 There are identical sub-expressions 'strcmp(arguments[1], "1") == 0' to the left and to the right of the '||' operator.
-/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Userland/SampleCodeModule/sampleCodeModule.c	150	err	V654 The condition 'running' of loop is always true.
+/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Bootloader/BMFS/bmfs.c	556	err	V595 The 'disk' pointer was utilized before it was verified against nullptr. Check lines: 556, 579.
+/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Bootloader/BMFS/bmfs.c	642	warn	V1032 The pointer 'dir_copy' is cast to a more strictly aligned pointer type.
+/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Bootloader/BMFS/bmfs.c	698	warn	V1032 The pointer 'Directory' is cast to a more strictly aligned pointer type.
+/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Bootloader/BMFS/bmfs.c	456	note	V575 The potential null pointer is passed into 'memset' function. Inspect the first argument.
+/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Bootloader/BMFS/bmfs.c	486	note	V575 The potential null pointer is passed into 'rewind' function. Inspect the first argument.
+/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Bootloader/BMFS/bmfs.c	242	note	V576 Incorrect format. Consider checking the third actual argument of the 'printf' function. The SIGNED integer type argument is expected.
+/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Bootloader/BMFS/bmfs.c	258	note	V576 Incorrect format. Consider checking the fourth actual argument of the 'printf' function. The SIGNED integer type argument is expected.
+/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Bootloader/BMFS/bmfs.c	258	note	V576 Incorrect format. Consider checking the third actual argument of the 'printf' function. The SIGNED integer type argument is expected.
+/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Bootloader/BMFS/bmfs.c	412	note	V576 Incorrect format. Consider checking the second actual argument of the 'printf' function. Under certain conditions the pointer can be null.
+/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Bootloader/BMFS/bmfs.c	693	note	V576 Incorrect format. Consider checking the second actual argument of the 'printf' function. The SIGNED integer type argument is expected.
+/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Bootloader/BMFS/bmfs.c	373	note	V584 The 'diskSize' value is present on both sides of the '>' operator. The expression is incorrect or it can be simplified.
+/home/mschvartztallone/Facultad/SO/TP2/TP2_SO-grupo7/Bootloader/BMFS/bmfs.c	505	note	V1004 The 'mbr' pointer was used unsafely after it was verified against nullptr. Check lines: 396, 505.

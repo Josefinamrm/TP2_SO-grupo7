@@ -1,5 +1,7 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <stringsLib.h>
 
 //función auxiliar
@@ -47,7 +49,7 @@ int strcmp(const char *s1, const char *s2){
 }
 
 
-int concat_str(char * dest, char * src){
+void concat_str(char * dest, char * src){
     char* ptr = dest + stringlen(dest);
      while (*src != '\0') {
         *ptr++ = *src++;

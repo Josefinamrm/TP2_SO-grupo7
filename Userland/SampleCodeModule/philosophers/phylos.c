@@ -1,5 +1,7 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <phylos.h>
 #include "random.h"
 
@@ -64,7 +66,7 @@ void remove_philosopher() {
 
 void get_stdin(){
     while(1){
-        char c = get_char(STDIN);
+        char c = get_char();
         if(c == 'a'){
             add_philosopher();
         }

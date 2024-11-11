@@ -2,6 +2,8 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <keyboardDriver.h>
 
 /* Disposición del teclado en inglés (US) */
@@ -41,7 +43,7 @@ static int capsFlag = 0;
 int writeIndex = 0, readIndex = 0;
 
 // Buffer circular para almacenar caracteres
-char buffer[BUFFER_SIZE] = {0};
+int buffer[BUFFER_SIZE] = {0};
 
 // Semáforos
 char * empty_slots = "keyboard_empty_slots";
@@ -56,7 +58,7 @@ void initialize_keyboard_driver(){
 
 
 /* Función para agregar un carácter al buffer */
-static void addToBuffer(char c)
+static void addToBuffer(int c)
 {
     if (writeIndex >= BUFFER_SIZE){
         writeIndex = 0;
@@ -69,26 +71,22 @@ static void addToBuffer(char c)
 }
 
 /* Función para obtener un carácter del buffer */
-char get_char_from_buffer()
+int get_char_from_buffer()
 {
     if (readIndex >= BUFFER_SIZE){
         readIndex = 0;
     }
 
-    char to_ret;
+    int to_ret;
     my_sem_wait(filled_slots);
     to_ret = buffer[readIndex++];
     my_sem_post(empty_slots);
     return to_ret;
-    /* if (readIndex == writeIndex)
-        return 0;
-    if (readIndex >= BUFFER_SIZE)
-        readIndex = 0;
-    return (buffer[readIndex++]); */
+
 }
 
 /* Función para obtener el último carácter ingresado en el buffer --> para el juego */
-char get_last_char_from_buffer()
+int get_last_char_from_buffer()
 {
     if (writeIndex == 0)
     {
