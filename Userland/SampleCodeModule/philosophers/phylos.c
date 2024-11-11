@@ -12,8 +12,6 @@ void add_philosopher(){
         return;
     }
 
-    usys_sem_wait(fork[counter]);
-
     char *num = usys_malloc(10);
     int_to_string(counter, num, 10);
     create_sem(num);
@@ -22,7 +20,6 @@ void add_philosopher(){
     
     create_philosopher(num);
 
-    usys_sem_post(fork[(counter-1)]);
     
     usys_sem_post(adding_mutex);
     usys_sem_post(phylo_mutex);
@@ -39,7 +36,7 @@ void remove_philosopher() {
 
     int i = counter - 1; 
     
-    usys_sem_wait(fork[i]);
+    // usys_sem_wait(fork[i]);
     usys_sem_close(fork[i]);
     usys_free(fork[i]);
 
@@ -145,6 +142,7 @@ void exit_phylos(){
     // usys_wait_processes(initial_pid);
     usys_sem_close(printing);
     usys_sem_close(phylo_mutex);
+    usys_sem_close("waiting");
     usys_exit();
 }
 
@@ -179,6 +177,7 @@ void take_forks(int i){
     usys_sem_wait(phylo_mutex);
     phylos[i].state = HUNGRY;
     usys_sem_post(phylo_mutex);
+
 
     if((i % 2)){
         usys_sem_wait(fork[LEFT(i)]);
