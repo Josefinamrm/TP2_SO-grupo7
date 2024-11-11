@@ -5,7 +5,7 @@
 #include <shell.h>
 
 #define INPUT_SIZE 100 
-#define COMMAND_COUNT 17
+#define COMMAND_COUNT 18
 #define CANT_REGS 18
 #define TRUE 1
 #define FALSE 0
@@ -25,7 +25,7 @@ void loop(int fd[2]);
 void cat(int fd[2]);
 void wc(int fd[2]);
 void filter(int fd[2]);
-//void phylo(int fd[2]);
+void phylo(int fd[2]);
 void kill();
 void nice();
 void block();
@@ -53,7 +53,7 @@ static Command commands[] = {
     {"cat", cat, "Imprime el stdin tal como lo recibe.","No recibe argumentos."},
     {"wc", wc, "Cuenta la cantidad de palabras en el stdin.","No recibe argumentos."},
     {"filter", filter, "Filtra el stdin y muestra solo las letras.","No recibe argumentos."},
-    /* {"phylo", phylo, "Muestra el problema de los filosofos.","No recibe argumentos."}, */
+    {"phylo", phylo, "Muestra el problema de los filosofos.","No recibe argumentos."},
     {"kill", kill, "Mata un proceso.","Recibe 1 argumento: PID del proceso a matar."},
     {"nice", nice, "Cambia la prioridad de un proceso.","Recibe 2 argumentos: PID del proceso y nueva prioridad."},
     {"block", block, "Bloquea un proceso.","Recibe 1 argumento: PID del proceso a bloquear."}
@@ -369,13 +369,13 @@ void filter(int fd[2]){
         usys_wait_processes(pid);
 }
 
-/* void phylo(int fd[2]){
+void phylo(int fd[2]){
     if(pipe == FALSE)  if(no_arguments_func("phylos")==-1) return;
     char * argv[] = {"phylos", NULL};
     int pid = usys_create_process((uint64_t) phylos_ps, argv, foreground, fd[0], fd[1]);
     if(foreground)
         usys_wait_processes(pid);
-} */
+}
 
 void kill(){
     if(cant_arguments_func("kill", argC, 2) == -1) return;

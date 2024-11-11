@@ -132,12 +132,8 @@ void keyboard_handler()
             if(ctrlFlag && scanCodeTable[scanCode] == 'c')
             {
                 printArray("^C");
-
-                if(my_getpid() > 2){
-                    my_exit_foreground();
-                }else{
-                    my_exit();
-                }
+                ctrlFlag = 0;
+                my_exit_foreground();
                 return;
             }
             if (ctrlFlag && scanCodeTable[scanCode]=='d')

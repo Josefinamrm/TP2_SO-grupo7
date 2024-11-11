@@ -73,7 +73,7 @@ process process_array[MAX_PROCESSES];
 
 uint8_t process_counter = 0;
 
-process foreground_process;
+int16_t last_fg_process_pid;
 
 /*--------------------------------------------------------- Process Queue Functions Implementations ---------------------------------------------------------*/
 
@@ -369,6 +369,35 @@ int16_t wake_up(int16_t pid){
 }
 
 
+// Auxiliary function to remove a process from the sleep queue but indicating pid
+void static remove_from_squeue_by_pid(int16_t pid){
+    if(sleep_queue->size == 0){
+        sleep_queue->front = sleep_queue->rear = NULL;
+    }else{
+        s_node * current = sleep_queue->front;
+        s_node * prev = NULL;
+        while(current != NULL && current->pid != pid){
+            prev = current; 
+            current = current->next;
+        }
+        if(current == NULL){
+            return;
+        }
+        if(current == sleep_queue->front){
+            sleep_queue->front = current->next;
+        }
+        else if(current == sleep_queue->rear){
+            sleep_queue->rear = prev;
+            prev->next = NULL;
+        }
+        else{
+            prev->next = current->next;
+        }
+        mm_free(current);
+        sleep_queue->size--;
+    }
+}
+
 /*--------------------------------------------------------- Scheduler Function Implementations ---------------------------------------------------------*/
 
 
@@ -386,8 +415,6 @@ static uint64_t setup_next_running_process(){
         remove_from_ready_queue(ready_queue->front->p->pid);
         if(ready_queue->size == 0){
             return idle_process_rsp();
-        }else{
-            return ready_queue->front->p->stack_pointer;
         }
     }else{
         // change prior process to ready state
@@ -407,10 +434,10 @@ static uint64_t setup_next_running_process(){
         }
     }
 
-    // Returns current running process
+    // Returns current running process and updates the last foreground process pid
     ready_queue->front->p->state = RUNNING;
     if(ready_queue->front->p->foreground == 1){
-        foreground_process = ready_queue->front->p;
+        last_fg_process_pid = ready_queue->front->p->pid;
     }
     return ready_queue->front->p->stack_pointer;
 }
@@ -695,8 +722,11 @@ void my_exit(){
 }
 
 void my_exit_foreground(){
-    my_kill(foreground_process->pid);
-    force_timer_tick();
+    // CtrlC-ing forbidden for idle (not in fg but anyways), init and shell
+    if(last_fg_process_pid <= 2){
+        return;
+    }
+    my_kill(last_fg_process_pid);
 }
 
 // Changes process priority
@@ -725,13 +755,17 @@ int64_t my_nice(int16_t pid, uint8_t new_prio){
 }
 
 
-// Kills process -> remove it from process_array ?
-// el scheduler se va a encargar de sacarlo de la lista
+// Kills process
 int16_t my_kill(int16_t pid){
     process p = process_array[pid];
 
-    // if process is not on the list then error
     if(p == NULL) return FINISH_ON_ERROR;
+
+    // If the process was asleep, the process won't be on the ready_queue, so if it was a fg process set fg pid to -1
+    // If there was another fg process the scheduler will take care to update the variable in the next run
+    if(p->state == ASLEEP && p->foreground){
+        last_fg_process_pid = -1;
+    }
     
     p->state = KILLED;
 
@@ -744,7 +778,9 @@ int16_t my_kill(int16_t pid){
     concat_queues(process_array[INIT_PID]->child_list, p->child_list);
 
     // set children freeeeee (but not free the process resources, just free them from the list)
+    // and wake it up..
     free_process_queue(p->child_list, 0);
+    remove_from_squeue_by_pid(pid);
     p->child_list = NULL;
     process_array[p->ppid]->active_child_processes--;
     my_sem_post(process_array[p->ppid]->child_processes_sem);
@@ -902,7 +938,7 @@ static void create_idle_process(){
 void init_function(){
     ready_queue = initialize_ready_queue();
     sleep_queue = initialize_sleep_queue();
-    foreground_process = (process) mm_malloc(sizeof(struct p));
+    last_fg_process_pid = -1;
     create_idle_process();
 }
 
@@ -913,7 +949,7 @@ void idle(){
 }
 
 void init_process(){
-    char * argv[] = {"userland", NULL};
+    char * argv[] = {"Shell", NULL};
     my_create_process((uint64_t)USERLAND_DIREC, argv, 1, STDIN, STDOUT);
     my_wait(-1);
     my_exit();

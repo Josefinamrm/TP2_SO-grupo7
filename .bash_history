@@ -1,10 +1,3 @@
-make clean
-cd toolchain
-make clean all
-cd ..
-make clean all
-make clean all
-make clean all
 make clean all
 make clean all
 clear
@@ -498,3 +491,10 @@ make clean buddy
 make clean all
 make clean all
 make clean all
+cd root
+make clean all
+cd Toolchain
+make clean all
+cd ..
+make clean all
+exit

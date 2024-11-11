@@ -296,7 +296,7 @@ void get_stdin(){
 void phylo_loop(){
     while(1){
         table();
-        usys_wait(2000);
+        usys_sleep(2);
     }
 }
 
@@ -378,13 +378,13 @@ void exit_phylos(){
 
 void think(int i){
     phylos[i].state = THINKING;
-    usys_wait(random_in_range(1, 3) * 1000);
+    usys_sleep(random_in_range(1, 3));
 
 }
 
 void eat(int i){
     phylos[i].state = EATING;
-    usys_wait(random_in_range(1, 3) * 1000);
+    usys_sleep(random_in_range(1, 3));
 }
 
 
@@ -394,7 +394,7 @@ void philosopher(int i){
         take_forks(i);
         eat(i);
         put_forks(i);
-        usys_wait(1000);
+        usys_sleep(1);
     }
 }
 

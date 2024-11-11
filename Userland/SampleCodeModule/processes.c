@@ -89,7 +89,7 @@ void loop_ps(){
         print("Hola! Soy el proceso: ");
         print_dec(pid);
         put_char('\n');
-        usys_sleep(10);
+        usys_sleep(1);
     }
         usys_exit();
 }
@@ -149,17 +149,17 @@ void filter_ps(){
     usys_exit(); 
 }
 
-/* void phylos_ps(){
+void phylos_ps(){
     main_phylos();
     usys_wait_processes(-1);
     usys_exit();
-} */
+}
 
-/* void philosopher_ps(int argc, char *argv[]){
+void philosopher_ps(int argc, char *argv[]){
     int i = satoi(argv[1]);
     philosopher(i);
     usys_exit();
-} */
+}
 
 void kill_ps(int argc, char *argv[]){
     int pid = satoi(argv[1]);
