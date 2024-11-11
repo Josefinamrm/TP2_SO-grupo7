@@ -15,7 +15,7 @@
 #define EATING 2
 
 #define LEFT_FORK(x) x
-#define RIGHT_FORK(x, y) (x + 1) % y
+#define RIGHT_FORK(x, y) (((x) + 1) % (y))
 
 typedef struct {
     int state;

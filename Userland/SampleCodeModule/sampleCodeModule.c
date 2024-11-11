@@ -1,21 +1,29 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /* sampleCodeModule.c */
 
 #include <shell.h>
 
 #define INPUT_SIZE 100 
-#define COMMAND_COUNT 18
+#define COMMAND_COUNT 22
 #define CANT_REGS 18
 #define TRUE 1
 #define FALSE 0
 #define MAX_ARGS 10
 
 void help();
+void divzero();
+void invopcode();
+void time();
 void zoomin();
 void zoomout();
 void inforeg();
 void clear_shell();
+void beep();
 void testprocess();
 void testprio();
 void ps(int fd[]);
@@ -40,10 +48,14 @@ static char *arguments[MAX_ARGS] = {0};
 
 static Command commands[] = {
     {"help", help, "Muestra la lista de comandos.","No recibe argumentos."},
+    {"divzero", divzero, "Simula la excepcion de division por 0"},
+    {"invopcode", invopcode, "Simula la excepcion de opcode invalida"},
+    {"time", time, "Muestra la hora actual"},
     {"inforeg", inforeg, "Imprime los registros capturados por CTRL.","No recibe argumentos."},
     {"zoomin", zoomin, "Aumenta el tamanio de la letra.", "No recibe argumentos."},
     {"zoomout", zoomout, "Disminuye el tamanio de la letra.", "No recibe argumentos."},
     {"clear", clear_shell, "Limpia la shell.", "No recibe argumentos."},
+    {"beep", beep, "Emite un beep"},
     {"testprocess", testprocess, "Crea el proceso test_process.","Recibe 1 argumento: Cantidad de procesos a crear."},
     {"testprio", testprio, "Crea procesos con distintas prioridades.","No recibe argumentos."},
     {"ps", (void (*)(char *))ps, "Muestra los procesos y sus estados.","No recibe argumentos."},
@@ -142,10 +154,9 @@ int main()
     print_color(GRAY, "luego del comando para ejecutar en background.\n");
 
     char c;
-    int running = 1; 
     currentFontSize = usys_get_font_size();
     print_prompt_icon();
-    while (running) {  // if ESC 
+    while (1) {  // if ESC 
         c = get_char();  // non-blocking read
         if (c != 0) {
             if (c == '\b' && bufferIndex > 0) {
@@ -212,7 +223,7 @@ static int cant_arguments_func(char * func, int cant, int needed){
 
 void help() {
     print("Comandos disponibles:\n");
-    for(int i = 1; i < COMMAND_COUNT ; i++){
+    for(int i = 0; i < COMMAND_COUNT ; i++){
             print("   ");
             print_color(LIGHT_BLUE, commands[i].name_id);
             print(": ");
@@ -221,6 +232,21 @@ void help() {
             print_color(GRAY, commands[i].usage);
             put_char('\n');
     }
+}
+void divzero() { 
+    int a = 1; //rax??
+    int b = 0; 
+    if (a/b == 1) {
+        print_error("This is wrong...");
+    }
+}
+void invopcode() {
+    _invalid_opcode_exception();
+}
+
+void time() {
+    print_color(GREEN, "ART (Argentine Time): UTC/GMT -3 horas\n"); 
+    _get_time(); 
 }
 
 void zoomin() {
@@ -292,6 +318,11 @@ void inforeg() {
 void clear_shell() {
     if(no_arguments_func("clear") ==-1) return;
     usys_clear_screen();
+}
+
+void beep() {
+    print_color(GREEN, "BEEP!!\n");
+    usys_beep(1000, 1);
 }
 
 void testprocess() {
@@ -379,7 +410,7 @@ void phylo(int fd[]){
 
 void kill(){
     if(cant_arguments_func("kill", argC, 2) == -1) return;
-    if(strcmp(arguments[1], "1") == 0 || strcmp(arguments[1], "1") == 0 || strcmp(arguments[1], "2") == 0){
+    if(strcmp(arguments[1], "1") == 0 || strcmp(arguments[1], "2") == 0){
         print_error("Error: no se puede matar al proceso.");
         print(arguments[1]);
         print("\n");
@@ -401,7 +432,7 @@ void nice(){
 
 void block(){
     if(cant_arguments_func("block", argC, 2) == -1) return;
-    if(strcmp(arguments[1], "1") == 0 || strcmp(arguments[1], "1") == 0 || strcmp(arguments[1], "2") == 0){
+    if(strcmp(arguments[1], "1") == 0 || strcmp(arguments[1], "2") == 0){
         print_error("Error: no se puede bloquear al proceso.");
         print(arguments[1]);
         print("\n");

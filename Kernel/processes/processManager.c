@@ -1,5 +1,9 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 #include "processManager.h"
 
@@ -427,7 +431,7 @@ static uint64_t setup_next_running_process(){
     ready_queue->front = ready_queue->front->next;
 
     // Check if the next is a blocked, asleep or killed process, if so remove it from the list
-    if(ready_queue->front->p->state == BLOCKED || ready_queue->front->p->state == KILLED || ready_queue->front->p->state == KILLED){
+    if(ready_queue->front->p->state == BLOCKED || ready_queue->front->p->state == KILLED || ready_queue->front->p->state == ASLEEP){
         remove_from_ready_queue(ready_queue->front->p->pid);
         if(ready_queue->size == 0){
             return idle_process_rsp();
@@ -601,7 +605,7 @@ int64_t write_to_fd(int16_t fd_number, char * buffer, int to_write){
 // Reads from file descriptor
 int64_t read_from_fd(int16_t fd_number, char * buffer, int to_read){
     int i = 0;
-    char c;
+    int c;
     int16_t fd_type = get_type((int16_t)fd_number);
 
     if(fd_type == -1 || fd_type == WRITE){
@@ -613,7 +617,7 @@ int64_t read_from_fd(int16_t fd_number, char * buffer, int to_read){
         while(i < to_read){
             c = get_char_from_buffer();
             if(c==EOF) return 0;
-            buffer[i++] = c;
+            buffer[i++] = (char)c;
      
         }
         break;
