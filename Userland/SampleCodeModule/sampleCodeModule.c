@@ -5,21 +5,17 @@
 #include <shell.h>
 
 #define INPUT_SIZE 100 
-#define COMMAND_COUNT 22
+#define COMMAND_COUNT 17
 #define CANT_REGS 18
 #define TRUE 1
 #define FALSE 0
 #define MAX_ARGS 10
 
 void help();
-void divzero();
-void invopcode();
-void time();
 void zoomin();
 void zoomout();
 void inforeg();
 void clear_shell();
-void beep();
 void testprocess();
 void testprio();
 void ps(int fd[2]);
@@ -29,7 +25,7 @@ void loop(int fd[2]);
 void cat(int fd[2]);
 void wc(int fd[2]);
 void filter(int fd[2]);
-void phylo(int fd[2]);
+//void phylo(int fd[2]);
 void kill();
 void nice();
 void block();
@@ -44,14 +40,10 @@ static char *arguments[MAX_ARGS] = {0};
 
 static Command commands[] = {
     {"help", help, "Muestra la lista de comandos.","No recibe argumentos."},
-    {"divzero", divzero, "Simula la excepcion de division por 0.","No recibe argumentos."},
-    {"invopcode", invopcode, "Simula la excepcion de opcode invalida.","No recibe argumentos."},
-    {"time", time, "Muestra la hora actual.","No recibe argumentos."},
     {"inforeg", inforeg, "Imprime los registros capturados por CTRL.","No recibe argumentos."},
     {"zoomin", zoomin, "Aumenta el tamanio de la letra.", "No recibe argumentos."},
     {"zoomout", zoomout, "Disminuye el tamanio de la letra.", "No recibe argumentos."},
     {"clear", clear_shell, "Limpia la shell.", "No recibe argumentos."},
-    {"beep", beep, "Emite un beep.","No recibe argumentos."},
     {"testprocess", testprocess, "Crea el proceso test_process.","Recibe 1 argumento: Cantidad de procesos a crear."},
     {"testprio", testprio, "Crea procesos con distintas prioridades.","No recibe argumentos."},
     {"ps", ps, "Muestra los procesos y sus estados.","No recibe argumentos."},
@@ -61,7 +53,7 @@ static Command commands[] = {
     {"cat", cat, "Imprime el stdin tal como lo recibe.","No recibe argumentos."},
     {"wc", wc, "Cuenta la cantidad de palabras en el stdin.","No recibe argumentos."},
     {"filter", filter, "Filtra el stdin y muestra solo las letras.","No recibe argumentos."},
-    {"phylo", phylo, "Muestra el problema de los filosofos.","No recibe argumentos."},
+    /* {"phylo", phylo, "Muestra el problema de los filosofos.","No recibe argumentos."}, */
     {"kill", kill, "Mata un proceso.","Recibe 1 argumento: PID del proceso a matar."},
     {"nice", nice, "Cambia la prioridad de un proceso.","Recibe 2 argumentos: PID del proceso y nueva prioridad."},
     {"block", block, "Bloquea un proceso.","Recibe 1 argumento: PID del proceso a bloquear."}
@@ -219,8 +211,6 @@ static int cant_arguments_func(char * func, int cant, int needed){
 /* --------------------------- Commands functions ------------------------------------------------------------------------*/
 
 void help() {
-    print_color(YELLOW, "Hacemos zoom-out para ver los comandos disponibles.\n");
-    zoomout();
     print("Comandos disponibles:\n");
     for(int i = 1; i < COMMAND_COUNT ; i++){
             print("   ");
@@ -230,28 +220,7 @@ void help() {
             print(" - ");
             print_color(GRAY, commands[i].usage);
             put_char('\n');
-    } 
-    print_color(YELLOW,"Restauramos el tamanio de la letra.\n");
-    zoomin();
-}
-
-void divzero() { 
-    if(no_arguments_func("divzero") ==-1) return;
-    int a = 1; //rax??
-    int b = 0; 
-    if ((a/b) == 1) {
-        print_error("This is wrong...");
     }
-}
-void invopcode() {
-    if(no_arguments_func("invopcode") ==-1) return;
-    _invalid_opcode_exception();
-}
-
-void time() {
-    if(no_arguments_func("time") ==-1) return;
-    print_color(GREEN, "ART (Argentine Time): UTC/GMT -3 horas\n"); 
-    _get_time(); 
 }
 
 void zoomin() {
@@ -323,12 +292,6 @@ void inforeg() {
 void clear_shell() {
     if(no_arguments_func("clear") ==-1) return;
     usys_clear_screen();
-}
-
-void beep() {
-    if(no_arguments_func("beep") ==-1) return;
-    print_color(GREEN, "BEEP!!\n");
-    usys_beep(1000, 10);
 }
 
 void testprocess() {
@@ -406,13 +369,13 @@ void filter(int fd[2]){
         usys_wait_processes(pid);
 }
 
-void phylo(int fd[2]){
+/* void phylo(int fd[2]){
     if(pipe == FALSE)  if(no_arguments_func("phylos")==-1) return;
     char * argv[] = {"phylos", NULL};
     int pid = usys_create_process((uint64_t) phylos_ps, argv, foreground, fd[0], fd[1]);
     if(foreground)
         usys_wait_processes(pid);
-}
+} */
 
 void kill(){
     if(cant_arguments_func("kill", argC, 2) == -1) return;

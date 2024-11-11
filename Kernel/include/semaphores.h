@@ -14,7 +14,7 @@ typedef struct{
 
 typedef struct{
     sem_t * sem;
-    waiting_processes_queue wp_queue;
+    process_queue wp_queue;
     uint16_t times_opened;
     uint8_t lock;
 } sem_block;

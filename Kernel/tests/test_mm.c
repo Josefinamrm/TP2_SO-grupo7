@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-void timer_wait(int seconds);
+void sleep_s(int seconds);
 
 #include "memoryManager.h"
 

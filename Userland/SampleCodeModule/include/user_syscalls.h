@@ -34,7 +34,7 @@ void usys_print_rect(uint32_t color, int x, int y, int size_x, int size_y);
 
 int usys_get_registers(uint64_t * registers);
 
-void usys_wait(int ms);
+void usys_sleep(int seconds);
 
 void usys_clear_screen();
 

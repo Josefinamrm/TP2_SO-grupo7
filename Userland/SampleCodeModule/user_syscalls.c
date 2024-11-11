@@ -37,8 +37,8 @@ int usys_get_registers(uint64_t * registers){
     return _getRegisters(registers);
 }
 
-void usys_wait(int ms){
-    _wait((uint64_t ) ms);
+void usys_sleep(int seconds){
+    _sleep((uint64_t)seconds);
 }
 
 void usys_clear_screen() {

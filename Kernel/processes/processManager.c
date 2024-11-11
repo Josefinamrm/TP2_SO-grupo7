@@ -8,7 +8,7 @@
 
 #define INIT_PID 1
 uint8_t idle_running;
-typedef enum  {READY = 0, RUNNING, BLOCKED, KILLED} State;
+typedef enum  {READY = 0, RUNNING, BLOCKED, KILLED, ASLEEP} State;
 
 /*--------------------------------------------------------- Process Control Structure ---------------------------------------------------------*/
 
@@ -36,7 +36,7 @@ struct p{
 
 };
 
-/*--------------------------------------------------------- Ready Process Queue ---------------------------------------------------------*/
+/*--------------------------------------------------------- Process Queue ---------------------------------------------------------*/
 
 typedef struct node{
     process p;
@@ -49,9 +49,25 @@ struct queue_info{
     uint32_t size;
 };
 
-/*--------------------------------------------------------- Process Array ---------------------------------------------------------*/
+/*--------------------------------------------------------- Sleeping Process Queue ---------------------------------------------------------*/
+
+typedef struct node_2{
+    int16_t pid;
+    uint64_t sleep_until;
+    struct node_2 * next;
+}s_node;
+
+struct sleep_queue_info{
+    s_node * front;
+    s_node * rear;
+    uint32_t size;
+};
+
+/*--------------------------------------------------------- Process Sets ---------------------------------------------------------*/
 
 process_queue ready_queue;
+
+sleeping_process_queue sleep_queue;
 
 process process_array[MAX_PROCESSES];
 
@@ -59,19 +75,19 @@ uint8_t process_counter = 0;
 
 process foreground_process;
 
-/*--------------------------------------------------------- List Functions Implementations ---------------------------------------------------------*/
+/*--------------------------------------------------------- Process Queue Functions Implementations ---------------------------------------------------------*/
 
-// Initializes children queue
-children_queue initialize_children_queue(){
-    children_queue list = (children_queue) mm_malloc(sizeof(struct queue_info));
-    list->front = NULL;
-    list->rear = NULL;
-    list->size = 0;
-    return list;
+// Initializes queue
+process_queue initialize_process_queue(){
+    process_queue queue = (process_queue) mm_malloc(sizeof(struct queue_info));
+    queue->front = NULL;
+    queue->rear = NULL;
+    queue->size = 0;
+    return queue;
 }
 
-// Adds a process to the end of the children queue
-void add_child(children_queue queue, process child){
+// Adds a process to the end of the queue
+void add_process(process_queue queue, process child){
     t_node * newborn = (t_node *) mm_malloc(sizeof(t_node));
     newborn->p = child;
     newborn->next = NULL;
@@ -86,8 +102,8 @@ void add_child(children_queue queue, process child){
 
 }
 
-// Deletes a process from the children queue, but doesn´t free the process
-void delete_child(children_queue queue, int16_t pid, uint8_t free_process){
+// Deletes a process from the process queue, it frees it if indicated by free_process
+void delete_process(process_queue queue, int16_t pid, uint8_t free_process){
     if(queue->size == 0){
         queue->front = queue->rear = NULL;
     }else{
@@ -123,39 +139,42 @@ void delete_child(children_queue queue, int16_t pid, uint8_t free_process){
     }
 }
 
-// Checks whether the list is empty
-uint64_t is_children_queue_empty(children_queue queue){
+
+
+// Checks if queue is empty, returns 1 if so
+uint8_t is_empty(process_queue queue){
     return queue->size == 0;
 }
 
-// Frees children list
-void free_children_queue(children_queue queue, uint8_t free_process){
+
+// Frees process queue
+void free_process_queue(process_queue queue, uint8_t free_process){
     if(queue->size > 0){
         t_node * current = queue->front;
         t_node * next = NULL;
         while(current != NULL){
             next = current->next;
-            delete_child(queue, current->p->pid, free_process);
+            delete_process(queue, current->p->pid, free_process);
             current = next;
         }
     }
     mm_free(queue);
 }
 
-// Concatenate lists
-void adopt_children(children_queue adoptive_p, children_queue children){
+// Concatenates queues
+void concat_queues(process_queue adoptive_p, process_queue children){
     adoptive_p->rear->next = children->front;
     adoptive_p->rear = children->rear;
     adoptive_p->size += children->size;
 }
 
-// Adds a process to the end of the queue -> same as add_child 
-void enqueue(waiting_processes_queue queue, int16_t pid){
-    add_child(queue, process_array[pid]);
+// Adds a process to the end of the queue -> same as add_process 
+void enqueue_process(process_queue queue, int16_t pid){
+    add_process(queue, process_array[pid]);
 }
 
 // Deletes the first process from the queue 
-int16_t dequeue(waiting_processes_queue queue){
+int16_t dequeue_process(process_queue queue){
     if(queue->size == 0)
         return FINISH_ON_ERROR;
 
@@ -172,17 +191,7 @@ int16_t dequeue(waiting_processes_queue queue){
     return pid_to_ret;
 }
 
-/*--------------------------------------------------------- Queue Functions Implementations ---------------------------------------------------------*/
-
-// Initializes queue and intitializes idle_running to 0
-process_queue initialize_queue(){
-    process_queue queue = (process_queue) mm_malloc(sizeof(struct queue_info));
-    queue->front = NULL;
-    queue->rear = NULL;
-    queue->size = 0;
-    idle_running = 0;
-    return queue;
-}
+/*--------------------------------------------------------- Process Queue Functions Implementations (Circular) ---------------------------------------------------------*/
 
 
 // Adds one or all process instances to the end of the queue
@@ -260,35 +269,107 @@ void remove_all_process_instances(process_queue queue, int16_t pid){
     remove_process_instance(queue, pid, 1);
 }
 
+/*--------------------------------------------------------- Ready Queue Function Implementations ---------------------------------------------------------*/
 
-// Checks if queue is empty, returns 1 if so
-uint8_t is_empty(process_queue queue){
-    return queue->size == 0;
+// Initializes queue and intitializes idle_running to 0
+process_queue initialize_ready_queue(){
+    idle_running = 0;
+    return initialize_process_queue();
 }
 
 
-
-/*--------------------------------------------------------- Ready Queue Functions ---------------------------------------------------------*/
-
 // Adds n process instances, where n = priority
-static int32_t add_to_ready_queue(process p){ 
-    
-    add_all_process_instances(ready_queue, p);
+void add_to_ready_queue(process p){ 
 
-    return FINISH_SUCCESFULLY;
+    add_all_process_instances(ready_queue, p);
 }
 
 // Removes an instance of the ready_queue
-static int32_t remove_from_ready_queue(int16_t pid){
+void remove_from_ready_queue(int16_t pid){
     if(process_array[pid] == NULL){
-        return EXIT_FAILURE;
+        return;
     }
     uint8_t prio = process_array[pid]->priority;
     remove_process_instance(ready_queue, pid, 0);
     process_array[pid]->priority = prio;
-    return FINISH_SUCCESFULLY;
 }
 
+
+/*--------------------------------------------------------- Sleep Queue Function Implementations  ---------------------------------------------------------*/
+
+// Initializes sleep queue
+process_queue initialize_sleep_queue(){
+    initialize_process_queue();
+}
+
+// Adds a procces to the sleeping queue
+void add_to_sleep_queue(int16_t pid, uint64_t until_ticks){
+    s_node * sleeping_beauty = (s_node *) mm_malloc(sizeof(s_node));
+    sleeping_beauty->pid = pid;
+    sleeping_beauty->sleep_until = until_ticks;
+    sleeping_beauty->next = NULL;
+
+    if(sleep_queue->size == 0){
+        sleep_queue->front = sleep_queue->rear = sleeping_beauty;
+    }else{
+        sleep_queue->rear->next = sleeping_beauty;
+        sleep_queue->rear = sleeping_beauty;
+    }
+
+    sleep_queue->size++;
+    go_to_sleep(pid);
+}
+
+// Removes a process from the sleeping queue which has slept enough
+void remove_from_sleep_queue(uint64_t ticks_elapsed){
+    if(sleep_queue->size == 0){
+        sleep_queue->front = sleep_queue->rear = NULL;
+    }else{
+        s_node * current = sleep_queue->front;
+        s_node * prev = NULL;
+        while(current != NULL){
+            if(current->sleep_until < ticks_elapsed){
+                if(current == sleep_queue->front){
+                    sleep_queue->front = current->next;
+                }
+                else if(current == sleep_queue->rear){
+                    sleep_queue->rear = prev;
+                    prev->next = NULL;
+                }
+                else{
+                    prev->next = current->next;
+                }
+                sleep_queue->size--;
+                wake_up(current->pid);
+                mm_free(current);
+            }
+            prev = current; 
+            current = current->next;
+        }
+    
+    }
+}
+
+
+// Makes process go to sleep
+int16_t go_to_sleep(int16_t pid){
+
+    if(process_array[pid] == NULL) return FINISH_ON_ERROR;    
+
+    process_array[pid]->state = ASLEEP;
+    if(ready_queue->front->p->pid == pid) force_timer_tick();
+
+    return EXIT_SUCCESS;
+}
+
+
+// Wakes process up
+int16_t wake_up(int16_t pid){
+    return my_unblock(pid);
+}
+
+
+/*--------------------------------------------------------- Scheduler Function Implementations ---------------------------------------------------------*/
 
 
 // Backs up rsp register 
@@ -300,8 +381,8 @@ static void backup_current_process(uint64_t rsp){
 // Sets next running process
 static uint64_t setup_next_running_process(){
 
-    // Check if the current process is blocked or killed, if so remove it from the list
-    if(ready_queue->front->p->state == BLOCKED || ready_queue->front->p->state == KILLED){
+    // Check if the current process is blocked, killed or asleep, if so remove it from the list
+    if(ready_queue->front->p->state == BLOCKED || ready_queue->front->p->state == KILLED || ready_queue->front->p->state == ASLEEP){
         remove_from_ready_queue(ready_queue->front->p->pid);
         if(ready_queue->size == 0){
             return idle_process_rsp();
@@ -318,8 +399,8 @@ static uint64_t setup_next_running_process(){
     ready_queue->rear = ready_queue->front;
     ready_queue->front = ready_queue->front->next;
 
-    // Check if the next is a blocked or killed process, if so remove it from the list
-    if(ready_queue->front->p->state == BLOCKED || ready_queue->front->p->state == KILLED){
+    // Check if the next is a blocked, asleep or killed process, if so remove it from the list
+    if(ready_queue->front->p->state == BLOCKED || ready_queue->front->p->state == KILLED || ready_queue->front->p->state == KILLED){
         remove_from_ready_queue(ready_queue->front->p->pid);
         if(ready_queue->size == 0){
             return idle_process_rsp();
@@ -333,6 +414,7 @@ static uint64_t setup_next_running_process(){
     }
     return ready_queue->front->p->stack_pointer;
 }
+
 
 
 // Returns next running process rsp from the ready process queue
@@ -585,12 +667,12 @@ int16_t my_create_process(uint64_t function, char ** argv, uint8_t foreground, i
         initial_rsp += PROCESS_STACK_SIZE / sizeof(uint64_t);
         new_process->base_pointer = (uint64_t)initial_rsp;
         new_process->stack_pointer = _setup_stack_structure_asm((uint64_t)initial_rsp, function, argc, (uint64_t)argv);
-        new_process->child_list = initialize_children_queue();
+        new_process->child_list = initialize_process_queue();
                                                                            // rdi        rsi      rdx       rcx
         new_process->foreground = foreground;
         process_array[new_pid] = new_process;
         initialize_fd(new_pid, new_process->ppid, read_fd, write_fd);
-        add_child(process_array[new_process->ppid]->child_list, new_process);
+        add_process(process_array[new_process->ppid]->child_list, new_process);
 
         new_process->child_processes_sem = (char *) mm_malloc(sizeof(7));
         create_sem_name(new_process->child_processes_sem, "pid", new_pid);
@@ -659,10 +741,10 @@ int16_t my_kill(int16_t pid){
         aux->p->ppid = INIT_PID;
         aux = aux->next;
     }
-    adopt_children(process_array[INIT_PID]->child_list, p->child_list);
+    concat_queues(process_array[INIT_PID]->child_list, p->child_list);
 
     // set children freeeeee (but not free the process resources, just free them from the list)
-    free_children_queue(p->child_list, 0);
+    free_process_queue(p->child_list, 0);
     p->child_list = NULL;
     process_array[p->ppid]->active_child_processes--;
     my_sem_post(process_array[p->ppid]->child_processes_sem);
@@ -709,7 +791,7 @@ static void my_wait_process(int16_t pid){
         my_sem_wait(p->child_processes_sem);
     }
 
-    delete_child(p->child_list, pid, 1);
+    delete_process(p->child_list, pid, 1);
     
 }
 
@@ -733,7 +815,7 @@ void my_wait(int16_t pid){
         while(aux != NULL){
             if(aux->p->state == KILLED){
                 t_node * save = aux->next;
-                delete_child(p->child_list, aux->p->pid, 1);
+                delete_process(p->child_list, aux->p->pid, 1);
                 aux = save;
             }
         }
@@ -762,6 +844,9 @@ int64_t get_process_info(process_view processes[MAX_PROCESSES]){
             break;
         case KILLED:
             processes[new_dim].state = "KILLED";
+            break;
+        case ASLEEP:
+            processes[new_dim].state = "ASLEEP";
             break;
         default:
             break;
@@ -801,7 +886,7 @@ static void create_idle_process(){
     idle_process->base_pointer = (uint64_t)initial_rsp;
     char * argv[] = {idle_process->name, NULL};
     idle_process->stack_pointer = _setup_stack_structure_asm((uint64_t)initial_rsp, (uint64_t)idle, 1, (uint64_t)argv);
-    idle_process->child_list = initialize_children_queue();
+    idle_process->child_list = initialize_process_queue();
     process_array[0] = idle_process;
 
     initialize_std_fd(0);
@@ -815,7 +900,8 @@ static void create_idle_process(){
 
 
 void init_function(){
-    ready_queue = initialize_queue();
+    ready_queue = initialize_ready_queue();
+    sleep_queue = initialize_sleep_queue();
     foreground_process = (process) mm_malloc(sizeof(struct p));
     create_idle_process();
 }

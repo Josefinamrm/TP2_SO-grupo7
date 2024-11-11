@@ -15,7 +15,7 @@ uint64_t _write_color(uint64_t fontCOlor, uint64_t buf, uint64_t size);
 
 uint64_t _getRegisters(uint64_t * registers);
 
-uint64_t _wait(uint64_t ms);
+uint64_t _sleep(uint64_t seconds);
 
 uint64_t _clear_screen();
 

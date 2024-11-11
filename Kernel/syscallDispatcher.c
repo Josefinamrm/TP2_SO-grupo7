@@ -27,7 +27,7 @@ int64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx
         case 8:
             return ksys_getRegisters(rdi);
         case 9:
-            return ksys_wait(rdi);
+            return ksys_sleep(rdi);
         case 10:
             return ksys_change_font_size(rdi);
         case 11:
@@ -143,9 +143,9 @@ uint64_t ksys_getRegisters(uint64_t rdi)
     return toRet;
 }
 
-uint64_t ksys_wait(uint64_t ms)
+uint64_t ksys_sleep(uint64_t s)
 {
-    timer_wait_ms(ms);
+    sleep_s(s);
     return FINISH_SUCCESFULLY;
 }
 

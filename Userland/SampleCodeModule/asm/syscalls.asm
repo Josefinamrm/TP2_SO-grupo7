@@ -3,7 +3,7 @@ GLOBAL _read
 GLOBAL _change_draw_size
 GLOBAL _print_array_of_draw_size
 GLOBAL _getRegisters
-GLOBAL _wait
+GLOBAL _sleep
 GLOBAL _write_color
 GLOBAL _clear_screen
 GLOBAL _change_font_size
@@ -156,7 +156,7 @@ _getRegisters:
     pop rbp
     ret
 
-_wait:
+_sleep:
     push rbp
     mov rbp, rsp 
 

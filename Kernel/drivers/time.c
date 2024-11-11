@@ -2,8 +2,8 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <time.h>
 #include <interrupts.h>
-#include <naiveConsole.h>
 #include <lib.h>
+#include <processManager.h>
 
 #define TICKS_PER_SECOND 18    // Number of ticks per second (assuming a common setup)
 
@@ -13,6 +13,7 @@ static unsigned long ticks = 0;
 void timer_handler()
 {
 	ticks++;
+    remove_from_sleep_queue(ticks);
 }
 
 int ticks_elapsed()
@@ -25,20 +26,9 @@ int seconds_elapsed()
 	return ticks / 18;
 }
 
-void timer_wait(int seconds)
+void sleep_s(int seconds)
 {
-	int startTime = ticks_elapsed();
-    while ((ticks_elapsed() - startTime) / TICKS_PER_SECOND < seconds)
-    {
-        _hlt();
-    }
+	uint64_t until_ticks = ticks_elapsed() + (seconds * 18);
+    add_to_sleep_queue(my_getpid(), until_ticks);
 }
 
-void timer_wait_ms(int ms)
-{
-	int startTime = ticks_elapsed();
-    while ((ticks_elapsed() - startTime) * 1000 / TICKS_PER_SECOND < ms)
-    {
-        _hlt();
-    }
-}
