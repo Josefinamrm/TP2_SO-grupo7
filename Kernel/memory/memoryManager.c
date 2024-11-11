@@ -15,7 +15,6 @@ uint64_t used_space = 0;
 uint64_t total_space = 0;
 
 void mm_init(uint64_t memory_start, uint64_t size){
-    printArray("BUDDY\n");
     for(int i = 0; i < CANT_NODES; i++){
         mem_states[i] = FREE;
     }
@@ -169,7 +168,6 @@ static Header * start;
 
 // Inicializa la lista y la cantidad de nodos libres
 void mm_init(uint64_t memory_start, uint64_t size){
-    printArray("MEM MAN\n");
     start = (Header *) memory_start;
     start->s.next = NULL;
     start->s.size = size;
