@@ -9,15 +9,13 @@
 #include <shell.h>
 
 #define INPUT_SIZE 100 
-#define COMMAND_COUNT 22
+#define COMMAND_COUNT 20
 #define CANT_REGS 18
 #define TRUE 1
 #define FALSE 0
 #define MAX_ARGS 10
 
 void help();
-void divzero();
-void invopcode();
 void time();
 void zoomin();
 void zoomout();
@@ -48,8 +46,6 @@ static char *arguments[MAX_ARGS] = {0};
 
 static Command commands[] = {
     {"help", help, "Muestra la lista de comandos.","No recibe argumentos."},
-    {"divzero", divzero, "Simula la excepcion de division por 0"},
-    {"invopcode", invopcode, "Simula la excepcion de opcode invalida"},
     {"time", time, "Muestra la hora actual"},
     {"inforeg", inforeg, "Imprime los registros capturados por CTRL.","No recibe argumentos."},
     {"zoomin", zoomin, "Aumenta el tamanio de la letra.", "No recibe argumentos."},
@@ -232,16 +228,6 @@ void help() {
             print_color(GRAY, commands[i].usage);
             put_char('\n');
     }
-}
-void divzero() { 
-    int a = 1; //rax??
-    int b = 0; 
-    if (a/b == 1) {
-        print_error("This is wrong...");
-    }
-}
-void invopcode() {
-    _invalid_opcode_exception();
 }
 
 void time() {

@@ -287,8 +287,8 @@ uint64_t ksys_sem_wait(uint64_t name){
     return FINISH_SUCCESFULLY;
 }
 
-uint64_t ksys_open_pipe(uint64_t file_descriptors[2]){
-    return open_pipe((uint8_t *)file_descriptors);
+uint64_t ksys_open_pipe(uint64_t file_descriptors){
+    return open_pipe((int *)file_descriptors);
 }
 
 uint64_t ksys_close_pipe(uint64_t pipe_id){
