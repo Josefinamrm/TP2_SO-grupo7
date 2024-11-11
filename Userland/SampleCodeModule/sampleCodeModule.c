@@ -5,7 +5,7 @@
 #include <shell.h>
 
 #define INPUT_SIZE 100 
-#define COMMAND_COUNT 18
+#define COMMAND_COUNT 19
 #define CANT_REGS 18
 #define TRUE 1
 #define FALSE 0
@@ -29,6 +29,7 @@ void phylo(int fd[]);
 void kill();
 void nice();
 void block();
+void testmemory();
 
 static char buffer[INPUT_SIZE] = {0};
 static int bufferIndex = 0;
@@ -44,11 +45,11 @@ static Command commands[] = {
     {"zoomin", zoomin, "Aumenta el tamanio de la letra.", "No recibe argumentos."},
     {"zoomout", zoomout, "Disminuye el tamanio de la letra.", "No recibe argumentos."},
     {"clear", clear_shell, "Limpia la shell.", "No recibe argumentos."},
-    {"testprocess", testprocess, "Crea el proceso test_process.","Recibe 1 argumento: Cantidad de procesos a crear."},
-    {"testprio", testprio, "Crea procesos con distintas prioridades.","No recibe argumentos."},
+    {"testprocess", testprocess, "Crea el proceso para testear la creacion de procesos.","Recibe 1 argumento: Cantidad de procesos a crear."},
+    {"testprio", testprio, "Crea el proceso para testear la prioridad de los procesos.","No recibe argumentos."},
     {"ps", (void (*)(char *))ps, "Muestra los procesos y sus estados.","No recibe argumentos."},
     {"mem", (void (*)(char *))mem, "Muestra informacion de la memoria.","No recibe argumentos."},
-    {"testsynchro", (void (*)(char *))testsynchro, "Crea el proceso para testear sincronizacion CON semaforos.","Recibe dos argumentos: cantidad de incrementos o decrementos y 1 o 0 (CON o SIN semaforos)."},
+    {"testsynchro", (void (*)(char *))testsynchro, "Crea el proceso para testear sincronizacion de procesos.","Recibe dos argumentos: cantidad de incrementos o decrementos y 1 o 0 (CON o SIN semaforos)."},
     {"loop", (void (*)(char *))loop, "Imprime saludo y ID cada 2 segundos.","No recibe argumentos."},
     {"cat", (void (*)(char *))cat, "Imprime el stdin tal como lo recibe.","No recibe argumentos."},
     {"wc", (void (*)(char *))wc, "Cuenta la cantidad de palabras en el stdin.","No recibe argumentos."},
@@ -56,7 +57,8 @@ static Command commands[] = {
     {"phylo", (void (*)(char *))phylo, "Muestra el problema de los filosofos.","No recibe argumentos."},
     {"kill", (void (*)(char *))kill, "Mata un proceso.","Recibe 1 argumento: PID del proceso a matar."},
     {"nice", (void (*)(char *))nice, "Cambia la prioridad de un proceso.","Recibe 2 argumentos: PID del proceso y nueva prioridad."},
-    {"block", (void (*)(char *))block, "Bloquea un proceso.","Recibe 1 argumento: PID del proceso a bloquear."}
+    {"block", (void (*)(char *))block, "Bloquea un proceso.","Recibe 1 argumento: PID del proceso a bloquear."}, 
+    {"testmemory", (void (*)(char *))testmemory, "Crea el proceso para testear el manejo de memoria.", "Recibe 1 argumento: memoria máxima."}
 };
 
 
@@ -410,5 +412,14 @@ void block(){
     char * argv[] = {"block", arguments[1], NULL};  
     int pid = usys_create_process((uint64_t) block_ps, argv, foreground, STDIN, STDOUT);
     if(foreground)
+        usys_wait_processes(pid);
+}
+
+void testmemory(){
+    if(cant_arguments_func("testmemory", argC, 2) == -1) return;
+    char * arg_command = (foreground)? arguments[1] : arguments[2];
+    char * argv[] = {"test processes", arg_command,NULL};
+    int pid = usys_create_process((uint64_t)testmemory_ps, argv, foreground, STDIN, STDOUT);
+    if(foreground) 
         usys_wait_processes(pid);
 }

@@ -200,3 +200,8 @@ void block_ps(int argc, char *argv[]){
     }
     usys_exit();
 }
+
+void testmemory_ps(int argc, char *argv[]){
+    print_dec(test_mm(argc, argv));  
+    usys_exit();
+}

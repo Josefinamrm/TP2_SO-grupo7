@@ -14,7 +14,6 @@ typedef struct P_rq {
 } p_rq;
 
 int64_t test_processes(int argc, char *argv[]) {
-print("Dentro de test processes\n");
   uint8_t rq;
   uint8_t alive = 0;
   uint8_t action;
@@ -45,11 +44,9 @@ print("Dentro de test processes\n");
       }
     }
 
-    print("ya cree los mas processes\n");
 
     // Randomly kills, blocks or unblocks processes until every one has been killed
     while (alive > 0) {
-      print("empiezo a matar procesos mientras sigan procesos vivos\n");
       for (rq = 0; rq < max_processes; rq++) {
         action = GetUniform(100) % 2;
 
@@ -87,7 +84,6 @@ print("Dentro de test processes\n");
           p_rqs[rq].state = RUNNING_t;
         }
     }
-    print("ya los mate todos\n");
   }
 
 }
