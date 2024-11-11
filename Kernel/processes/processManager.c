@@ -556,10 +556,10 @@ int64_t write_to_fd(int16_t fd_number, char * buffer, int to_write){
         break;
     
     case PIPE:
-        int16_t pipe_id = get_id(fd_number);
+        {int16_t pipe_id = get_id(fd_number);
         if(pipe_id != -1){
             return write_pipe(pipe_id, buffer, to_write);
-        }
+        }}
         break;
     
     default:
@@ -593,10 +593,10 @@ int64_t read_from_fd(int16_t fd_number, char * buffer, int to_read){
 
     // por ahora, después capaz cambiarlo al fd
     case PIPE:
-        int16_t pipe_id = get_id(fd_number);
+        {int16_t pipe_id = get_id(fd_number);
         if(pipe_id != -1){
             i = read_pipe(pipe_id, buffer, to_read);
-        }
+        }}
         break;
     
     default:
