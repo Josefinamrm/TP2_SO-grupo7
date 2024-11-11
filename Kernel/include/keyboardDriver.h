@@ -29,9 +29,9 @@ void keyboard_handler();
 
 extern char getScanCode();
 
-char get_char_from_buffer();
+int get_char_from_buffer();
 
-char get_last_char_from_buffer();
+int get_last_char_from_buffer();
 
 void flushBuffer();
 
