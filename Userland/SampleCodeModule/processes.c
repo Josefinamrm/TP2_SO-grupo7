@@ -53,25 +53,19 @@ void testprio_ps(){
 
 void memoryinfo_ps() {
 
-    usys_write(STDOUT, "-------------------------------------------------------\n", 56);
-    usys_write(STDOUT, "Total space: ", 13);
-    char total_space[100];
-    int_to_string(usys_total_space(), total_space, 100);
-    usys_write(STDOUT, total_space, stringlen(total_space));
-    usys_write(STDOUT, "\n", 1);
+    print("-------------------------------------------------------\n");
+    print("Total space: ");
+    print_dec(usys_total_space());
+    put_char('\n');
 
-    usys_write(STDOUT, "Occupied space: ", 16);
-    char occupied_space[100];
-    int_to_string(usys_occupied_space(), occupied_space, 100);
-    usys_write(STDOUT, occupied_space, stringlen(occupied_space));
-    usys_write(STDOUT, "\n", 1);
+    print("Occupied space: ");
+    print_dec(usys_occupied_space());
+    put_char('\n');
 
-    usys_write(STDOUT, "Unused space: ", 14);
-    char unused_space[100];
-    int_to_string(usys_unused_space(), unused_space, 100);
-    usys_write(STDOUT, unused_space, stringlen(unused_space));
-    usys_write(STDOUT, "\n", 1);
-    usys_write(STDOUT, "-------------------------------------------------------\n", 56);
+    print("Unused space: ");
+    print_dec(usys_unused_space());
+    put_char('\n');
+    print("-------------------------------------------------------\n");
      
     usys_exit();
 }
