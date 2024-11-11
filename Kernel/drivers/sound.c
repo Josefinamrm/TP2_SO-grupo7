@@ -41,6 +41,6 @@ void nosound()
 void beep(uint32_t frec, int time_ms)
 {
     play_sound(frec);
-    timer_wait_ms(time_ms);
+    sleep_s(time_ms);
     nosound();
 }

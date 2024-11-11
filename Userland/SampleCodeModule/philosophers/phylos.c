@@ -224,7 +224,7 @@
 //     usys_sem_post(phylo_mutex);
 // }
 
-#include <phylos.h>
+/* #include <phylos.h>
 
 
 void add_philosopher(){
@@ -412,4 +412,4 @@ void test_philosopher(int i) {
         phylos[i].state = EATING;
         usys_sem_post(fork[i]); // Permitir que el filósofo proceda
     }
-}
+} */

@@ -58,7 +58,7 @@ int16_t my_sem_open(char * name, int value){
         new_sem_block->sem->name = name;
         new_sem_block->sem->value = value;
         new_sem_block->lock = 1;
-        new_sem_block->wp_queue = initialize_children_queue();          // change maybe
+        new_sem_block->wp_queue = initialize_process_queue();          // change maybe
         new_sem_block->times_opened = 1;
         sem_array[sem_id] = new_sem_block;
         sem_counter++;
@@ -84,7 +84,7 @@ void my_sem_close(char * name){
         sem_array[sem_block_id]->times_opened--;
     }else{
         mm_free(sem_array[sem_block_id]->sem);
-        free_children_queue(sem_array[sem_block_id]->wp_queue, 0);
+        free_process_queue(sem_array[sem_block_id]->wp_queue, 0);
         mm_free(sem_array[sem_block_id]);
         sem_array[sem_block_id] = NULL;
     }
@@ -100,7 +100,7 @@ void my_sem_post(char * name){
     if(sem_block_id != -1){
         acquire(&(sem_array[sem_block_id]->lock));
         if(!is_empty(sem_array[sem_block_id]->wp_queue) && sem_array[sem_block_id]->sem->value == 0){
-            int16_t pid = dequeue(sem_array[sem_block_id]->wp_queue);
+            int16_t pid = dequeue_process(sem_array[sem_block_id]->wp_queue);
             my_unblock(pid);
         }
         sem_array[sem_block_id]->sem->value++;
@@ -119,7 +119,7 @@ void my_sem_wait(char * name){
         acquire(&(sem_array[sem_block_id]->lock));
         while(sem_array[sem_block_id]->sem->value == 0){
             int16_t pid = my_getpid();
-            enqueue(sem_array[sem_block_id]->wp_queue, pid);
+            enqueue_process(sem_array[sem_block_id]->wp_queue, pid);
             release(&(sem_array[sem_block_id]->lock));
             my_block(pid);
         }
