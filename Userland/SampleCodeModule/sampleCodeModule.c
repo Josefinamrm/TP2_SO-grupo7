@@ -20,14 +20,14 @@ void inforeg();
 void clear_shell();
 void testprocess();
 void testprio();
-void ps(int fd[2]);
-void mem(int fd[2]);
-void testsynchro(int fd[2]); 
-void loop(int fd[2]);
-void cat(int fd[2]);
-void wc(int fd[2]);
-void filter(int fd[2]);
-void phylo(int fd[2]);
+void ps(int fd[]);
+void mem(int fd[]);
+void testsynchro(int fd[]); 
+void loop(int fd[]);
+void cat(int fd[]);
+void wc(int fd[]);
+void filter(int fd[]);
+void phylo(int fd[]);
 void kill();
 void nice();
 void block();
@@ -50,7 +50,7 @@ static Command commands[] = {
     {"testprio", testprio, "Crea procesos con distintas prioridades.","No recibe argumentos."},
     {"ps", ps, "Muestra los procesos y sus estados.","No recibe argumentos."},
     {"mem", mem, "Muestra informacion de la memoria.","No recibe argumentos."},
-    {"testsynchro", testsynchro, "Crea el proceso para testear sincronizacion CON semaforos.","Recibe dos argumentos: cantidad de incrementos o decrementos y 1 o 0 (CON o SIN semáforos)."},
+    {"testsynchro", testsynchro, "Crea el proceso para testear sincronizacion CON semaforos.","Recibe dos argumentos: cantidad de incrementos o decrementos y 1 o 0 (CON o SIN semaforos)."},
     {"loop", loop, "Imprime saludo y ID cada 2 segundos.","No recibe argumentos."},
     {"cat", cat, "Imprime el stdin tal como lo recibe.","No recibe argumentos."},
     {"wc", wc, "Cuenta la cantidad de palabras en el stdin.","No recibe argumentos."},
@@ -66,7 +66,7 @@ void execute_command(char * cmd, int fd[2]) {
 
     for (int i = 0; i < COMMAND_COUNT; i++) {
         if (strcmp(cmd, commands[i].name_id) == 0) {
-            (commands[i].func)(fd);
+            (commands[i].func)((void *)fd);
             return;
         }
     }
@@ -80,7 +80,7 @@ void pipe_impl(char * args[], int argC) {
     int fds[2];
     if(usys_open_pipe(fds) == -1){
         print_error("Error al crear el pipe.\n");
-        return -1;
+        return;
     }
     int fd_left[2];
     fd_left[0] = STDIN;
@@ -313,7 +313,7 @@ void testprio() {
         usys_wait_processes(pid);
 }
 
-void ps(int fd[2]) {
+void ps(int fd[]) {
     if(pipe == FALSE) if(no_arguments_func("ps") ==-1) return;
     char * argv[] = {"ps", NULL};
     int pid = usys_create_process((uint64_t)ps_ps, argv, foreground, fd[0], fd[1]); 
@@ -321,7 +321,7 @@ void ps(int fd[2]) {
         usys_wait_processes(pid);
 }
 
-void mem(int fd[2]) {
+void mem(int fd[]) {
     if(pipe == FALSE) if(no_arguments_func("mem") ==-1) return;
     char * argv[] = {"memoryinfo", NULL};
     int pid = usys_create_process((uint64_t)memoryinfo_ps, argv, foreground, fd[0], fd[1]); 
@@ -329,7 +329,7 @@ void mem(int fd[2]) {
         usys_wait_processes(pid);
 }
 
-void testsynchro(int fd[2]) {
+void testsynchro(int fd[]) {
     if(pipe == FALSE) if(cant_arguments_func("testsynchro", argC, 3) == -1) return;
     char * arg_1 = foreground? arguments[1] : arguments[2];
     char * arg_2 = foreground? arguments[2] : arguments[3];
@@ -339,7 +339,7 @@ void testsynchro(int fd[2]) {
         usys_wait_processes(pid);
 }
 
-void loop(int fd[2]){
+void loop(int fd[]){
     if(pipe == FALSE) if(no_arguments_func("loop") ==-1) return;
     char * argv[] = {"loop", NULL};
     int pid = usys_create_process((uint64_t) loop_ps, argv, foreground, fd[0], fd[1]);
@@ -347,7 +347,7 @@ void loop(int fd[2]){
         usys_wait_processes(pid);
 }
 
-void cat(int fd[2]){
+void cat(int fd[]){
     if(pipe == FALSE) if(no_arguments_func("cat") ==-1) return;
     char * argv[] = {"cat", NULL};
     int pid = usys_create_process((uint64_t) cat_ps, argv, foreground, fd[0], fd[1]);
@@ -355,7 +355,7 @@ void cat(int fd[2]){
         usys_wait_processes(pid);
 }
 
-void wc(int fd[2]){
+void wc(int fd[]){
     if(pipe == FALSE) if(no_arguments_func("wc")==-1) return;
     char * argv[] = {"wc", NULL};
     int pid = usys_create_process((uint64_t) wc_ps, argv, foreground, fd[0], fd[1]);
@@ -363,7 +363,7 @@ void wc(int fd[2]){
         usys_wait_processes(pid);
 }
 
-void filter(int fd[2]){
+void filter(int fd[]){
     if(pipe == FALSE) if(no_arguments_func("filter")==-1) return;
     char * argv[] = {"filter", NULL};
     int pid = usys_create_process((uint64_t) filter_ps, argv, foreground, fd[0], fd[1]);
@@ -371,7 +371,7 @@ void filter(int fd[2]){
         usys_wait_processes(pid);
 }
 
-void phylo(int fd[2]){
+void phylo(int fd[]){
     if(pipe == FALSE)  if(no_arguments_func("phylos")==-1) return;
     char * argv[] = {"phylos", NULL};
     int pid = usys_create_process((uint64_t) phylos_ps, argv, foreground, fd[0], fd[1]);
