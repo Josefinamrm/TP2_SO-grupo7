@@ -51,6 +51,7 @@ int concat_str(char * dest, char * src){
         *ptr++ = *src++;
     }
     *ptr = '\0';
+    return 0;
 }
 
 

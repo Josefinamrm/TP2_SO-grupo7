@@ -46,17 +46,17 @@ static Command commands[] = {
     {"clear", clear_shell, "Limpia la shell.", "No recibe argumentos."},
     {"testprocess", testprocess, "Crea el proceso test_process.","Recibe 1 argumento: Cantidad de procesos a crear."},
     {"testprio", testprio, "Crea procesos con distintas prioridades.","No recibe argumentos."},
-    {"ps", ps, "Muestra los procesos y sus estados.","No recibe argumentos."},
-    {"mem", mem, "Muestra informacion de la memoria.","No recibe argumentos."},
-    {"testsynchro", testsynchro, "Crea el proceso para testear sincronizacion CON semaforos.","Recibe dos argumentos: cantidad de incrementos o decrementos y 1 o 0 (CON o SIN semaforos)."},
-    {"loop", loop, "Imprime saludo y ID cada 2 segundos.","No recibe argumentos."},
-    {"cat", cat, "Imprime el stdin tal como lo recibe.","No recibe argumentos."},
-    {"wc", wc, "Cuenta la cantidad de palabras en el stdin.","No recibe argumentos."},
-    {"filter", filter, "Filtra el stdin y muestra solo las letras.","No recibe argumentos."},
-    {"phylo", phylo, "Muestra el problema de los filosofos.","No recibe argumentos."},
-    {"kill", kill, "Mata un proceso.","Recibe 1 argumento: PID del proceso a matar."},
-    {"nice", nice, "Cambia la prioridad de un proceso.","Recibe 2 argumentos: PID del proceso y nueva prioridad."},
-    {"block", block, "Bloquea un proceso.","Recibe 1 argumento: PID del proceso a bloquear."}
+    {"ps", (void (*)(char *))ps, "Muestra los procesos y sus estados.","No recibe argumentos."},
+    {"mem", (void (*)(char *))mem, "Muestra informacion de la memoria.","No recibe argumentos."},
+    {"testsynchro", (void (*)(char *))testsynchro, "Crea el proceso para testear sincronizacion CON semaforos.","Recibe dos argumentos: cantidad de incrementos o decrementos y 1 o 0 (CON o SIN semaforos)."},
+    {"loop", (void (*)(char *))loop, "Imprime saludo y ID cada 2 segundos.","No recibe argumentos."},
+    {"cat", (void (*)(char *))cat, "Imprime el stdin tal como lo recibe.","No recibe argumentos."},
+    {"wc", (void (*)(char *))wc, "Cuenta la cantidad de palabras en el stdin.","No recibe argumentos."},
+    {"filter", (void (*)(char *))filter, "Filtra el stdin y muestra solo las letras.","No recibe argumentos."},
+    {"phylo", (void (*)(char *))phylo, "Muestra el problema de los filosofos.","No recibe argumentos."},
+    {"kill", (void (*)(char *))kill, "Mata un proceso.","Recibe 1 argumento: PID del proceso a matar."},
+    {"nice", (void (*)(char *))nice, "Cambia la prioridad de un proceso.","Recibe 2 argumentos: PID del proceso y nueva prioridad."},
+    {"block", (void (*)(char *))block, "Bloquea un proceso.","Recibe 1 argumento: PID del proceso a bloquear."}
 };
 
 

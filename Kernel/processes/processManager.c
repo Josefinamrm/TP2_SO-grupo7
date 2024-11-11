@@ -299,7 +299,7 @@ void remove_from_ready_queue(int16_t pid){
 
 // Initializes sleep queue
 process_queue initialize_sleep_queue(){
-    initialize_process_queue();
+    return initialize_process_queue();
 }
 
 // Adds a procces to the sleeping queue
@@ -937,7 +937,7 @@ static void create_idle_process(){
 
 void init_function(){
     ready_queue = initialize_ready_queue();
-    sleep_queue = initialize_sleep_queue();
+    sleep_queue = (sleeping_process_queue) initialize_sleep_queue();
     last_fg_process_pid = -1;
     create_idle_process();
 }

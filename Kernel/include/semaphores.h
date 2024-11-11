@@ -33,6 +33,6 @@ void my_sem_post(char * name);
 void my_sem_wait(char * name);
 
 // Creates semaphore name as "name" + number to serve as a unique id. Copies it to sem_name
-void create_sem_name(char * sem_name, const char * name, int16_t number);
+void create_sem_name(char * sem_name, char * name, int16_t number);
 
 #endif
