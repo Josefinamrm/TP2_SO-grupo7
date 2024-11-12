@@ -34,6 +34,7 @@ int64_t test_processes(int argc, char *argv[]) {
   p_rq p_rqs[max_processes];
 
   while (1) {
+    usys_sleep(1);
     // Create max_processes processes
     for (rq = 0; rq < max_processes; rq++) {
       p_rqs[rq].pid = usys_create_process((uint64_t)endless_loop, argvAux, 0, 0, 1);
@@ -50,6 +51,7 @@ int64_t test_processes(int argc, char *argv[]) {
 
     // Randomly kills, blocks or unblocks processes until every one has been killed
     while (alive > 0) {
+
       for (rq = 0; rq < max_processes; rq++) {
         action = GetUniform(100) % 2;
 

@@ -22,7 +22,7 @@ void zoomout();
 void inforeg();
 void clear_shell();
 void beep();
-void testprocess(int fd[]);
+void testprocess();
 void testprio(int fd[]);
 void ps(int fd[]);
 void mem(int fd[]);
@@ -324,12 +324,12 @@ void beep() {
     usys_beep(1000, 1);
 }
 
-void testprocess(int fd[]) {
-    if(pipe == FALSE) if(cant_arguments_func("testprocess", argC, 2) == -1) return;
+void testprocess() {
+    if(cant_arguments_func("testprocess", argC, 2) == -1) return;
     char * arg_command = (foreground)? arguments[1] : arguments[2];
     char * argv[] = {"test processes", arg_command ,NULL};
-    int pid = usys_create_process((uint64_t)testprocess_ps, argv, foreground, fd[0], fd[1]);
-    if(foreground) 
+    int pid = usys_create_process((uint64_t)testprocess_ps, argv, foreground, STDIN, STDOUT);
+    if(foreground)
         usys_wait_processes(pid);
 }
 
