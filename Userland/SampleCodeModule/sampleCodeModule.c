@@ -63,8 +63,8 @@ static Command commands[] = {
     {"kill", (void (*)(char *))kill, "Mata un proceso.","Recibe 1 argumento: PID del proceso a matar."},
     {"nice", (void (*)(char *))nice, "Cambia la prioridad de un proceso.","Recibe 2 argumentos: PID del proceso y nueva prioridad: L (low), M (medium), H (high) o U (ultra)"},
     {"block", (void (*)(char *))block, "Bloquea un proceso.","Recibe 1 argumento: PID del proceso a bloquear."}, 
-    {"testprocess", testprocess, "Crea el proceso para testear la creacion de procesos.","Recibe 1 argumento: Cantidad de procesos a crear."},
-    {"testprio", testprio, "Crea el proceso para testear la prioridad de los procesos.","No recibe argumentos."},
+    {"testprocess", (void (*)(char *))testprocess, "Crea el proceso para testear la creacion de procesos.","Recibe 1 argumento: Cantidad de procesos a crear."},
+    {"testprio", (void (*)(char *))testprio, "Crea el proceso para testear la prioridad de los procesos.","No recibe argumentos."},
     {"testsynchro", (void (*)(char *))testsynchro, "Crea el proceso para testear sincronizacion de procesos.","Recibe dos argumentos: cantidad de incrementos o decrementos y 1 o 0 (CON o SIN semaforos)."},
     {"testmemory", (void (*)(char *))testmemory, "Crea el proceso para testear el manejo de memoria.", "Recibe 1 argumento: memoria máxima."}
 };
