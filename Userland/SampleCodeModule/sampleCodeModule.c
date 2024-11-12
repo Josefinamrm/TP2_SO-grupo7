@@ -66,7 +66,7 @@ static Command commands[] = {
     {"testprocess", (void (*)(char *))testprocess, "Crea el proceso para testear la creacion de procesos.","Recibe 1 argumento: Cantidad de procesos a crear."},
     {"testprio", (void (*)(char *))testprio, "Crea el proceso para testear la prioridad de los procesos.","No recibe argumentos."},
     {"testsynchro", (void (*)(char *))testsynchro, "Crea el proceso para testear sincronizacion de procesos.","Recibe dos argumentos: cantidad de incrementos o decrementos y 1 o 0 (CON o SIN semaforos)."},
-    {"testmemory", (void (*)(char *))testmemory, "Crea el proceso para testear el manejo de memoria.", "Recibe 1 argumento: memoria máxima."}
+    {"testmemory", (void (*)(char *))testmemory, "Crea el proceso para testear el manejo de memoria.", "Recibe 1 argumento: memoria maxima."}
 };
 
 
@@ -230,8 +230,9 @@ void help() {
             print_color(GRAY, commands[i].usage);
             put_char('\n');
     }
+    put_char('\n');
     print("Comandos para correr los tests:\n");
-    for(int i=COMMAND_COUNT-1; i<COMMAND_COUNT; i++){
+    for(int i=COMMAND_COUNT-4; i<COMMAND_COUNT; i++){
         print("   ");
         print_color(LIGHT_BLUE, commands[i].name_id);
         print(": ");
