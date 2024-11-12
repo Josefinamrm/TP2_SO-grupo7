@@ -325,7 +325,7 @@ void beep() {
 }
 
 void testprocess(int fd[]) {
-    if(cant_arguments_func("testprocess", argC, 2) == -1) return;
+    if(pipe == FALSE) if(cant_arguments_func("testprocess", argC, 2) == -1) return;
     char * arg_command = (foreground)? arguments[1] : arguments[2];
     char * argv[] = {"test processes", arg_command ,NULL};
     int pid = usys_create_process((uint64_t)testprocess_ps, argv, foreground, fd[0], fd[1]);
@@ -334,7 +334,7 @@ void testprocess(int fd[]) {
 }
 
 void testprio(int fd[]) {
-    if(no_arguments_func("testprio") ==-1) return;
+    if(pipe == FALSE) if(no_arguments_func("testprio") ==-1) return;
     char * argv[] = {"test prio", NULL};
     int pid = usys_create_process((uint64_t)testprio_ps, argv, foreground, fd[0], fd[1]);
     if(foreground) 
@@ -408,7 +408,7 @@ void phylo(int fd[]){
 }
 
 void kill(int fd[]){
-    if(cant_arguments_func("kill", argC, 2) == -1) return;
+    if(pipe == FALSE) if(cant_arguments_func("kill", argC, 2) == -1) return;
     if(strcmp(arguments[1], "1") == 0 || strcmp(arguments[1], "2") == 0){
         print_error("Error: no se puede matar al proceso.");
         print(arguments[1]);
@@ -422,7 +422,7 @@ void kill(int fd[]){
 }
 
 void nice(int fd[]){
-    if(cant_arguments_func("nice", argC, 3) == -1) return;
+    if(pipe == FALSE) if(cant_arguments_func("nice", argC, 3) == -1) return;
 
     char new_prio_char = TO_UPPER(arguments[2][0]);
     char * new_prio = NULL;
@@ -454,7 +454,7 @@ void nice(int fd[]){
 }
 
 void block(int fd[]){
-    if(cant_arguments_func("block", argC, 2) == -1) return;
+    if(pipe == FALSE) if(cant_arguments_func("block", argC, 2) == -1) return;
     if(strcmp(arguments[1], "1") == 0 || strcmp(arguments[1], "2") == 0){
         print_error("Error: no se puede bloquear al proceso.");
         print(arguments[1]);
@@ -468,7 +468,7 @@ void block(int fd[]){
 }
 
 void testmemory(int fd[]){
-    if(cant_arguments_func("testmemory", argC, 2) == -1) return;
+    if(pipe == FALSE) if(cant_arguments_func("testmemory", argC, 2) == -1) return;
     char * arg_command = (foreground)? arguments[1] : arguments[2];
     char * argv[] = {"test processes", arg_command,NULL};
     int pid = usys_create_process((uint64_t)testmemory_ps, argv, foreground, fd[0], fd[1]);

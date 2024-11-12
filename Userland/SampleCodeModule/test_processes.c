@@ -34,7 +34,6 @@ int64_t test_processes(int argc, char *argv[]) {
   p_rq p_rqs[max_processes];
 
   while (1) {
-    print("Dentro de while(1)\n");
     // Create max_processes processes
     for (rq = 0; rq < max_processes; rq++) {
       p_rqs[rq].pid = usys_create_process((uint64_t)endless_loop, argvAux, 0, 0, 1);
