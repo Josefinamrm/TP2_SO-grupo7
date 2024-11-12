@@ -15,7 +15,7 @@ uint64_t _write_color(uint64_t fontCOlor, uint64_t buf, uint64_t size);
 
 uint64_t _getRegisters(uint64_t * registers);
 
-uint64_t _wait(uint64_t ms);
+uint64_t _sleep(uint64_t seconds);
 
 uint64_t _clear_screen();
 
@@ -37,9 +37,9 @@ uint64_t _flush_buffer();
 
 uint64_t _get_pid();
 
-int64_t _create_process(uint64_t params);
+int64_t _create_process(uint64_t function, uint64_t argv, uint64_t foreground, uint64_t read_fd, uint64_t write_fd);
 
-void _nice(uint64_t pid, uint64_t newPrio);
+int64_t _nice(uint64_t pid, uint64_t newPrio);
 
 int64_t _kill(uint64_t pid);
 
@@ -51,7 +51,7 @@ void _yield();
 
 void _wait_processes(uint64_t pid);
 
-void _ps();
+uint64_t _get_processes_info(uint64_t processes);
 
 void _exit();
 
@@ -71,7 +71,7 @@ int _total_space();
 
 // semaphore syscalls
 
-int16_t _sem_open(uint64_t name, uint64_t value);
+int64_t _sem_open(uint64_t name, uint64_t value);
 
 void _sem_close(uint64_t name);
 
@@ -79,6 +79,25 @@ void _sem_post(uint64_t name);
 
 void _sem_wait(uint64_t name);
 
+// ipc 
+
+int64_t _open_pipe(uint64_t file_descriptors);
+
+int64_t _close_pipe(uint64_t pipe_id);
+
+int64_t _write_pipe(uint64_t pipe_id, uint64_t buf, uint64_t to_write);
+
+int64_t _read_pipe(uint64_t pipe_id, uint64_t buf, uint64_t to_read);
+
+int64_t _open_fd(int8_t type, int8_t permission, int16_t pipe_id);
+
+void _close_fd(uint64_t fd_number);
+
+int64_t _close_all_fds(int16_t pid);
+
+int64_t _write_to_fd(int16_t fd_number, uint64_t buffer, uint64_t to_write);
+
+int64_t _read_from_fd(int16_t fd_number, uint64_t buffer, uint64_t to_read);
 #endif
 
 

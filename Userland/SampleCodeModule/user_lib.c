@@ -1,5 +1,9 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <user_syscalls.h>
 #include <user_lib.h>
 
@@ -21,27 +25,27 @@ void put_char(char c) {
 }
 
 void print_color(int fontColor, char * string) {
-    usys_write_color(fontColor, string, strlen(string));
+    usys_write_color(fontColor, string, stringlen(string));
 }
 
 
 void print_error(char * string) {
-    usys_write(STDERR, string, strlen(string)); 
+    usys_write(STDERR, string, stringlen(string)); 
 }
 
 void print(char * string) {
-    usys_write(STDOUT, string, strlen(string)); 
+    usys_write(STDOUT, string, stringlen(string)); 
 }
 
-int strlen(char *arr)
-{
-    int i = 0;
-    while (arr[i++] != '\0')
-        ;
-    return i;
+int stringlen(const char *arr){
+    const char *s = arr;
+    while (*s != '\0') {
+        s++;
+    }
+    return s - arr;
 }
 
-void strcpy(char *destination, const char *source)
+void stringcpy(char *destination, const char *source)
 {
     while (*source != '\0')
     {
@@ -160,7 +164,7 @@ int parse_command_arg(char * str, char * arguments[]) {
 
         // allocate memory for argument
         arguments[argC] = (char *) usys_malloc(len + 1);
-        strcpy(arguments[argC], start);
+        stringcpy(arguments[argC], start);
         arguments[argC][len] = '\0'; // null-terminate
 
         // move to next argument
@@ -197,4 +201,9 @@ void udraw_frame(uint32_t color, uint64_t x, uint64_t y, uint64_t size_x, uint64
 
 void udraw_array(uint32_t fontColor, uint32_t backgroundColor, int x, int y, char * arr) {
     _draw_array(fontColor, backgroundColor, (uint64_t) x,(uint64_t) y, (uint64_t) arr);
+}
+
+int is_vowel(char c) {
+    c = TO_LOWER(c);
+    return (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u');
 }

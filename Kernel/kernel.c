@@ -1,10 +1,13 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <stdint.h>
 #include <string.h>
 #include <lib.h>
 #include <moduleLoader.h>
-#include <naiveConsole.h>
 #include <videoDriver.h>
 #include <idtLoader.h>
 #include <memoryManager.h>
@@ -65,6 +68,7 @@ int main()
 	//dory_start();
 	load_idt();
 	mm_init(FREE_MEM_START, TOTAL_HEADER_UNITS - 1);
+	initialize_keyboard_driver();
 	init_function();
 	_sti();
 	printArray("You shouldn't be here chief..."); 	// Imprimir un mensaje (esto no debería ocurrir)

@@ -3,7 +3,7 @@ GLOBAL _read
 GLOBAL _change_draw_size
 GLOBAL _print_array_of_draw_size
 GLOBAL _getRegisters
-GLOBAL _wait
+GLOBAL _sleep
 GLOBAL _write_color
 GLOBAL _clear_screen
 GLOBAL _change_font_size
@@ -24,7 +24,7 @@ GLOBAL _block
 GLOBAL _unblock
 GLOBAL _yield
 GLOBAL _wait_processes
-GLOBAL _ps
+GLOBAL _get_processes_info
 GLOBAL _exit
 
 ; memory:
@@ -42,6 +42,18 @@ GLOBAL _sem_open
 GLOBAL _sem_close
 GLOBAL _sem_post
 GLOBAL _sem_wait
+
+; ipc
+
+GLOBAL _open_pipe
+GLOBAL _close_pipe
+GLOBAL _write_pipe
+GLOBAL _read_pipe
+GLOBAL _open_fd
+GLOBAL _close_fd
+GLOBAL _close_all_fds
+GLOBAL _write_to_fd
+GLOBAL _read_from_fd
 
 section .text
 
@@ -144,7 +156,7 @@ _getRegisters:
     pop rbp
     ret
 
-_wait:
+_sleep:
     push rbp
     mov rbp, rsp 
 
@@ -311,7 +323,7 @@ _wait_processes:
     pop rbp 
     ret
 
-_ps:
+_get_processes_info:
     push rbp 
     mov rbp, rsp 
 
@@ -437,6 +449,105 @@ _sem_wait:
     mov rbp, rsp 
 
     mov rax, 35
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_open_pipe:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 36
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_close_pipe:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 37
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_write_pipe:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 38
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_read_pipe: 
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 39
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_open_fd:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 40
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_close_fd:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 41
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_close_all_fds:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 42
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_write_to_fd:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 43
+    int 80h 
+
+    mov rsp, rbp 
+    pop rbp 
+    ret
+
+_read_from_fd:
+    push rbp 
+    mov rbp, rsp 
+
+    mov rax, 44
     int 80h 
 
     mov rsp, rbp 

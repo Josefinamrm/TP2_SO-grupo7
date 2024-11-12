@@ -144,6 +144,7 @@ SECTION .text
 %endmacro
 
 _idle:
+	sti
 	hlt
 	jmp _idle
 

@@ -1,5 +1,9 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <user_syscalls.h>
 #include <user_lib.h>
 #include <test_util.h>
@@ -13,27 +17,27 @@ typedef struct P_rq {
   enum State_t state;
 } p_rq;
 
-int64_t test_processes(uint64_t argc, char *argv[]) {
-print("Dentro de test processes\n");
+int64_t test_processes(int argc, char *argv[]) {
   uint8_t rq;
   uint8_t alive = 0;
   uint8_t action;
   uint64_t max_processes;
-  char *argvAux[] = {"test process",0, NULL};
+  char *argvAux[] = {"test process", NULL};
 
-  if (argc != 3)
+  if (argc != 2){
     return -1;
+  }
 
-  if ((max_processes = satoi(argv[2])) <= 0)
+  if ((max_processes = satoi(argv[1])) <= 0)
     return -1;
 
   p_rq p_rqs[max_processes];
 
   while (1) {
-    print("Dentro de while(1)\n");
+    usys_sleep(1);
     // Create max_processes processes
     for (rq = 0; rq < max_processes; rq++) {
-      p_rqs[rq].pid = usys_create_process((uint64_t)endless_loop, usys_get_pid(), 1, 2, argvAux);
+      p_rqs[rq].pid = usys_create_process((uint64_t)endless_loop, argvAux, 0, 0, 1);
 
       if (p_rqs[rq].pid == -1) {
         print("test_processes: ERROR creating process\n");
@@ -44,11 +48,10 @@ print("Dentro de test processes\n");
       }
     }
 
-    print("ya cree los mas processes\n");
 
     // Randomly kills, blocks or unblocks processes until every one has been killed
     while (alive > 0) {
-      print("empiezo a matar procesos mientras sigan procesos vivos\n");
+
       for (rq = 0; rq < max_processes; rq++) {
         action = GetUniform(100) % 2;
 
@@ -86,7 +89,6 @@ print("Dentro de test processes\n");
           p_rqs[rq].state = RUNNING_t;
         }
     }
-    print("ya los mate todos\n");
   }
 
 }

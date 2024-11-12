@@ -1,6 +1,11 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-#include "syscallDispatcher.h"
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
+#include <syscallDispatcher.h>
 #include <semaphores.h>
 
 int64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, uint64_t r8, uint64_t rax)
@@ -26,7 +31,7 @@ int64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx
         case 8:
             return ksys_getRegisters(rdi);
         case 9:
-            return ksys_wait(rdi);
+            return ksys_sleep(rdi);
         case 10:
             return ksys_change_font_size(rdi);
         case 11:
@@ -43,7 +48,7 @@ int64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx
         case 16:
             return ksys_getpid();
         case 17:
-            return ksys_create_process(rdi);
+            return ksys_create_process(rdi, rsi, rdx, rcx, r8);
         case 18:
             return ksys_nice(rdi, rsi);
         case 19:
@@ -57,7 +62,7 @@ int64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx
         case 23:
             return ksys_wait_processes(rdi);
         case 24:
-            return ksys_ps();
+            return ksys_get_process_info(rdi);
         case 25:
             return ksys_exit();
         case 26:
@@ -80,6 +85,18 @@ int64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx
             return ksys_sem_post(rdi);
         case 35:    
             return ksys_sem_wait(rdi);
+        case 36:
+            return ksys_open_pipe(rdi);
+        case 37:
+            return ksys_close_pipe(rdi);
+        case 38:
+            return ksys_write_pipe(rdi, rsi, rdx);
+        case 39:
+            return ksys_read_pipe(rdi, rsi, rdx);
+        case 40:
+            return ksys_open_fd(rdi, rsi, rdx);
+        case 41:
+            return ksys_close_fd(rdi);
     }
 
 
@@ -87,49 +104,21 @@ int64_t syscallDispatcher(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx
     return FINISH_SUCCESFULLY;
 }
 
-uint64_t ksys_read(uint64_t fd, uint64_t buffer, uint64_t count)
+int64_t ksys_read(uint64_t fd, uint64_t buffer, uint64_t count)
 {
-    int i = 0;
-    char c;
-    char *buff = (char *)buffer;
-    if (fd == STDIN)
-    {
-        while (i < count && (c = get_char_from_buffer()) != 0)
-        {
-            buff[i++] = c;
-        }
-        return i;
-    }
-    else if (fd == LASTIN)
-    {
-        while (i < count && (c = get_last_char_from_buffer()) != 0)
-        {
-            buff[i++] = c;
-        }
-        return i;
-    }
-    return 0;
+    return read_from_fd((int16_t)fd, (char *)buffer, (int)count);
 }
 
-uint64_t ksys_write(uint64_t fd, uint64_t buffer, uint64_t count)
+// check error 
+int64_t ksys_write(uint64_t fd, uint64_t buffer, uint64_t count)
 {
-    if (fd == STDOUT)
-    {
-        printArrayOfDimWithColor(WHITE, BLACK, (char *)buffer, count);
-    }
-    else if (fd == STDERR)
-    {
-        printArrayOfDimWithColor(RED, BLACK, (char *)buffer, count);
-    }
-    return count;
+    return write_to_fd((int16_t)fd, (char *) buffer, (int)count);
 }
 
 uint64_t ksys_getTime()
 {
-    // char * reserve = "";
-    char reserve[TIME_STR]; // en reserve queda guardado el time en formato hh:mm:ss
+    char reserve[TIME_STR];
     timeToStr(reserve);
-    // print(reserve);   ver cual funcion uso para imprimir el string
     printArray(reserve);
     return FINISH_SUCCESFULLY;
 }
@@ -158,9 +147,9 @@ uint64_t ksys_getRegisters(uint64_t rdi)
     return toRet;
 }
 
-uint64_t ksys_wait(uint64_t ms)
+uint64_t ksys_sleep(uint64_t s)
 {
-    timer_wait_ms(ms);
+    sleep_s(s);
     return FINISH_SUCCESFULLY;
 }
 
@@ -210,12 +199,12 @@ uint64_t ksys_getpid(){
 }
 
 
-int64_t ksys_create_process(uint64_t params)
+int64_t ksys_create_process(uint64_t function, uint64_t argv, uint64_t foreground, uint64_t read_fd, uint64_t write_fd)
 {
-    return my_create_process((parameters_structure *) params);
+    return my_create_process(function, (char **)argv, (uint8_t)foreground, (int)read_fd, (int)write_fd);
 }
 
-uint64_t ksys_nice(uint64_t pid, uint64_t newPrio){
+int64_t ksys_nice(uint64_t pid, uint64_t newPrio){
     my_nice((int16_t)pid, (uint8_t)newPrio);
     return FINISH_SUCCESFULLY;
 }
@@ -244,9 +233,8 @@ uint64_t ksys_wait_processes(uint64_t pid){
     return FINISH_SUCCESFULLY;
 }
 
-uint64_t ksys_ps(){
-    my_ps();
-    return FINISH_SUCCESFULLY;
+uint64_t ksys_get_process_info(uint64_t processes){
+    return get_process_info((process_view *)processes);
 }
 
 
@@ -280,7 +268,7 @@ uint64_t ksys_total_space(){
     return (uint64_t) mm_total_space();
 }
 
-uint64_t ksys_sem_open(uint64_t name, uint64_t value){
+int64_t ksys_sem_open(uint64_t name, uint64_t value){
     return my_sem_open((char *)name, (int)value);
 }
 
@@ -299,3 +287,27 @@ uint64_t ksys_sem_wait(uint64_t name){
     return FINISH_SUCCESFULLY;
 }
 
+uint64_t ksys_open_pipe(uint64_t file_descriptors){
+    return open_pipe((int *)file_descriptors);
+}
+
+uint64_t ksys_close_pipe(uint64_t pipe_id){
+    return close_pipe((int16_t)pipe_id);
+}
+
+uint64_t ksys_write_pipe(uint64_t pipe_id, uint64_t buf, uint64_t to_write){
+    return write_pipe((int16_t)pipe_id, (char *)buf, (int)to_write);
+}
+
+uint64_t ksys_read_pipe(uint64_t pipe_id, uint64_t buf, uint64_t to_read){
+    return read_pipe((int16_t)pipe_id, (char *)buf, (int)to_read);
+}
+
+uint64_t ksys_open_fd(uint64_t type, uint64_t permission, uint64_t pipe_id){
+    return open_fd((uint8_t)type, (uint8_t)permission, (int16_t)pipe_id);
+}
+
+uint64_t ksys_close_fd(uint64_t fd_number){
+    close_fd((int16_t)fd_number);
+    return FINISH_SUCCESFULLY;
+}

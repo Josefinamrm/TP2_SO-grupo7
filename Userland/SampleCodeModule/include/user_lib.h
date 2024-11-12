@@ -8,11 +8,14 @@
 
 #define INPUT_SIZE 100
 
+#define TO_LOWER(c) ((c) >= 'A' && (c) <= 'Z' ? (c) + ('a'-'A') : (c))
+#define TO_UPPER(c) ((c) >= 'a' && (c) <= 'z' ? (c) - ('a'-'A') : (c))
+
 void print(char *arr);
 
-int strlen(char *arr);
+int stringlen(const char *arr);
 
-void strcpy(char *destination, const char *source);
+void stringcpy(char *destination, const char *source);
 
 uint32_t uint_to_base(uint64_t value, char *buffer, uint32_t base);
 
@@ -44,5 +47,6 @@ void udraw_array(uint32_t fontColor, uint32_t backgroundColor, int x, int y, cha
 
 void udraw_frame(uint32_t color, uint64_t x, uint64_t y, uint64_t size_x, uint64_t size_y, uint64_t thickness);
 
+int is_vowel(char c);
 
 #endif

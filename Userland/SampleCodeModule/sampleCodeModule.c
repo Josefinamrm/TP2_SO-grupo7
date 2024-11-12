@@ -1,65 +1,108 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /* sampleCodeModule.c */
 
 #include <shell.h>
 
 #define INPUT_SIZE 100 
-#define COMMAND_COUNT 19
+#define COMMAND_COUNT 21
 #define CANT_REGS 18
 #define TRUE 1
 #define FALSE 0
 #define MAX_ARGS 10
 
 void help();
-void divzero();
-void invopcode();
 void time();
-void play_eliminator();
 void zoomin();
 void zoomout();
 void inforeg();
 void clear_shell();
 void beep();
 void testprocess();
-void testprio();
-void ps();
-void mem();
-void testsynchro(); 
-void loop();
-void cat();
-void wc();
-void filter();
+void testprio(int fd[]);
+void ps(int fd[]);
+void mem(int fd[]);
+void testsynchro(int fd[]); 
+void loop(int fd[]);
+void cat(int fd[]);
+void wc(int fd[]);
+void filter(int fd[]);
+void phylo(int fd[]);
+void kill(int fd[]);
+void nice(int fd[]);
+void block(int fd[]);
+void testmemory(int fd[]);
 
 static char buffer[INPUT_SIZE] = {0};
 static int bufferIndex = 0;
 static int currentFontSize;
-static int gameActive = 0;
 static char foreground = TRUE;
+static char pipe = FALSE;
 static int argC=0;
 static char *arguments[MAX_ARGS] = {0};
 
 static Command commands[] = {
     {"help", help, "Muestra la lista de comandos.","No recibe argumentos."},
-    {"divzero", divzero, "Simula la excepcion de division por 0.","No recibe argumentos."},
-    {"invopcode", invopcode, "Simula la excepcion de opcode invalida.","No recibe argumentos."},
-    {"time", time, "Muestra la hora actual.","No recibe argumentos."},
+    {"time", time, "Muestra la hora actual"},
     {"inforeg", inforeg, "Imprime los registros capturados por CTRL.","No recibe argumentos."},
-    {"eliminator", play_eliminator, "Inicia el juego de eliminator.","No recibe argumentos."},
     {"zoomin", zoomin, "Aumenta el tamanio de la letra.", "No recibe argumentos."},
     {"zoomout", zoomout, "Disminuye el tamanio de la letra.", "No recibe argumentos."},
     {"clear", clear_shell, "Limpia la shell.", "No recibe argumentos."},
-    {"beep", beep, "Emite un beep.","No recibe argumentos."},
-    {"testprocess", testprocess, "Crea el proceso test_process.","Recibe 1 argumento: Cantidad de procesos a crear."},
-    {"testprio", testprio, "Crea procesos con distintas prioridades.","No recibe argumentos."},
-    {"ps", ps, "Muestra los procesos y sus estados.","No recibe argumentos."},
-    {"mem", mem, "Muestra informacion de la memoria.","No recibe argumentos."},
-    {"testsynchro", testsynchro, "Crea el proceso para testear sincronizacion CON semaforos.","Recibe dos argumentos: cantidad de incrementos o decrementos y 1 o 0 (CON o SIN semáforos)."},
-    {"loop", loop, "Imprime saludo y ID cada 2 segundos.","No recibe argumentos."},
-    {"cat", cat, "Imprime el stdin tal como lo recibe.","No recibe argumentos."},
-    {"wc", wc, "Cuenta la cantidad de palabras en el stdin.","No recibe argumentos."},
-    {"filter", filter, "Filtra el stdin y muestra solo las letras.","No recibe argumentos."}
+    {"beep", beep, "Emite un beep"},
+    {"ps", (void (*)(char *))ps, "Muestra los procesos y sus estados.","No recibe argumentos."},
+    {"mem", (void (*)(char *))mem, "Muestra informacion de la memoria.","No recibe argumentos."},
+    {"loop", (void (*)(char *))loop, "Imprime saludo y ID cada 2 segundos.","No recibe argumentos."},
+    {"cat", (void (*)(char *))cat, "Imprime el stdin tal como lo recibe.","No recibe argumentos."},
+    {"wc", (void (*)(char *))wc, "Cuenta la cantidad de palabras en el stdin.","No recibe argumentos."},
+    {"filter", (void (*)(char *))filter, "Filtra el stdin y muestra solo las letras.","No recibe argumentos."},
+    {"phylo", (void (*)(char *))phylo, "Muestra el problema de los filosofos.","No recibe argumentos."},
+    {"kill", (void (*)(char *))kill, "Mata un proceso.","Recibe 1 argumento: PID del proceso a matar."},
+    {"nice", (void (*)(char *))nice, "Cambia la prioridad de un proceso.","Recibe 2 argumentos: PID del proceso y nueva prioridad: L (low), M (medium), H (high) o U (ultra)"},
+    {"block", (void (*)(char *))block, "Bloquea un proceso.","Recibe 1 argumento: PID del proceso a bloquear."}, 
+    {"testprocess", (void (*)(char *))testprocess, "Crea el proceso para testear la creacion de procesos.","Recibe 1 argumento: Cantidad de procesos a crear."},
+    {"testprio", (void (*)(char *))testprio, "Crea el proceso para testear la prioridad de los procesos.","No recibe argumentos."},
+    {"testsynchro", (void (*)(char *))testsynchro, "Crea el proceso para testear sincronizacion de procesos.","Recibe dos argumentos: cantidad de incrementos o decrementos y 1 o 0 (CON o SIN semaforos)."},
+    {"testmemory", (void (*)(char *))testmemory, "Crea el proceso para testear el manejo de memoria.", "Recibe 1 argumento: memoria maxima."}
 };
+
+
+void execute_command(char * cmd, int fd[2]) {
+
+    for (int i = 0; i < COMMAND_COUNT; i++) {
+        if (strcmp(cmd, commands[i].name_id) == 0) {
+            (commands[i].func)((void *)fd);
+            return;
+        }
+    }
+
+    print_error("Error: comando no diponible. Ingrese \"help\" para ver los comandos disponibles.\n");
+}
+
+
+void pipe_impl(char * args[], int argC) {
+
+    int fds[2];
+    if(usys_open_pipe(fds) == -1){
+        print_error("Error al crear el pipe.\n");
+        return;
+    }
+    int fd_left[2];
+    fd_left[0] = STDIN;
+    fd_left[1] = fds[1];
+
+    int fd_right[2];
+    fd_right[0] = fds[0];
+    fd_right[1] = STDOUT;
+
+    execute_command(args[0], fd_left);
+    execute_command(args[2], fd_right);
+
+}
+
 
 void parse_command(char *str) {
 
@@ -77,16 +120,17 @@ void parse_command(char *str) {
             foreground = FALSE;
             str = cmd;
         }
-    }
-
-    for (int i = 0; i < COMMAND_COUNT; i++) {
-        if (strcmp(cmd, commands[i].name_id) == 0) {
-            (*commands[i].func)(cmd);
+        if (strcmp(arguments[1], "|") == 0){
+            pipe = TRUE;
+            pipe_impl(arguments, argC);
             return;
         }
-    } 
-        
-    print_error("Error: comando no diponible. Ingrese \"help\" para ver los comandos disponibles.\n");
+    }
+ 
+    if(pipe == FALSE){
+        int fd[2] = {STDIN, STDOUT};
+        execute_command(cmd, fd);
+    }
 }
 
 void print_prompt_icon() {
@@ -108,10 +152,9 @@ int main()
     print_color(GRAY, "luego del comando para ejecutar en background.\n");
 
     char c;
-    int running = 1; 
     currentFontSize = usys_get_font_size();
     print_prompt_icon();
-    while (running) {  // if ESC 
+    while (1) {  // if ESC 
         c = get_char();  // non-blocking read
         if (c != 0) {
             if (c == '\b' && bufferIndex > 0) {
@@ -129,6 +172,7 @@ int main()
                 buffer[bufferIndex++] = c;
             }
             foreground = TRUE;
+            pipe = FALSE;
             argC = 0;
         }
     } 
@@ -176,10 +220,8 @@ static int cant_arguments_func(char * func, int cant, int needed){
 /* --------------------------- Commands functions ------------------------------------------------------------------------*/
 
 void help() {
-    print_color(YELLOW, "Hacemos zoom-out para ver los comandos disponibles.\n");
-    zoomout();
     print("Comandos disponibles:\n");
-    for(int i = 1; i < COMMAND_COUNT ; i++){
+    for(int i = 0; i < COMMAND_COUNT-4 ; i++){
             print("   ");
             print_color(LIGHT_BLUE, commands[i].name_id);
             print(": ");
@@ -187,26 +229,21 @@ void help() {
             print(" - ");
             print_color(GRAY, commands[i].usage);
             put_char('\n');
-    } 
-    print_color(YELLOW,"Restauramos el tamanio de la letra.\n");
-    zoomin();
-}
-
-void divzero() { 
-    if(no_arguments_func("divzero") ==-1) return;
-    int a = 1; //rax??
-    int b = 0; 
-    if ((a/b) == 1) {
-        print_error("This is wrong...");
     }
-}
-void invopcode() {
-    if(no_arguments_func("invopcode") ==-1) return;
-    _invalid_opcode_exception();
+    put_char('\n');
+    print("Comandos para correr los tests:\n");
+    for(int i=COMMAND_COUNT-4; i<COMMAND_COUNT; i++){
+        print("   ");
+        print_color(LIGHT_BLUE, commands[i].name_id);
+        print(": ");
+        print(commands[i].desc);
+        print(" - ");
+        print_color(GRAY, commands[i].usage);
+        put_char('\n');
+    }
 }
 
 void time() {
-    if(no_arguments_func("time") ==-1) return;
     print_color(GREEN, "ART (Argentine Time): UTC/GMT -3 horas\n"); 
     _get_time(); 
 }
@@ -283,99 +320,158 @@ void clear_shell() {
 }
 
 void beep() {
-    if(no_arguments_func("beep") ==-1) return;
     print_color(GREEN, "BEEP!!\n");
-    usys_beep(1000, 10);
-}
-
-void play_eliminator() {
-    if(no_arguments_func("eliminator") ==-1) return;
-    gameActive = 1;
-    clear_shell();
-    eliminator();
-    clear_shell(); 
-    gameActive = 0;
+    usys_beep(1000, 1);
 }
 
 void testprocess() {
     if(cant_arguments_func("testprocess", argC, 2) == -1) return;
     char * arg_command = (foreground)? arguments[1] : arguments[2];
-    char * argv[] = {"test processes", foreground, arg_command ,NULL};
-    int pid = usys_create_process((uint64_t)testprocess_ps,  usys_get_pid() , 1 , 3, argv);
+    char * argv[] = {"test processes", arg_command ,NULL};
+    int pid = usys_create_process((uint64_t)testprocess_ps, argv, foreground, STDIN, STDOUT);
+    if(foreground)
+        usys_wait_processes(pid);
+}
+
+void testprio(int fd[]) {
+    if(pipe == FALSE) if(no_arguments_func("testprio") ==-1) return;
+    char * argv[] = {"test prio", NULL};
+    int pid = usys_create_process((uint64_t)testprio_ps, argv, foreground, fd[0], fd[1]);
     if(foreground) 
         usys_wait_processes(pid);
 }
 
-void testprio() {
-    if(no_arguments_func("testprio") ==-1) return;
-    char * argv[] = {"test prio", foreground, NULL};
-    int pid = usys_create_process((uint64_t)testprio_ps, usys_get_pid(), 1, 2, argv);
+void ps(int fd[]) {
+    if(pipe == FALSE) if(no_arguments_func("ps") ==-1) return;
+    char * argv[] = {"ps", NULL};
+    int pid = usys_create_process((uint64_t)ps_ps, argv, foreground, fd[0], fd[1]); 
     if(foreground) 
         usys_wait_processes(pid);
 }
 
-void ps() {
-    if(no_arguments_func("ps") ==-1) return;
-    char * argv[] = {"ps", foreground, NULL};
-    int pid = usys_create_process((uint64_t)ps_ps, usys_get_pid(), 1, 2, argv); 
+void mem(int fd[]) {
+    if(pipe == FALSE) if(no_arguments_func("mem") ==-1) return;
+    char * argv[] = {"memoryinfo", NULL};
+    int pid = usys_create_process((uint64_t)memoryinfo_ps, argv, foreground, fd[0], fd[1]); 
     if(foreground) 
         usys_wait_processes(pid);
 }
 
-void mem() {
-    if(no_arguments_func("mem") ==-1) return;
-    char * argv[] = {"memoryinfo", foreground, NULL};
-    int pid = usys_create_process((uint64_t)memoryinfo_ps, usys_get_pid(), 1, 2, argv); 
-    if(foreground) 
-        usys_wait_processes(pid);
-}
-
-void testsynchro() {
-    if(cant_arguments_func("testsynchro", argC, 3) == -1) return;
+void testsynchro(int fd[]) {
+    if(pipe == FALSE) if(cant_arguments_func("testsynchro", argC, 3) == -1) return;
     char * arg_1 = foreground? arguments[1] : arguments[2];
     char * arg_2 = foreground? arguments[2] : arguments[3];
-    //char * argv[] = {"test synchro", foreground, "5", "1", NULL};
-    char * argv[] = {"test synchro", foreground, arg_1, arg_2, NULL};
-    int pid = usys_create_process((uint64_t)testsynchro_ps, usys_get_pid(), 1, 4, argv); 
+    char * argv[] = {"test synchro", arg_1, arg_2, NULL};
+    int pid = usys_create_process((uint64_t)testsynchro_ps, argv, foreground, fd[0], fd[1]); 
     if(foreground) 
         usys_wait_processes(pid);
 }
 
-// void testnosynchro() {
-//     if(cant_arguments_func("testnosynchro", argC, 2) == -1) return;
-//     char * arg_1 = foreground? arguments[1] : arguments[2];
-//     char * arg_2 = foreground? arguments[2] : arguments[3];
-//     char * argv[] = {"test synchro", foreground, arg_1, arg_2, NULL};
-//     int pid = usys_create_process((uint64_t)testsynchro_ps, usys_get_pid(), 1, 4, argv); 
-//     if(foreground) 
-//         usys_wait_processes(pid);
-// }
-
-void loop(){
-    no_arguments_func("loop");
-    char * argv[] = {"loop", foreground, NULL};
-    int pid = usys_create_process((uint64_t) loop_ps, usys_get_pid(), 1, 2, argv);
+void loop(int fd[]){
+    if(pipe == FALSE) if(no_arguments_func("loop") ==-1) return;
+    char * argv[] = {"loop", NULL};
+    int pid = usys_create_process((uint64_t) loop_ps, argv, foreground, fd[0], fd[1]);
     if(foreground)
         usys_wait_processes(pid);
 }
 
-void cat(){
-    char * argv[] = {"cat", foreground, NULL};
-    int pid = usys_create_process((uint64_t) cat_ps, usys_get_pid(), 1, 2, argv);
+void cat(int fd[]){
+    if(pipe == FALSE) if(no_arguments_func("cat") ==-1) return;
+    char * argv[] = {"cat", NULL};
+    int pid = usys_create_process((uint64_t) cat_ps, argv, foreground, fd[0], fd[1]);
     if(foreground)
         usys_wait_processes(pid);
 }
 
-void wc(){
-    char * argv[] = {"wc", foreground, NULL};
-    int pid = usys_create_process((uint64_t) wc_ps, usys_get_pid(), 1, 2, argv);
+void wc(int fd[]){
+    if(pipe == FALSE) if(no_arguments_func("wc")==-1) return;
+    char * argv[] = {"wc", NULL};
+    int pid = usys_create_process((uint64_t) wc_ps, argv, foreground, fd[0], fd[1]);
     if(foreground)
         usys_wait_processes(pid);
 }
 
-void filter(){
-    char * argv[] = {"filter", foreground, NULL};
-    int pid = usys_create_process((uint64_t) filter_ps, usys_get_pid(), 1, 2, argv);
+void filter(int fd[]){
+    if(pipe == FALSE) if(no_arguments_func("filter")==-1) return;
+    char * argv[] = {"filter", NULL};
+    int pid = usys_create_process((uint64_t) filter_ps, argv, foreground, fd[0], fd[1]);
     if(foreground)
+        usys_wait_processes(pid);
+}
+
+void phylo(int fd[]){
+    if(pipe == FALSE)  if(no_arguments_func("phylos")==-1) return;
+    char * argv[] = {"phylos", NULL};
+    int pid = usys_create_process((uint64_t) phylos_ps, argv, foreground, fd[0], fd[1]);
+    if(foreground)
+        usys_wait_processes(pid);
+}
+
+void kill(int fd[]){
+    if(pipe == FALSE) if(cant_arguments_func("kill", argC, 2) == -1) return;
+    if(strcmp(arguments[1], "1") == 0 || strcmp(arguments[1], "2") == 0){
+        print_error("Error: no se puede matar al proceso.");
+        print(arguments[1]);
+        print("\n");
+        return;
+    }
+    char * argv[] = {"kill", arguments[1], NULL};
+    int pid = usys_create_process((uint64_t) kill_ps, argv, foreground, fd[0], fd[1]);
+    if(foreground)
+        usys_wait_processes(pid);
+}
+
+void nice(int fd[]){
+    if(pipe == FALSE) if(cant_arguments_func("nice", argC, 3) == -1) return;
+
+    char new_prio_char = TO_UPPER(arguments[2][0]);
+    char * new_prio = NULL;
+
+    switch(new_prio_char){
+        case 'L':
+            new_prio = "1";
+            break;
+        case 'M':
+            new_prio = "2";
+            break;
+        case 'H':
+            new_prio = "3";
+            break;
+        case 'U':
+            new_prio = "4";
+            break;
+        default:
+            print_error("Error: prioridad no válida\n");
+            return;
+    }
+
+    
+
+    char * argv[] = {"nice", arguments[1], new_prio, NULL};
+    int pid = usys_create_process((uint64_t) nice_ps, argv, foreground, fd[0], fd[1]);
+    if(foreground)
+        usys_wait_processes(pid);
+}
+
+void block(int fd[]){
+    if(pipe == FALSE) if(cant_arguments_func("block", argC, 2) == -1) return;
+    if(strcmp(arguments[1], "1") == 0 || strcmp(arguments[1], "2") == 0){
+        print_error("Error: no se puede bloquear al proceso.");
+        print(arguments[1]);
+        print("\n");
+        return;
+    }
+    char * argv[] = {"block", arguments[1], NULL};  
+    int pid = usys_create_process((uint64_t) block_ps, argv, foreground, fd[0], fd[1]);
+    if(foreground)
+        usys_wait_processes(pid);
+}
+
+void testmemory(int fd[]){
+    if(pipe == FALSE) if(cant_arguments_func("testmemory", argC, 2) == -1) return;
+    char * arg_command = (foreground)? arguments[1] : arguments[2];
+    char * argv[] = {"test processes", arg_command,NULL};
+    int pid = usys_create_process((uint64_t)testmemory_ps, argv, foreground, fd[0], fd[1]);
+    if(foreground) 
         usys_wait_processes(pid);
 }

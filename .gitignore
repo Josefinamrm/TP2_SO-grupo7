@@ -15,8 +15,9 @@
 
 # other
 .gdb_history
+.bash_history
 .viminfo
 .vscode/c_cpp_properties.json
 .vscode/settings.json
 *.elf
-.config
+.config/*

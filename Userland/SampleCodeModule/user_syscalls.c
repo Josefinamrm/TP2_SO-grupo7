@@ -1,5 +1,9 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <user_syscalls.h>
 #include <interrupts.h>
 
@@ -37,8 +41,8 @@ int usys_get_registers(uint64_t * registers){
     return _getRegisters(registers);
 }
 
-void usys_wait(int ms){
-    _wait((uint64_t ) ms);
+void usys_sleep(int seconds){
+    _sleep((uint64_t)seconds);
 }
 
 void usys_clear_screen() {
@@ -69,13 +73,12 @@ uint64_t usys_get_pid(){
     return _get_pid();
 }
 
-int64_t usys_create_process(uint64_t function, int16_t ppid, uint8_t priority, uint64_t argc, char ** argv){
-    parameters_structure params = {function, ppid, priority, argc, argv};
-    return _create_process((uint64_t)&params);
+int64_t usys_create_process(uint64_t function, char ** argv, uint8_t foreground, int16_t read_fd, int16_t write_fd){
+    return _create_process(function, (uint64_t) argv, (uint64_t)foreground, (uint64_t)read_fd, (uint64_t)write_fd);
 }
 
-void usys_nice(int16_t pid, uint8_t newPrio){
-    _nice((uint64_t)pid, (uint64_t)newPrio);
+int64_t usys_nice(int16_t pid, uint8_t newPrio){
+    return _nice((uint64_t)pid, (uint64_t)newPrio);
 }
 
 int64_t usys_kill(int16_t pid){
@@ -98,8 +101,8 @@ void usys_wait_processes(int16_t pid){
     _wait_processes((uint64_t)pid);
 }
 
-void usys_ps(){
-    _ps();
+uint64_t usys_get_process_info(process_view processes[MAX_PROCESSES]){
+    return _get_processes_info((uint64_t)processes);
 }
 
 void usys_exit(){
@@ -131,7 +134,7 @@ int usys_total_space(){
     return _total_space();
 }
 
-int16_t usys_sem_open(char * name, int value){
+int64_t usys_sem_open(char * name, int value){
     return _sem_open((uint64_t)name, (uint64_t)value);
 }
 
@@ -145,4 +148,28 @@ void usys_sem_post(char * name){
 
 void usys_sem_wait(char * name){
     _sem_wait((uint64_t)name);
+}
+
+int64_t usys_open_pipe(int file_descriptors[2]){
+    return _open_pipe((uint64_t)file_descriptors);
+}
+
+int64_t usys_close_pipe(int16_t pipe_id){
+    return _close_pipe((uint64_t)pipe_id);
+}
+
+int64_t usys_write_pipe(int16_t pipe_id, char * buf, int to_write){
+    return _write_pipe((uint64_t)pipe_id, (uint64_t)buf, (uint64_t)to_write);
+}
+
+int64_t usys_read_pipe(int16_t pipe_id, char * buf, int to_read){
+    return _read_pipe((uint64_t)pipe_id, (uint64_t)buf, (uint64_t)to_read);
+}
+
+int64_t usys_open_fd(int8_t type, int8_t permission, int16_t pipe_id){
+    return _open_fd((uint64_t)type, (uint64_t)permission, (uint64_t)pipe_id);
+}
+
+void usys_close_fd(int16_t fd_number){
+    _close_fd((uint64_t)fd_number);
 }

@@ -4,85 +4,113 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <standard_types.h>
 #include <memoryManager.h>
 #include <interrupts.h>
 #include <lib.h>
 #include "videoDriver.h"
 #include "time.h"
 
-#define MAX_PROCESS 200
+#define MAX_PROCESSES 200
+#define MAX_FD 200
 #define PROCESS_STACK_SIZE 4096
-#define FINISH_SUCCESFULLY 0
-#define FINISH_ON_ERROR -1
-
+#define DEFAULT_PRIO 1
 
 // IDEA: CAMBIAR LA IMPL DE LISTA Y PROCESO A OTRO FILE NO POR AHORA
-
-// sería mas facil en el momento de crear el proceso decirle si escribe a la terminal o si escribe a un pipe (agodio)
-enum fd {STDIN=0, STDOUT, STDERR};
-
 typedef struct{
-    uint64_t function;
-    int16_t ppid;
+    char * name;
+    int16_t pid;
     uint8_t priority;
-    uint64_t argc;
-    char ** argv;
-}parameters_structure;
+    char * state;
+    uint64_t stack_pointer;
+    char * foreground;
+}process_view;
 
-typedef struct queue_info * children_queue;
 
 typedef struct queue_info * process_queue;
 
-typedef struct queue_info * waiting_processes_queue;
+typedef struct sleep_queue_info * sleeping_process_queue;
 
 typedef struct p * process;
 
-/*--------------------------------------------------------- Process List Functions  ---------------------------------------------------------*/
+typedef struct fd_struct * fd;
 
-// Initializes children queue
-children_queue initialize_children_queue();
+#include <pipes.h>
 
-// Adds a process to the end of the children queue
-void add_child(children_queue queue, process child);
+/*--------------------------------------------------------- Process Queue Functions  ---------------------------------------------------------*/
 
-// Deletes a process from the children queue, but doesn´t free the process
-void delete_child(children_queue queue, int16_t pid, uint8_t free_process);
+// Initializes process_queue queue
+process_queue initialize_process_queue();
 
-// Checks whether the queue is empty
-uint64_t childless(children_queue queue);
+// Adds a process to the end of the process queue
+void add_process(process_queue queue, process child);
 
-// Frees children queue
-void free_children_queue(children_queue queue, uint8_t free_process);
+// Deletes a process from the process queue, it frees it if indicated by free_process
+void delete_process(process_queue queue, int16_t pid, uint8_t free_process);
 
-// Concatenate queues
-void adopt_children(children_queue adoptive_p, children_queue children);
+// Checks if queue is empty, returns 1 if so
+uint8_t is_empty(process_queue queue);
 
-// Adds a process to the end of the queue -> same as add_child 
-void enqueue(waiting_processes_queue queue, int16_t pid);
+// Frees process queue
+void free_process_queue(process_queue queue, uint8_t free_process);
+
+// Concatenates queues
+void concat_queues(process_queue adoptive_p, process_queue children);
+
+// Adds a process to the end of the queue
+void enqueue_process(process_queue queue, int16_t pid);
 
 // Deletes the first process from the queue from the list, returns its pid
-int16_t dequeue(waiting_processes_queue queue);
+int16_t dequeue_process(process_queue queue);
 
-/*--------------------------------------------------------- Process Queue Functions ---------------------------------------------------------*/
+/*--------------------------------------------------------- Process Queue Functions (Circular) ---------------------------------------------------------*/
 
-// Initializes queue
-process_queue initialize_queue();
-
+// Initializes queue and intitializes idle_running to 0
+process_queue initialize_ready_queue();
 
 // Adds a process to the end of the queue
 void add_process_instance(process_queue queue, process p, uint8_t add_all);
 
+// Adds all instances of the process in the queue
+void add_all_process_instances(process_queue queue, process p);
 
 // Removes all or one instance of the process in the queue
 void remove_process_instance(process_queue queue, int16_t pid, uint8_t remove_all);
-
 
 // Removes all instances of the process in the queue
 void remove_all_process_instances(process_queue queue, int16_t pid);
 
 
-// Checks if queue is empty, returns 1 if so
-uint8_t is_empty(process_queue queue);
+/*--------------------------------------------------------- Ready Queue Functions  ---------------------------------------------------------*/
+
+// Initializes queue and intitializes idle_running to 0
+process_queue initialize_ready_queue();
+
+// Adds n process instances, where n = priority
+void add_to_ready_queue(process p);
+
+// Removes an instance of the ready_queue
+void remove_from_ready_queue(int16_t pid);
+
+
+/*--------------------------------------------------------- Sleep Queue Functions  ---------------------------------------------------------*/
+
+// Initializes sleep queue
+process_queue initialize_sleep_queue();
+
+// Adds a procces to the sleeping queue
+void add_to_sleep_queue(int16_t pid, uint64_t until_ticks);
+
+// Removes a process from the sleeping queue which has slept enough
+void remove_from_sleep_queue(uint64_t ticks_elapsed);
+
+// Makes process go to sleep
+int16_t go_to_sleep(int16_t pid);
+
+// Wakes process up
+int16_t wake_up(int16_t pid);
+
+/*--------------------------------------------------------- Scheduler Function ---------------------------------------------------------*/
 
 
 // Returns next running process rsp from the ready process queue
@@ -96,8 +124,33 @@ uint64_t idle_process_rsp();
 // Returns wether ready queue is empty (1) or not (0)
 uint8_t is_ready_queue_empty();
 
-// Returns the next available pid
-int16_t next_available_pid();
+
+/*--------------------------------------------------------- File Descriptor Functions ---------------------------------------------------------*/
+
+// Opens new file descriptor for a certain pid
+int16_t open_fd_for_pid(Type type, Permission permission, int16_t id, int16_t process_pid);
+
+// Opens new file descriptor
+int16_t open_fd(Type type, Permission permission, int16_t id);
+
+// Closes file descriptor from a certain pid
+void close_fd_from_pid(int16_t fd_number, int16_t process_pid);
+
+// Closes file descriptor
+void close_fd(int16_t fd_number);
+
+// Closes all file descriptors
+int16_t close_all_fds(int16_t pid);
+
+// Writes to file descriptor
+int64_t write_to_fd(int16_t fd_number, char * buffer, int to_write);
+
+// Reads from file descriptor
+int64_t read_from_fd(int16_t fd_number, char * buffer, int to_read);
+
+int16_t get_type(int16_t fd_number);
+
+int16_t get_id(int16_t fd_number);
 
 /*--------------------------------------------------------- Syscalls ---------------------------------------------------------*/
 
@@ -105,7 +158,7 @@ int16_t next_available_pid();
 int16_t my_getpid();
 
 // Creates a new process
-int16_t my_create_process(parameters_structure * params);
+int16_t my_create_process(uint64_t function, char ** argv, uint8_t foreground, int read_fd, int write_fd);
 
 // Exits the current process, killing it
 void my_exit();
@@ -113,7 +166,7 @@ void my_exit();
 void my_exit_foreground();
 
 // Changes process priority
-void my_nice(int16_t pid, uint8_t newPrio);
+int64_t my_nice(int16_t pid, uint8_t newPrio);
 
 // Kills process
 int16_t my_kill(int16_t pid);
@@ -130,8 +183,8 @@ void my_yield();
 // Waits for all children to finish
 void my_wait(int16_t pid);
 
-// Prints processes info -> name, pid and state
-void my_ps();
+// Fills the array with each process structure
+int64_t get_process_info(process_view processes[MAX_PROCESSES]);
 
 /*--------------------------------------------------------- Base Processes and Functions ---------------------------------------------------------*/
 

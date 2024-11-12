@@ -1,5 +1,9 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 /* Sacado de OSDEV : https://wiki.osdev.org/PC_Speaker#Through_the_Programmable_Interval_Timer_.28PIT.29 */
 
 #include <stdint.h>
@@ -41,6 +45,6 @@ void nosound()
 void beep(uint32_t frec, int time_ms)
 {
     play_sound(frec);
-    timer_wait_ms(time_ms);
+    sleep_s(time_ms);
     nosound();
 }

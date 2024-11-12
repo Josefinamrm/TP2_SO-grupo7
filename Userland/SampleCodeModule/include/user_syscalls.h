@@ -2,18 +2,20 @@
 #define USER_SYSCALLS_H
 #include <interrupts.h>
 
-#define STDIN 0
-#define STDOUT 1
-#define STDERR 2
-#define LASTIN 3
+typedef enum {STDIN = 0, STDOUT, STDERR, BACKGROUND, PIPE, LASTIN} Type;
 
+#define READ 0
+#define WRITE 1
+
+#define MAX_PROCESSES 200
 typedef struct{
-    uint64_t function;
-    int16_t ppid;
+    char * name;
+    int16_t pid;
     uint8_t priority;
-    uint64_t argc;
-    char ** argv;
-}parameters_structure;
+    char * state;
+    uint64_t stack_pointer;
+    char * foreground;
+}process_view;
 
 
 int usys_read(int fd, char * buf, int size);
@@ -32,7 +34,7 @@ void usys_print_rect(uint32_t color, int x, int y, int size_x, int size_y);
 
 int usys_get_registers(uint64_t * registers);
 
-void usys_wait(int ms);
+void usys_sleep(int seconds);
 
 void usys_clear_screen();
 
@@ -51,9 +53,9 @@ void flush_buffer();
 
 uint64_t usys_get_pid();
 
-int64_t usys_create_process(uint64_t function, int16_t ppid, uint8_t priority, uint64_t argc, char ** argv);
+int64_t usys_create_process(uint64_t function, char ** argv, uint8_t foreground, int16_t read_fd, int16_t write_fd);
 
-void usys_nice(int16_t pid, uint8_t new_prio);
+int64_t usys_nice(int16_t pid, uint8_t new_prio);
 
 int64_t usys_kill(int16_t pid);
 
@@ -65,7 +67,7 @@ void usys_yield();
 
 void usys_wait_processes(int16_t pid);
 
-void usys_ps();
+uint64_t usys_get_process_info(process_view processes[MAX_PROCESSES]);
 
 void usys_exit();
 
@@ -85,12 +87,26 @@ int usys_total_space();
 
 // semaphores syscalls
 
-int16_t usys_sem_open(char * name, int value);
+int64_t usys_sem_open(char * name, int value);
 
 void usys_sem_close(char * name);
 
 void usys_sem_post(char * name);
 
 void usys_sem_wait(char * name);
+
+// ipc
+
+int64_t usys_open_pipe(int file_descriptors[2]);
+
+int64_t usys_close_pipe(int16_t pipe_id);
+
+int64_t usys_write_pipe(int16_t pipe_id, char * buf, int to_write);
+
+int64_t usys_read_pipe(int16_t pipe_id, char * buf, int to_read);
+
+int64_t usys_open_fd(int8_t type, int8_t permission, int16_t pipe_id);
+
+void usys_close_fd(int16_t fd_number);
 
 #endif

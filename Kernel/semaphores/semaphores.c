@@ -1,6 +1,11 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include <semaphores.h>
+#include <videoDriver.h>
 
 sem_block * sem_array[MAX_SEM] = {0};
 
@@ -17,17 +22,6 @@ static int16_t next_available_position(){
         }
     }
     return to_ret;
-}
-
-
-
-// Compares 2 strings
-static int strcmp(const char *s1, const char *s2){
-    while (*s1 == *s2++) {
-        if (*s1++ == 0)
-			return 0;
-    }
-	return (*s1 - *--s2);
 }
 
 
@@ -50,6 +44,7 @@ static int16_t get_sem_id(char * name){
 
 
 // Opens semaphore if it exists, if not it creates it and opens it
+// Returns 0 if successful, -1 on error
 int16_t my_sem_open(char * name, int value){
     
     if(name == NULL || value < 0 || sem_counter == MAX_SEM){
@@ -67,7 +62,7 @@ int16_t my_sem_open(char * name, int value){
         new_sem_block->sem->name = name;
         new_sem_block->sem->value = value;
         new_sem_block->lock = 1;
-        new_sem_block->wp_queue = initialize_children_queue();          // change maybe
+        new_sem_block->wp_queue = initialize_process_queue();          // change maybe
         new_sem_block->times_opened = 1;
         sem_array[sem_id] = new_sem_block;
         sem_counter++;
@@ -93,7 +88,7 @@ void my_sem_close(char * name){
         sem_array[sem_block_id]->times_opened--;
     }else{
         mm_free(sem_array[sem_block_id]->sem);
-        free_children_queue(sem_array[sem_block_id]->wp_queue, 0);
+        free_process_queue(sem_array[sem_block_id]->wp_queue, 0);
         mm_free(sem_array[sem_block_id]);
         sem_array[sem_block_id] = NULL;
     }
@@ -108,8 +103,8 @@ void my_sem_post(char * name){
 
     if(sem_block_id != -1){
         acquire(&(sem_array[sem_block_id]->lock));
-        if(sem_array[sem_block_id]->sem->value == 0){
-            int16_t pid = dequeue(sem_array[sem_block_id]->wp_queue);
+        if(!is_empty(sem_array[sem_block_id]->wp_queue) && sem_array[sem_block_id]->sem->value == 0){
+            int16_t pid = dequeue_process(sem_array[sem_block_id]->wp_queue);
             my_unblock(pid);
         }
         sem_array[sem_block_id]->sem->value++;
@@ -126,14 +121,23 @@ void my_sem_wait(char * name){
 
     if(sem_block_id != -1){
         acquire(&(sem_array[sem_block_id]->lock));
-        if(sem_array[sem_block_id]->sem->value == 0){
+        while(sem_array[sem_block_id]->sem->value == 0){
             int16_t pid = my_getpid();
-            enqueue(sem_array[sem_block_id]->wp_queue, pid);
+            enqueue_process(sem_array[sem_block_id]->wp_queue, pid);
             release(&(sem_array[sem_block_id]->lock));
-            my_block(pid);          // ??
-        }         
-        sem_array[sem_block_id]->sem->value--;
-        release(&(sem_array[sem_block_id]->lock));
+            my_block(pid);
+        }
+            sem_array[sem_block_id]->sem->value--;
+            release(&(sem_array[sem_block_id]->lock));
+        
     }
 }
 
+
+// Creates semaphore name as "name" + number to serve as a unique id
+void create_sem_name(char * sem_name, char * name, int16_t pipe_number){
+    char pipe_number_buf[4];
+    concat_str(sem_name, name);
+    int_to_string(pipe_number, pipe_number_buf, 4);
+    concat_str(sem_name, pipe_number_buf);
+}
