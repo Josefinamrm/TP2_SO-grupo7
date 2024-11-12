@@ -9,6 +9,7 @@
 #define INPUT_SIZE 100
 
 #define TO_LOWER(c) ((c) >= 'A' && (c) <= 'Z' ? (c) + ('a'-'A') : (c))
+#define TO_UPPER(c) ((c) >= 'a' && (c) <= 'z' ? (c) - ('a'-'A') : (c))
 
 void print(char *arr);
 
