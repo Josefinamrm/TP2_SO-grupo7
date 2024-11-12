@@ -22,8 +22,8 @@ void zoomout();
 void inforeg();
 void clear_shell();
 void beep();
-void testprocess();
-void testprio();
+void testprocess(int fd[]);
+void testprio(int fd[]);
 void ps(int fd[]);
 void mem(int fd[]);
 void testsynchro(int fd[]); 
@@ -32,10 +32,10 @@ void cat(int fd[]);
 void wc(int fd[]);
 void filter(int fd[]);
 void phylo(int fd[]);
-void kill();
-void nice();
-void block();
-void testmemory();
+void kill(int fd[]);
+void nice(int fd[]);
+void block(int fd[]);
+void testmemory(int fd[]);
 
 static char buffer[INPUT_SIZE] = {0};
 static int bufferIndex = 0;
@@ -52,20 +52,20 @@ static Command commands[] = {
     {"zoomin", zoomin, "Aumenta el tamanio de la letra.", "No recibe argumentos."},
     {"zoomout", zoomout, "Disminuye el tamanio de la letra.", "No recibe argumentos."},
     {"clear", clear_shell, "Limpia la shell.", "No recibe argumentos."},
-    {"testprocess", testprocess, "Crea el proceso para testear la creacion de procesos.","Recibe 1 argumento: Cantidad de procesos a crear."},
-    {"testprio", testprio, "Crea el proceso para testear la prioridad de los procesos.","No recibe argumentos."},
     {"beep", beep, "Emite un beep"},
     {"ps", (void (*)(char *))ps, "Muestra los procesos y sus estados.","No recibe argumentos."},
     {"mem", (void (*)(char *))mem, "Muestra informacion de la memoria.","No recibe argumentos."},
-    {"testsynchro", (void (*)(char *))testsynchro, "Crea el proceso para testear sincronizacion de procesos.","Recibe dos argumentos: cantidad de incrementos o decrementos y 1 o 0 (CON o SIN semaforos)."},
     {"loop", (void (*)(char *))loop, "Imprime saludo y ID cada 2 segundos.","No recibe argumentos."},
     {"cat", (void (*)(char *))cat, "Imprime el stdin tal como lo recibe.","No recibe argumentos."},
     {"wc", (void (*)(char *))wc, "Cuenta la cantidad de palabras en el stdin.","No recibe argumentos."},
     {"filter", (void (*)(char *))filter, "Filtra el stdin y muestra solo las letras.","No recibe argumentos."},
     {"phylo", (void (*)(char *))phylo, "Muestra el problema de los filosofos.","No recibe argumentos."},
     {"kill", (void (*)(char *))kill, "Mata un proceso.","Recibe 1 argumento: PID del proceso a matar."},
-    {"nice", (void (*)(char *))nice, "Cambia la prioridad de un proceso.","Recibe 2 argumentos: PID del proceso y nueva prioridad."},
+    {"nice", (void (*)(char *))nice, "Cambia la prioridad de un proceso.","Recibe 2 argumentos: PID del proceso y nueva prioridad: L (low), M (medium), H (high) o U (ultra)"},
     {"block", (void (*)(char *))block, "Bloquea un proceso.","Recibe 1 argumento: PID del proceso a bloquear."}, 
+    {"testprocess", testprocess, "Crea el proceso para testear la creacion de procesos.","Recibe 1 argumento: Cantidad de procesos a crear."},
+    {"testprio", testprio, "Crea el proceso para testear la prioridad de los procesos.","No recibe argumentos."},
+    {"testsynchro", (void (*)(char *))testsynchro, "Crea el proceso para testear sincronizacion de procesos.","Recibe dos argumentos: cantidad de incrementos o decrementos y 1 o 0 (CON o SIN semaforos)."},
     {"testmemory", (void (*)(char *))testmemory, "Crea el proceso para testear el manejo de memoria.", "Recibe 1 argumento: memoria máxima."}
 };
 
@@ -221,7 +221,7 @@ static int cant_arguments_func(char * func, int cant, int needed){
 
 void help() {
     print("Comandos disponibles:\n");
-    for(int i = 0; i < COMMAND_COUNT ; i++){
+    for(int i = 0; i < COMMAND_COUNT-4 ; i++){
             print("   ");
             print_color(LIGHT_BLUE, commands[i].name_id);
             print(": ");
@@ -229,6 +229,16 @@ void help() {
             print(" - ");
             print_color(GRAY, commands[i].usage);
             put_char('\n');
+    }
+    print("Comandos para correr los tests:\n");
+    for(int i=COMMAND_COUNT-1; i<COMMAND_COUNT; i++){
+        print("   ");
+        print_color(LIGHT_BLUE, commands[i].name_id);
+        print(": ");
+        print(commands[i].desc);
+        print(" - ");
+        print_color(GRAY, commands[i].usage);
+        put_char('\n');
     }
 }
 
@@ -313,19 +323,19 @@ void beep() {
     usys_beep(1000, 1);
 }
 
-void testprocess() {
+void testprocess(int fd[]) {
     if(cant_arguments_func("testprocess", argC, 2) == -1) return;
     char * arg_command = (foreground)? arguments[1] : arguments[2];
     char * argv[] = {"test processes", arg_command ,NULL};
-    int pid = usys_create_process((uint64_t)testprocess_ps, argv, foreground, STDIN, STDOUT);
+    int pid = usys_create_process((uint64_t)testprocess_ps, argv, foreground, fd[0], fd[1]);
     if(foreground) 
         usys_wait_processes(pid);
 }
 
-void testprio() {
+void testprio(int fd[]) {
     if(no_arguments_func("testprio") ==-1) return;
     char * argv[] = {"test prio", NULL};
-    int pid = usys_create_process((uint64_t)testprio_ps, argv, foreground, STDIN, STDOUT);
+    int pid = usys_create_process((uint64_t)testprio_ps, argv, foreground, fd[0], fd[1]);
     if(foreground) 
         usys_wait_processes(pid);
 }
@@ -351,7 +361,7 @@ void testsynchro(int fd[]) {
     char * arg_1 = foreground? arguments[1] : arguments[2];
     char * arg_2 = foreground? arguments[2] : arguments[3];
     char * argv[] = {"test synchro", arg_1, arg_2, NULL};
-    int pid = usys_create_process((uint64_t)testsynchro_ps, argv, foreground, STDIN, STDOUT); 
+    int pid = usys_create_process((uint64_t)testsynchro_ps, argv, foreground, fd[0], fd[1]); 
     if(foreground) 
         usys_wait_processes(pid);
 }
@@ -396,7 +406,7 @@ void phylo(int fd[]){
         usys_wait_processes(pid);
 }
 
-void kill(){
+void kill(int fd[]){
     if(cant_arguments_func("kill", argC, 2) == -1) return;
     if(strcmp(arguments[1], "1") == 0 || strcmp(arguments[1], "2") == 0){
         print_error("Error: no se puede matar al proceso.");
@@ -405,20 +415,44 @@ void kill(){
         return;
     }
     char * argv[] = {"kill", arguments[1], NULL};
-    int pid = usys_create_process((uint64_t) kill_ps, argv, foreground, STDIN, STDOUT);
+    int pid = usys_create_process((uint64_t) kill_ps, argv, foreground, fd[0], fd[1]);
     if(foreground)
         usys_wait_processes(pid);
 }
 
-void nice(){
+void nice(int fd[]){
     if(cant_arguments_func("nice", argC, 3) == -1) return;
-    char * argv[] = {"nice", arguments[1], arguments[2], NULL};
-    int pid = usys_create_process((uint64_t) nice_ps, argv, foreground, STDIN, STDOUT);
+
+    char new_prio_char = TO_UPPER(arguments[2][0]);
+    char * new_prio = NULL;
+
+    switch(new_prio_char){
+        case 'L':
+            new_prio = "1";
+            break;
+        case 'M':
+            new_prio = "2";
+            break;
+        case 'H':
+            new_prio = "3";
+            break;
+        case 'U':
+            new_prio = "4";
+            break;
+        default:
+            print_error("Error: prioridad no válida\n");
+            return;
+    }
+
+    
+
+    char * argv[] = {"nice", arguments[1], new_prio, NULL};
+    int pid = usys_create_process((uint64_t) nice_ps, argv, foreground, fd[0], fd[1]);
     if(foreground)
         usys_wait_processes(pid);
 }
 
-void block(){
+void block(int fd[]){
     if(cant_arguments_func("block", argC, 2) == -1) return;
     if(strcmp(arguments[1], "1") == 0 || strcmp(arguments[1], "2") == 0){
         print_error("Error: no se puede bloquear al proceso.");
@@ -427,16 +461,16 @@ void block(){
         return;
     }
     char * argv[] = {"block", arguments[1], NULL};  
-    int pid = usys_create_process((uint64_t) block_ps, argv, foreground, STDIN, STDOUT);
+    int pid = usys_create_process((uint64_t) block_ps, argv, foreground, fd[0], fd[1]);
     if(foreground)
         usys_wait_processes(pid);
 }
 
-void testmemory(){
+void testmemory(int fd[]){
     if(cant_arguments_func("testmemory", argC, 2) == -1) return;
     char * arg_command = (foreground)? arguments[1] : arguments[2];
     char * argv[] = {"test processes", arg_command,NULL};
-    int pid = usys_create_process((uint64_t)testmemory_ps, argv, foreground, STDIN, STDOUT);
+    int pid = usys_create_process((uint64_t)testmemory_ps, argv, foreground, fd[0], fd[1]);
     if(foreground) 
         usys_wait_processes(pid);
 }
